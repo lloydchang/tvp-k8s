@@ -13,8 +13,8 @@
           v                              v
 +--------------------+          +--------------------+
 | Kubernetes API     |          | ArgoCD API         |
-| - Create Pod       |          | - Sync Apps       |
-| - List Services    |          | - Rollback        |
-| - Delete Namespace|          | - Get App Status  |
+| - Create Pod       |          | - Sync Apps        |
+| - List Services    |          | - Rollback         |
+| - Delete Namespace |          | - Get App Status   |
 +--------------------+          +--------------------+
 ```
