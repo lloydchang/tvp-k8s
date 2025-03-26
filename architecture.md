@@ -1,3 +1,4 @@
+```
                 +--------------------+
                 |  Client/Developer  |
                 +---------+----------+
@@ -16,3 +17,4 @@
 | - List Services    |          | - Rollback        |
 | - Delete Namespace|          | - Get App Status  |
 +--------------------+          +--------------------+
+```
