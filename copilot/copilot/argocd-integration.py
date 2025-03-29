@@ -13,7 +13,7 @@ class ArgoCDIntegrator:
         
         # Ensure repo exists or clone
         if not os.path.exists(git_repo_path):
-            Repo.clone_from(argocd_repo_url, git_repo_path)
+            self.repo = Repo.clone_from(argocd_repo_url, git_repo_path)
         else:
             self.repo = Repo(git_repo_path)
 
