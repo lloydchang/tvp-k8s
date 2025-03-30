@@ -11,7 +11,7 @@ from kubernetes import client
 from typing import Optional, Dict, Any, List
 import httpx
 
-from config import get_settings, get_k8s_client
+from config import get_settings, get_kubernetes_client
 
 router = APIRouter()
 
