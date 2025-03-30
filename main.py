@@ -13,7 +13,7 @@ import httpx
 from kubernetes_api import router as kubernetes_router
 from argocd_api import router as argocd_router, get_argocd_token
 from tvp import router as tvp_router, start_reconciliation_thread
-from config import get_settings, get_k8s_client
+from config import get_settings, get_kubernetes_client
 
 app = FastAPI(
     title="Kubernetes Platform API",
@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 # Include routers from different modules
-app.include_router(kubernetes_router, prefix="/k8s", tags=["Kubernetes"])
+app.include_router(kubernetes_router, prefix="/kubernetes", tags=["Kubernetes"])
 app.include_router(argocd_router, prefix="/argocd", tags=["ArgoCD"])
 app.include_router(tvp_router, prefix="/tvp", tags=["TVP"])
 
@@ -53,7 +53,7 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
-            {"prefix": "/k8s", "description": "Kubernetes API operations"},
+            {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
             {"prefix": "/argocd", "description": "ArgoCD API operations"},
             {"prefix": "/tvp", "description": "Thinnest Viable Platform operations"}
         ]
@@ -74,8 +74,8 @@ async def health_check():
     
     # Check Kubernetes connectivity
     try:
-        k8s_client = get_k8s_client()
-        k8s_client.list_namespace()  # Removed timeout_seconds parameter
+        kubernetes_client = get_kubernetes_client()
+        kubernetes_client.list_namespace()  # Removed timeout_seconds parameter
         health_status["services"]["kubernetes"] = {
             "status": "healthy"
         }
