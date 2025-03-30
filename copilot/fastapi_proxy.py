@@ -16,7 +16,7 @@ ARGOCD_USERNAME = "admin"
 ARGOCD_PASSWORD = "yourpassword"  # Use a secret manager in production!
 
 # Read Kubernetes Service Account token
-def get_k8s_token():
+def get_k8s_token() -> str:
     """
     Retrieve the Kubernetes service account token.
     
@@ -27,8 +27,8 @@ def get_k8s_token():
     try:
         with open(K8S_TOKEN_PATH, "r") as f:
             return f.read().strip()
-    except Exception:
-        raise HTTPException(status_code=500, detail="Unable to read K8s token")
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Unable to read K8s token: {e}") from e
 
 async def proxy_request(target_url: str, method: str, request: Request, headers: dict = None):
     """
