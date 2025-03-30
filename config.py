@@ -10,6 +10,7 @@ from pydantic import BaseSettings
 from kubernetes import client, config
 from fastapi import HTTPException
 import os
+import warnings
 
 class Settings(BaseSettings):
     """Configuration settings for the application."""
@@ -19,20 +20,34 @@ class Settings(BaseSettings):
     k8s_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
     # ArgoCD settings
-    argocd_url: str = "https://argocd-server.argocd.svc"
-    argocd_username: str = "admin"
-    argocd_password: str = "password"  # In production, use secrets
+    argocd_url: str = os.getenv("ARGOCD_URL", "https://argocd-server.argocd.svc")
+    argocd_username: str = os.getenv("ARGOCD_USERNAME", "admin")
+    argocd_password: str = os.getenv("ARGOCD_PASSWORD", "")  # No default for security
     
-    # GitOps settings
-    git_repo_url: str = "git@github.com:your-org/k8s-apps.git"
-    git_repo_path: str = "/tmp/k8s-apps"
-    git_branch: str = "main"
+    # TVP settings
+    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/k8s-apps.git")
+    tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/k8s-apps")
+    tvp_branch: str = os.getenv("TVP_BRANCH", "main")
     
     # Environment
-    environment: str = "development"
+    environment: str = os.getenv("ENVIRONMENT", "development")
+    
+    # Security
+    verify_ssl: bool = os.getenv("VERIFY_SSL", "true").lower() != "false"
     
     class Config:
         env_file = ".env"
+        
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._check_security_settings()
+    
+    def _check_security_settings(self):
+        """Check and warn about insecure settings."""
+        if not self.argocd_password:
+            warnings.warn("ArgoCD password not set. Please set ARGOCD_PASSWORD environment variable.")
+        if not self.verify_ssl:
+            warnings.warn("SSL verification is disabled. This is insecure and should not be used in production.")
 
 @lru_cache()
 def get_settings():
