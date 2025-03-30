@@ -6,3 +6,7 @@ kubernetes:
       clusters:
         - name: my-cluster
           url: https://kubernetes.default.svc
+          # Explicitly define authentication method (if needed)
+          authProvider: serviceAccount
+          # Optional: add service account token path if not using default
+          # serviceAccountToken: /var/run/secrets/kubernetes.io/serviceaccount/token
