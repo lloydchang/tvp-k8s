@@ -73,10 +73,13 @@ def commit_and_push_changes(app_name):
     Args:
         app_name: The name of the application whose deployment update is being committed.
     """
-    repo = Repo(GIT_REPO_PATH)
-    repo.git.add(update=True)
-    repo.index.commit(f"Deploy {app_name} update via FastAPI")
-    repo.remote(name="origin").push()
+    try:
+        repo = Repo(GIT_REPO_PATH)
+        repo.git.add(update=True)
+        repo.index.commit(f"Deploy {app_name} update via FastAPI")
+        repo.remote(name="origin").push()
+    except Exception as e:
+        raise Exception(f"Git commit/push operation failed: {str(e)}") from e
 
 @app.post("/deploy")
 def deploy_application(app_name: str, image: str, replicas: int = 1):
