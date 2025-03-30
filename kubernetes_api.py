@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import httpx
 
-from config import get_settings, get_k8s_client
+from config import get_settings, get_kubernetes_client
 
 router = APIRouter()
 
@@ -27,13 +27,13 @@ def get_apps_v1_client():
     """
     Returns a Kubernetes AppsV1Api client.
     """
-    # Use the same configuration method as get_k8s_client
-    get_k8s_client()  # This sets up the configuration
+    # Use the same configuration method as get_kubernetes_client
+    get_kubernetes_client()  # This sets up the configuration
     return client.AppsV1Api()
 
 # Kubernetes True Pass-Through Proxy
-@router.api_route("/k8s/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
-async def k8s_proxy(path: str, request: Request):
+@router.api_route("/kubernetes/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+async def kubernetes_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Kubernetes API.
     """
@@ -41,10 +41,10 @@ async def k8s_proxy(path: str, request: Request):
     
     # Determine headers
     try:
-        with open(settings.k8s_token_path, "r") as f:
-            k8s_token = f.read().strip()
+        with open(settings.kubernetes_token_path, "r") as f:
+            kubernetes_token = f.read().strip()
         headers = {
-            "Authorization": f"Bearer {k8s_token}",
+            "Authorization": f"Bearer {kubernetes_token}",
         }
     except:
         # For local development using kubeconfig
@@ -56,7 +56,7 @@ async def k8s_proxy(path: str, request: Request):
             headers[header_key] = header_value
     
     # Create the target URL
-    target_url = f"{settings.k8s_api_url}/api/v1/{path}"
+    target_url = f"{settings.kubernetes_api_url}/api/v1/{path}"
     
     # Pass through the request without modification
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
