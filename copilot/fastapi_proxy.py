@@ -67,7 +67,8 @@ except httpx.HTTPError as e:
 @app.post("/k8s/{path:path}")
 @app.put("/k8s/{path:path}")
 @app.delete("/k8s/{path:path}")
-async def k8s_proxy(path: str, request: Request):
+async def k8s_proxy(path: str, request: Request) -> dict:
+    ...
     """
     Proxies a request to the Kubernetes API.
     
