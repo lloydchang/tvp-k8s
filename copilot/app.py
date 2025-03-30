@@ -39,11 +39,17 @@ async def deploy_app(name: str, image: str, replicas: int = 1):
         metadata=client.V1ObjectMeta(name=name),
         spec=client.V1DeploymentSpec(
             replicas=replicas,
-            selector={"matchLabels": {"app": name}},
+            selector=client.V1LabelSelector(
+                match_labels={"app": name},
+            ),
             template=client.V1PodTemplateSpec(
-                metadata={"labels": {"app": name}},
+                metadata=client.V1ObjectMeta(
+                    labels={"app": name},
+                ),
                 spec=client.V1PodSpec(
-                    containers=[client.V1Container(name=name, image=image)]
+                    containers=[client.V1Container(name=name, image=image, ports=[
+                        client.V1ContainerPort(container_port=80),
+                    ])],
                 )
             ),
         )
