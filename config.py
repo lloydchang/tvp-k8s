@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     """Configuration settings for the application."""
     
     # Kubernetes settings
-    k8s_api_url: str = "https://kubernetes.default.svc"
-    k8s_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    kubernetes_api_url: str = "https://kubernetes.default.svc"
+    kubernetes_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
     # ArgoCD settings
     argocd_url: str = os.getenv("ARGOCD_URL", "https://argocd-server.argocd.svc")
@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     argocd_password: str = os.getenv("ARGOCD_PASSWORD", "")  # No default for security
     
     # TVP settings
-    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/k8s-apps.git")
-    tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/k8s-apps")
+    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/kubernetes-apps.git")
+    tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/kubernetes-apps")
     tvp_branch: str = os.getenv("TVP_BRANCH", "main")
     
     # Environment
@@ -56,7 +56,7 @@ def get_settings():
     """
     return Settings()
 
-def get_k8s_client():
+def get_kubernetes_client():
     """
     Retrieves a Kubernetes API client.
     
@@ -75,17 +75,17 @@ def get_k8s_client():
     
     return client.CoreV1Api()
 
-def get_k8s_token():
+def get_kubernetes_token():
     """
     Retrieve the Kubernetes service account token.
     
-    This function reads the token from the file specified by K8S_TOKEN_PATH and returns
+    This function reads the token from the file specified by kubernetes_TOKEN_PATH and returns
     it as a stripped string. If the token cannot be read, it raises an HTTPException
     with a 500 status code.
     """
     settings = get_settings()
     try:
-        with open(settings.k8s_token_path, "r") as f:
+        with open(settings.kubernetes_token_path, "r") as f:
             return f.read().strip()
     except OSError as e:
-        raise HTTPException(status_code=500, detail=f"Unable to read K8s token: {e}")
+        raise HTTPException(status_code=500, detail=f"Unable to read kubernetes token: {e}")
