@@ -1,7 +1,9 @@
 """
 Thinnest Viable Platform (TVP) Module
 
-This module provides functionality for platform operations using a minimal, focused approach that reduces cognitive load for developers while providing just enough functionality to enable rapid, safe delivery.
+This module provides functionality for platform operations using a minimal,
+focused approach that reduces cognitive load for developers while providing
+just enough functionality to enable rapid, safe delivery.
 
 Following GitOps principles:
 1. Declarative - Configuration stored in Git as YAML
