@@ -11,21 +11,22 @@ config.load_kube_config()
 @app.post("/deploy")
 async def deploy_app(name: str, image: str, replicas: int = 1):
     """
-    Deploys an application to a Kubernetes cluster.
+    Deploys a containerized application to Kubernetes.
     
-    Creates a Kubernetes deployment in the default namespace using the specified
-    name, container image, and replica count. The deployment’s metadata and pod
-    template labels are set based on the application name. Returns a success
-    message on creation or raises an HTTPException (status code 500) if an error
-    occurs.
+    Creates a deployment in the "default" namespace with the specified name, container image, 
+    and replica count. Returns a success message on successful creation; if an error occurs, 
+    an HTTPException is raised with the error details.
     
-    Parameters:
-        name (str): Identifier for the deployment and pod labels.
-        image (str): Container image to deploy.
-        replicas (int, optional): Number of replicas to deploy. Defaults to 1.
+    Args:
+        name: The deployment name and pod label.
+        image: The container image to deploy.
+        replicas: The number of pod replicas to create (default is 1).
     
     Returns:
-        dict: A confirmation message indicating successful deployment.
+        A dictionary containing a success message.
+    
+    Raises:
+        HTTPException: If an error occurs during deployment creation.
     """
     v1 = client.AppsV1Api()
 

@@ -9,22 +9,23 @@ class ArgoCDIntegrator:
                  git_repo_path='/tmp/app-manifests',
                  argocd_repo_url='https://github.com/your-org/kubernetes-manifests'):
         """
-                 Initializes the ArgoCDIntegrator instance.
+                 Initialize the ArgoCDIntegrator instance.
                  
-                 Sets the local Git repository path and ArgoCD repository URL. If the local repository
-                 does not exist at the specified path, the repository is cloned from the remote URL;
-                 otherwise, the existing repository is initialized.
+                 Sets up the local Git repository for storing ArgoCD manifests. If the repository
+                 is not found at the specified path, it is cloned from the given remote URL; otherwise,
+                 the existing repository is loaded.
                  
                  Args:
-                     git_repo_path: Local filesystem path for the Git repository containing application manifests.
-                     argocd_repo_url: URL of the remote Git repository to clone if the local repository is absent.
+                     git_repo_path: Local directory path for the repository. Defaults to '/tmp/app-manifests'.
+                     argocd_repo_url: Remote Git URL to clone the repository from if not present.
+                         Defaults to 'https://github.com/your-org/kubernetes-manifests'.
                  """
                  self.git_repo_path = git_repo_path
         self.argocd_repo_url = argocd_repo_url
         
         # Ensure repo exists or clone
         if not os.path.exists(git_repo_path):
-            Repo.clone_from(argocd_repo_url, git_repo_path)
+            self.repo = Repo.clone_from(argocd_repo_url, git_repo_path)
         else:
             self.repo = Repo(git_repo_path)
 
@@ -35,17 +36,19 @@ class ArgoCDIntegrator:
         """
                                       Generate an ArgoCD Application manifest.
                                       
-                                      Builds and returns a dictionary representing an ArgoCD Application Custom
-                                      Resource with preset metadata, source details, destination, and automated
-                                      sync policies.
+                                      Constructs an ArgoCD Application Custom Resource manifest as a dictionary. The manifest
+                                      includes metadata with the application name (appending "-application"), source settings
+                                      with the Git repository URL and a fixed target revision and path, and a destination
+                                      configured to deploy to the specified Kubernetes namespace. It also sets up a sync
+                                      policy for automated pruning and self-healing.
                                       
                                       Args:
-                                          app_name (str): The base name for the application, used to construct the resource name.
-                                          git_source (str): The Git repository URL for the application source.
-                                          k8s_target_namespace (str): The Kubernetes namespace where the application is deployed.
+                                          app_name: The base name for the application.
+                                          git_source: URL of the Git repository containing the application.
+                                          k8s_target_namespace: Kubernetes namespace where the application will be deployed.
                                       
                                       Returns:
-                                          dict: A dictionary describing the ArgoCD Application manifest.
+                                          A dictionary representing the ArgoCD Application manifest.
                                       """
         argocd_app = {
             'apiVersion': 'argoproj.io/v1alpha1',
@@ -77,16 +80,15 @@ class ArgoCDIntegrator:
 
     def commit_and_push_manifest(self, app_name: str, manifest):
         """
-        Commits and pushes the ArgoCD application manifest to the Git repository.
+        Commit and push the ArgoCD application manifest to the Git repository.
         
-        This method creates the target application directory if it does not exist,
-        writes the provided manifest to an 'application.yaml' file, stages the file,
-        commits the change with a message that includes the application name, and
-        pushes the commit to the remote repository.
+        This method creates or updates a directory for the specified application under the
+        configured Git repository path, writes the provided manifest as a YAML file, and then
+        stages, commits, and pushes the changes to the remote repository.
         
         Args:
-            app_name: The name of the application, used to determine the directory path and commit message.
-            manifest: A dictionary representing the ArgoCD manifest to be written and committed.
+            app_name (str): The name of the application, used for directory creation and commit message.
+            manifest: A dictionary representing the ArgoCD application manifest.
         """
         app_dir = os.path.join(self.git_repo_path, f'apps/{app_name}')
         os.makedirs(app_dir, exist_ok=True)
@@ -109,23 +111,22 @@ async def create_argocd_application(
     namespace: str = 'default'
 ):
     """
-    Initiate an ArgoCD application deployment.
+    Creates an ArgoCD application for deployment.
     
-    This asynchronous function constructs an ArgoCD application manifest using the
-    specified application name, Git source, and Kubernetes namespace. It then commits
-    the manifest to a Git repository and returns a response indicating that the deployment
-    has been initiated. An HTTPException is raised if any error occurs during the process.
-    
+    Generates an ArgoCD manifest with the provided application name, Git source, and 
+    target Kubernetes namespace, then commits the manifest to a Git repository. Returns 
+    a dictionary indicating the deployment initiation status and details. Raises an 
+    HTTPException with a 500 status code if an error occurs.
+      
     Args:
-        app_name (str): The name of the application to deploy.
-        git_source (str): The Git repository source for the application.
-        namespace (str, optional): The Kubernetes namespace for the deployment.
-                                   Defaults to 'default'.
-    
+        app_name: The name of the application to be deployed.
+        git_source: The Git source reference for the application manifest.
+        namespace: The Kubernetes namespace for the application (default is "default").
+      
     Returns:
-        dict: A dictionary containing the deployment status and details including the
-              application name, git source, and namespace.
-    
+        A dictionary containing the deployment status and details including app_name, 
+        git_source, and namespace.
+      
     Raises:
         HTTPException: If an error occurs during manifest generation or Git operations.
     """

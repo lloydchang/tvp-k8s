@@ -6,6 +6,11 @@ import yaml
 app = FastAPI()
 
 def get_k8s_client():
+    """
+    Retrieves a Kubernetes API client.
+    
+    Loads the local Kubernetes configuration and returns a new ApiClient instance for interacting with the cluster.
+    """
     config.load_kube_config()
     return client.ApiClient()
 
@@ -17,7 +22,23 @@ async def create_argocd_application(
     app_name: str,
     k8s_client: client.ApiClient = Depends(get_k8s_client)
 ):
-    """Creates an Argo CD Application."""
+    """
+    Creates an Argo CD Application.
+    
+    This asynchronous endpoint constructs a YAML manifest for an Argo CD Application using the provided repository URL, manifest path, target namespace, and application name, then applies it to a Kubernetes cluster. On success, it returns a confirmation message; if the creation fails, an HTTPException is raised with details from the Kubernetes API.
+    
+    Args:
+        repo_url: URL of the Git repository containing the application's source.
+        path: Relative path within the repository to the application's manifests.
+        target_namespace: Kubernetes namespace where the application will be deployed.
+        app_name: Name assigned to the Argo CD application.
+    
+    Returns:
+        A dictionary with a success message confirming the application's creation.
+    
+    Raises:
+        HTTPException: If an error occurs during application creation.
+    """
 
     # Construct the Application YAML
     application_yaml = f"""
@@ -60,6 +81,15 @@ async def create_argocd_application(
 @app.post("/argocd/applications/{app_name}/sync")
 async def sync_argocd_application(app_name: str, k8s_client: client.ApiClient = Depends(get_k8s_client)):
    #Implementation for triggering sync
+   """
+   Triggers synchronization of an Argo CD application.
+   
+   This asynchronous endpoint initiates the synchronization process for the Argo CD
+   application identified by its name. The current implementation is a placeholder.
+   
+   Args:
+       app_name: The name of the Argo CD application to be synchronized.
+   """
    pass
 
 
