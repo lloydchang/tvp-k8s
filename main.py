@@ -12,7 +12,7 @@ import httpx
 # Import our modules
 from kubernetes_api import router as kubernetes_router
 from argocd_api import router as argocd_router, get_argocd_token
-from tvp import router as tvp_router
+from tvp import router as tvp_router, start_reconciliation_thread
 from config import get_settings, get_k8s_client
 
 app = FastAPI(
@@ -34,6 +34,15 @@ app.add_middleware(
 app.include_router(kubernetes_router, prefix="/k8s", tags=["Kubernetes"])
 app.include_router(argocd_router, prefix="/argocd", tags=["ArgoCD"])
 app.include_router(tvp_router, prefix="/tvp", tags=["TVP"])
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Runs when the application starts.
+    Initializes background tasks like the GitOps reconciliation thread.
+    """
+    # Start the TVP GitOps reconciliation thread
+    start_reconciliation_thread()
 
 @app.get("/", tags=["Health"])
 async def root():
