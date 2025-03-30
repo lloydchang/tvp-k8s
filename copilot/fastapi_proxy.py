@@ -59,7 +59,8 @@ async def proxy_request(target_url: str, method: str, request: Request, headers:
             response = await client.request(method, target_url, headers=headers, json=body)
             return response.json()
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")
+except httpx.HTTPError as e:
+    raise HTTPException(status_code=500, detail=f"Proxy error: {e}") from e
 
 # ------------- Kubernetes Pass-Through Proxy -------------
 @app.get("/k8s/{path:path}")
