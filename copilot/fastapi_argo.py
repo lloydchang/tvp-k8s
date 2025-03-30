@@ -82,7 +82,7 @@ def commit_and_push_changes(app_name):
         raise Exception(f"Git commit/push operation failed: {str(e)}") from e
 
 @app.post("/deploy")
-def deploy_application(app_name: str, image: str, replicas: int = 1):
+def deploy_application(app_name: str, image: str, replicas: int = 1) -> dict:
     """
     Deploys an application by updating its Kubernetes deployment manifest.
     
