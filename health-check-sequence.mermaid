@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant K8sClient
+    participant ArgoCD
+    
+    Client->>FastAPI: GET /health
+    
+    FastAPI->>K8sClient: list_namespace()
+    alt K8s Healthy
+        K8sClient-->>FastAPI: Success response
+        FastAPI->>FastAPI: K8s status = "healthy"
+    else K8s Unhealthy
+        K8sClient-->>FastAPI: Error
+        FastAPI->>FastAPI: K8s status = "unhealthy"
+        FastAPI->>FastAPI: Overall status = "degraded"
+    end
+    
+    FastAPI->>ArgoCD: get_argocd_token()
+    alt ArgoCD Healthy
+        ArgoCD-->>FastAPI: Valid token
+        FastAPI->>FastAPI: ArgoCD status = "healthy"
+    else ArgoCD Unhealthy
+        ArgoCD-->>FastAPI: Error
+        FastAPI->>FastAPI: ArgoCD status = "unhealthy"
+        FastAPI->>FastAPI: Overall status = "degraded"
+    end
+    
+    FastAPI-->>Client: Health status response

@@ -1,0 +1,29 @@
+flowchart TB
+    subgraph "Thinnest Viable Platform"
+        API[FastAPI Application]
+        RT[Reconciliation Thread]
+        
+        API --> RT
+        RT --> API
+    end
+    
+    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
+    GitRepo -->|Pull| RT
+    RT -->|Apply configs| K8s[(Kubernetes Cluster)]
+    
+    subgraph "Kubernetes Cluster"
+        K8s
+        ArgoCD
+    end
+    
+    Client[Client Application] --> API
+    API -->|Proxy| K8s
+    API -->|Proxy| ArgoCD
+    
+    classDef platform fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    
+    class API,RT platform
+    class K8s,ArgoCD,GitRepo external
+    class Dev,Client user

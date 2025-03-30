@@ -1,0 +1,40 @@
+classDiagram
+    class FastAPI {
+        +title: str
+        +description: str
+        +version: str
+        +startup_event()
+        +root()
+        +health_check()
+    }
+    
+    class KubernetesRouter {
+        +kubernetes_proxy()
+        +get_kubernetes_client()
+    }
+    
+    class ArgoCDRouter {
+        +argocd_proxy()
+        +get_argocd_token()
+    }
+    
+    class TVPRouter {
+        +get_tvp_status()
+        +trigger_reconciliation()
+        +get_deployment_status()
+    }
+    
+    class Config {
+        +Settings
+        +get_settings()
+        +get_kubernetes_client()
+        +get_kubernetes_token()
+    }
+    
+    FastAPI --> KubernetesRouter : includes
+    FastAPI --> ArgoCDRouter : includes
+    FastAPI --> TVPRouter : includes
+    KubernetesRouter --> Config : depends on
+    ArgoCDRouter --> Config : depends on
+    TVPRouter --> Config : depends on
+    FastAPI --> Config : depends on

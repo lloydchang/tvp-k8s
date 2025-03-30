@@ -1,0 +1,27 @@
+flowchart TB
+    Client[Client Application] --> API[FastAPI Application]
+    
+    subgraph "FastAPI Application"
+        API --> KR[Kubernetes Router]
+        API --> AR[ArgoCD Router]
+        API --> TR[TVP Router]
+        API --> Health[Health Check]
+        TR --> RT[Reconciliation Thread]
+    end
+    
+    KR --> KC[Kubernetes Client]
+    AR --> AT[ArgoCD Token]
+    TR --> GitRepo[(Git Repository)]
+    
+    KC --> K8s[(Kubernetes API)]
+    AT --> ArgoCD[(ArgoCD API)]
+    RT --> GitRepo
+    RT --> K8s
+    
+    classDef component fill:#f9f,stroke:#333,stroke-width:2px
+    classDef api fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    
+    class API,KR,AR,TR,Health component
+    class KC,AT,RT api
+    class K8s,ArgoCD,GitRepo external

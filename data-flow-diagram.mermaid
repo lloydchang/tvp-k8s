@@ -1,0 +1,29 @@
+flowchart TD
+    User[User/Client] -->|API Request| API[FastAPI App]
+    
+    API -->|/kubernetes/*| KP[Kubernetes Proxy]
+    API -->|/argocd/*| AP[ArgoCD Proxy]
+    API -->|/tvp/*| TVP[TVP Router]
+    
+    KP -->|Auth token| KA[Kubernetes API]
+    AP -->|Login| Auth[ArgoCD Auth]
+    Auth -->|Token| AP
+    AP -->|Auth token| AA[ArgoCD API]
+    
+    TVP -->|Status| TS[TVP Status]
+    TVP -->|Reconcile| R[Reconciliation]
+    
+    TS --> Git[Git Repository]
+    R --> Git
+    R --> KA
+    
+    KA --> K8s[(Kubernetes Cluster)]
+    AA --> ArgoCD[(ArgoCD Service)]
+    
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef app fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    
+    class User user
+    class API,KP,AP,TVP,TS,R,Auth app
+    class K8s,ArgoCD,Git,KA,AA external
