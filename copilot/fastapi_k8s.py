@@ -79,7 +79,11 @@ async def create_argocd_application(
 
 
 @app.post("/argocd/applications/{app_name}/sync")
-async def sync_argocd_application(app_name: str, k8s_client: client.ApiClient = Depends(get_k8s_client)):
+@app.post("/argocd/applications/{app_name}/sync")
+async def sync_argocd_application(app_name: str) -> None:
+    k8s_client = get_k8s_client()
+    # Implementation for triggering sync
+    pass
    #Implementation for triggering sync
    """
    Triggers synchronization of an Argo CD application.
