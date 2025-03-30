@@ -1,3 +1,0 @@
-import { createRouter } from '@backstage/plugin-fastapi-proxy';
-...
-app.use('/api/fastapi', await createRouter({ logger }));

@@ -5,6 +5,12 @@ from kubernetes.client.rest import ApiException
 app = FastAPI()
 
 def get_k8s_client():
+    """
+    Loads Kubernetes configuration and returns a Kubernetes API client.
+    
+    This function loads the kubeconfig file using the Kubernetes client library and instantiates an
+    ApiClient for interacting with a Kubernetes cluster.
+    """
     config.load_kube_config()
     return client.ApiClient()
 
@@ -14,7 +20,20 @@ async def kubernetes_passthru(
     request: Request,
     k8s_client: client.ApiClient = Depends(get_k8s_client)
 ):
-    """Passes through requests to the Kubernetes API."""
+    """
+    Forward a request to the Kubernetes API.
+    
+    This asynchronous endpoint forwards client requests to the Kubernetes API. It conditionally
+    extracts the request body based on the HTTP method, constructs the corresponding Kubernetes
+    API URL using the provided path, and streams the Kubernetes API response back to the client.
+    A placeholder is included for implementing authentication and authorization logic.
+    
+    Raises:
+        HTTPException: If the Kubernetes API call fails or an internal error occurs.
+    
+    Returns:
+        The raw content of the Kubernetes API response.
+    """
 
     # Authentication/Authorization (CRITICAL!) - Replace with your auth logic
     # Check user permissions, e.g., using RBAC or other authentication mechanism

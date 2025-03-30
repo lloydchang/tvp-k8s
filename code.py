@@ -4,7 +4,11 @@ from kubernetes import client, config
 app = FastAPI()
 
 def get_k8s_client():
-    """Load Kubernetes configuration and return the API client."""
+    """
+    Attempts to load the Kubernetes configuration and return a CoreV1Api client.
+    
+    If the configuration fails to load, raises an HTTPException with a 500 status code.
+    """
     try:
         config.load_kube_config()  # Loads from ~/.kube/config or in-cluster config
     except client.config_exception.ConfigException as e:
@@ -13,7 +17,14 @@ def get_k8s_client():
 
 @app.get("/namespaces")
 async def list_namespaces(k8s_client: client.CoreV1Api = Depends(get_k8s_client)):
-    """Lists all namespaces in the Kubernetes cluster."""
+    """
+    Lists all namespaces in the Kubernetes cluster.
+    
+    This asynchronous endpoint retrieves namespace names using the provided Kubernetes client.
+    It calls the client's list_namespace method to obtain namespace items and returns a list
+    of the namespace names. If the API call fails, an HTTPException is raised with the
+    corresponding status code and error detail.
+    """
     try:
         namespaces = k8s_client.list_namespace()
         return [ns.metadata.name for ns in namespaces.items]
@@ -22,7 +33,12 @@ async def list_namespaces(k8s_client: client.CoreV1Api = Depends(get_k8s_client)
 
 @app.get("/healthz")
 async def health_check():
-    """Health check endpoint."""
+    """
+    Check the health status of the service.
+    
+    Returns:
+        dict: A JSON-compatible dictionary with a "status" key set to "ok".
+    """
     return {"status": "ok"}
 
 # Add more endpoints for deployments, services, etc.

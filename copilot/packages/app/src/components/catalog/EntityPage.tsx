@@ -1,3 +1,0 @@
-import { EntityKubernetesContent } from '@backstage/plugin-kubernetes';
-...
-<EntityKubernetesContent />

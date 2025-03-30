@@ -21,7 +21,19 @@ def clone_or_pull_repo():
         Repo.clone_from(GIT_REPO_URL, GIT_REPO_PATH, branch=GIT_BRANCH)
 
 def update_k8s_manifest(app_name, image, replicas):
-    """Updates the Kubernetes YAML file for the app."""
+    """
+    Updates the Kubernetes deployment manifest for the specified application.
+    
+    Constructs a Kubernetes deployment configuration in YAML format using the provided
+    application name, container image, and replica count. The resulting manifest is
+    written to the deployment.yaml file located at the app's directory under the
+    repository path, replacing any existing configuration.
+    
+    Parameters:
+        app_name: The name of the application.
+        image: The container image to use in the deployment.
+        replicas: The desired number of replicas for the deployment.
+    """
     file_path = f"{GIT_REPO_PATH}/apps/{app_name}/deployment.yaml"
 
     # Example of modifying a YAML file
@@ -52,14 +64,45 @@ spec:
         f.write(new_yaml)
 
 def commit_and_push_changes(app_name):
-    """Commits and pushes the changes to Git."""
-    repo = Repo(GIT_REPO_PATH)
-    repo.git.add(update=True)
-    repo.index.commit(f"Deploy {app_name} update via FastAPI")
-    repo.remote(name="origin").push()
+    """
+    Commits repository changes and pushes them to the remote.
+    
+    Stages updated files, creates a commit with a message indicating the deployment update for the given
+    application, and pushes the commit to the remote repository.
+    
+    Args:
+        app_name: The name of the application whose deployment update is being committed.
+    """
+    try:
+        repo = Repo(GIT_REPO_PATH)
+        repo.git.add(update=True)
+        repo.index.commit(f"Deploy {app_name} update via FastAPI")
+        repo.remote(name="origin").push()
+    except Exception as e:
+        raise Exception(f"Git commit/push operation failed: {str(e)}") from e
 
 @app.post("/deploy")
-def deploy_application(app_name: str, image: str, replicas: int = 1):
+def deploy_application(app_name: str, image: str, replicas: int = 1) -> dict:
+    """
+    Deploys an application by updating its Kubernetes deployment manifest.
+    
+    This function orchestrates the deployment process by ensuring the latest state of the Git repository
+    is available, updating the Kubernetes manifest with the specified container image and replica count,
+    and committing and pushing the changes to the remote repository. A confirmation message is returned
+    upon success, prompting ArgoCD to synchronize the deployment. If any operation fails, an HTTPException
+    with a 500 status code is raised.
+    
+    Args:
+        app_name: The name of the application to deploy.
+        image: The container image to use in the deployment.
+        replicas: The number of replicas for the deployment (default is 1).
+    
+    Returns:
+        A dictionary containing a message confirming the update.
+    
+    Raises:
+        HTTPException: If an error occurs during repository operations or manifest updates.
+    """
     try:
         clone_or_pull_repo()
         update_k8s_manifest(app_name, image, replicas)
