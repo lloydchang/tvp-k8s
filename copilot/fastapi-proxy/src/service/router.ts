@@ -6,7 +6,8 @@ export const router = express.Router();
 router.use(express.json());
 
 router.all('*', async (req, res) => {
-  const targetUrl = `http://fastapi-service:8000${req.path}`;
+  const fastApiServiceUrl = process.env.FASTAPI_SERVICE_URL || 'http://fastapi-service:8000';
+  const targetUrl = `${fastApiServiceUrl}${req.path}`;
   
   try {
     // Forward original headers but ensure content-type is set for JSON body
