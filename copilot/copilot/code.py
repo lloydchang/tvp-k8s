@@ -5,9 +5,10 @@ app = FastAPI()
 
 def get_k8s_client():
     """
-    Attempts to load the Kubernetes configuration and return a CoreV1Api client.
+    Loads Kubernetes configuration and returns a CoreV1Api client.
     
-    If the configuration fails to load, raises an HTTPException with a 500 status code.
+    Attempts to load the Kubernetes configuration from the default kubeconfig file or in-cluster settings.
+    Raises an HTTPException with status code 500 if the configuration cannot be loaded.
     """
     try:
         config.load_kube_config()  # Loads from ~/.kube/config or in-cluster config
@@ -17,13 +18,11 @@ def get_k8s_client():
 
 @app.get("/namespaces")
 async def list_namespaces(k8s_client: client.CoreV1Api = Depends(get_k8s_client)):
-    """
-    Lists all namespaces in the Kubernetes cluster.
+    """Retrieves the names of all namespaces in the Kubernetes cluster.
     
-    This asynchronous endpoint retrieves namespace names using the provided Kubernetes client.
-    It calls the client's list_namespace method to obtain namespace items and returns a list
-    of the namespace names. If the API call fails, an HTTPException is raised with the
-    corresponding status code and error detail.
+    This asynchronous endpoint uses the Kubernetes client to query for available namespaces and
+    returns a list of their names. If the Kubernetes API call fails, an HTTPException is raised
+    with the corresponding error status and message.
     """
     try:
         namespaces = k8s_client.list_namespace()
@@ -34,10 +33,10 @@ async def list_namespaces(k8s_client: client.CoreV1Api = Depends(get_k8s_client)
 @app.get("/healthz")
 async def health_check():
     """
-    Check the health status of the service.
+    Check application health and return status.
     
     Returns:
-        dict: A JSON-compatible dictionary with a "status" key set to "ok".
+        dict: A dictionary with a "status" key set to "ok", indicating the service is healthy.
     """
     return {"status": "ok"}
 

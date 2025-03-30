@@ -6,6 +6,11 @@ app = FastAPI(title="Kubernetes Platform API")
 
 # Kubernetes cluster connection
 def get_k8s_client():
+    """
+    Returns a Kubernetes CoreV1Api client configured for the current environment.
+    
+    Attempts to load the in-cluster configuration; if that fails, falls back to the local kubeconfig.
+    """
     try:
         config.load_incluster_config()
     except config.ConfigException:
@@ -25,6 +30,13 @@ async def create_deployment(
 ):
     # Implementation for creating a standardized deployment
     # Add custom logic, validation, and organizational standards
+    """
+    Creates a Kubernetes deployment using the provided deployment details.
+    
+    Constructs a V1Deployment specification based on the input deployment request and creates the
+    deployment in the specified namespace using the Kubernetes AppsV1 API. Returns a JSON response
+    with the deployment status and API details.
+    """
     deployment_spec = client.V1Deployment(
         metadata=client.V1ObjectMeta(name=deployment.name),
         spec={
@@ -51,4 +63,10 @@ async def create_deployment(
 
 @app.get("/health")
 async def health_check():
+    """
+    Check the platform's health status.
+    
+    Returns:
+        dict: A JSON response containing the health status of the platform.
+    """
     return {"status": "Platform is healthy"}

@@ -5,6 +5,13 @@ from kubernetes.client.rest import ApiException
 app = FastAPI()
 
 def get_k8s_client():
+    """
+    Load Kubernetes configuration and return an API client.
+    
+    This function initializes the Kubernetes configuration using the default kube config file
+    and returns an instance of the Kubernetes API client, which can be used to interact with
+    the Kubernetes cluster.
+    """
     config.load_kube_config()
     return client.ApiClient()
 
@@ -14,7 +21,20 @@ async def argocd_passthru(
     request: Request,
     k8s_client: client.ApiClient = Depends(get_k8s_client)
 ):
-    """Passes through requests to the Argo CD API (via Kubernetes API)."""
+    """
+    Pass through requests to the Argo CD API via the Kubernetes API.
+    
+    This asynchronous route captures details of an incoming HTTP request—conditionally reading
+    the request body for POST, PUT, and PATCH methods—and constructs the corresponding Argo CD API
+    endpoint URL. It forwards the request using a Kubernetes API client and streams the response
+    content back to the caller.
+    
+    Note:
+      Replace the placeholder authentication logic with proper permission checks.
+    
+    Raises:
+      HTTPException: If the Kubernetes API call fails or an unexpected error occurs.
+    """
 
     # Authentication/Authorization (CRITICAL!) - Replace with your auth logic
     # Check user permissions to access Argo CD resources
