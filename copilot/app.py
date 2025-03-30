@@ -6,7 +6,13 @@ from kubernetes import client, config
 app = FastAPI()
 
 # Load kubeconfig (adjust for in-cluster deployment)
-config.load_kube_config()
+# Load appropriate Kubernetes config based on environment
+try:
+    # Try to load in-cluster config first (when running inside a pod)
+    config.load_incluster_config()
+except config.ConfigException:
+    # Fall back to local kubeconfig for development
+    config.load_kube_config()
 
 @app.post("/deploy")
 async def deploy_app(name: str, image: str, replicas: int = 1):
