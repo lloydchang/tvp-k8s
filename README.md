@@ -32,7 +32,6 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples
   - https://github.com/TeamTopologies/Thin-Platform-template
   - https://github.com/sbalnojan/TVP-example
-    - https://github.com/Pablomosquerasaenz/Thinnest-Viable-Platform-examples
 - Documentation and tools focused on reducing cognitive load for development teams
   - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
   - https://github.com/cnoe-io/idpbuilder
