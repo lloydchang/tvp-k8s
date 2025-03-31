@@ -34,7 +34,12 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - https://github.com/sbalnojan/TVP-example
 - Documentation and tools focused on reducing cognitive load for development teams
   - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
-  - https://github.com/cnoe-io/idpbuilder
+  - https://cnoe.io/
+    - https://github.com/cnoe-io/idpbuilder
+  - https://github.com/backstage/backstage
+    - https://github.com/backstage
+  - https://roadie.io/
+  - https://www.atlassian.com/software/compass
 - A set of curated APIs with simplified access to infrastructure
   - https://github.com/lloydchang/tvp
 
