@@ -6,10 +6,15 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 ### Key Principles of TVP:
 
-- Focus on developer experience, treating development teams as customers
-- Build only what is necessary - "thinnest viable"
 - Use modern software development techniques within the platform team
+  - https://github.com/cncf/tag-app-delivery/issues/273
+  - https://github.com/cncf/tag-app-delivery/pull/301
+  - https://github.com/cncf/tag-app-delivery/pull/308
+  - https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper
+- Focus on product thinking and developer experience, treating development teams as customers
+  - https://www.youtube.com/watch?v=rgV4HLSd1dk
 - Accelerate and simplify software delivery for teams using the platform
+- Build only what is necessary - "thinnest viable"
 
 As Matthew Skelton [explains](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
@@ -23,9 +28,12 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
 
 - A wiki page defining which cloud services to use and how to use them
   - https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples
+  - https://github.com/TeamTopologies/Thin-Platform-template
   - https://github.com/sbalnojan/TVP-example
+    - https://github.com/Pablomosquerasaenz/Thinnest-Viable-Platform-examples
 - Documentation and tools focused on reducing cognitive load for development teams
   - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
+  - https://github.com/cnoe-io/idpbuilder
 - A set of curated APIs with simplified access to infrastructure
   - https://github.com/lloydchang/tvp
 
