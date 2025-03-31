@@ -16,6 +16,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 - Focus on product thinking and developer experience, treating development teams as customers
   - [Sprinkle your Devops platform with product thinking](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
 - Accelerate and simplify software delivery for teams using the platform
+  - https://www.reddit.com/r/ExperiencedDevs/comments/1dtwsij/curious_what_peoples_experiences_with_platform/
 - Build only what is necessary - "thinnest viable"
 
 As Matthew Skelton [explains](https://www.youtube.com/watch?v=8AQPSR09bxk):
