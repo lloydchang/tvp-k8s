@@ -7,11 +7,11 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 ### Key Principles of TVP:
 
 - Use modern software development techniques within the platform team
-  - [[WG Platforms] Platforms Def - What is a platform #273](https://github.com/cncf/tag-app-delivery/issues/273)
-  - [What Is a Platform Modifications #301](https://github.com/cncf/tag-app-delivery/pull/301)
-  - [[Platforms] Add paragraph on TVP and "internal" #308](https://github.com/cncf/tag-app-delivery/pull/308)
-  - [Platforms white paper](https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper)
   - [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
+    - [[WG Platforms] Platforms Def - What is a platform #273](https://github.com/cncf/tag-app-delivery/issues/273)
+    - [What Is a Platform Modifications #301](https://github.com/cncf/tag-app-delivery/pull/301)
+    - [[Platforms] Add paragraph on TVP and "internal" #308](https://github.com/cncf/tag-app-delivery/pull/308)
+    - [Platforms white paper](https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper)
   - [Platform Engineering Maturity Model](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/)
 - Focus on product thinking and developer experience, treating development teams as customers
   - [Sprinkle your Devops platform with product thinking](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
