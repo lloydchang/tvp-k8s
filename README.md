@@ -6,7 +6,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 ### Key Principles of TVP:
 
-- Use modern software development techniques within the platform team
+- **Use modern software development techniques within the platform team**
   - [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
     > Inspired by the cross-functional cooperation promised by DevOps, platform engineering has begun to emerge in enterprises as an explicit form of that cooperation. Platforms curate and present foundational capabilities, frameworks and experiences to facilitate and accelerate the work of internal customers such as application developers, data scientists and information workers. Particularly in cloud computing, platforms have helped enterprises realize values long promised by the cloud like fast product releases, portability across infrastructures, more secure and resilient products, and greater developer productivity.
     >
@@ -17,11 +17,13 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
     - [Platforms white paper](https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper)
   - [Platform Engineering Maturity Model](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/)
     > CNCF’s initial [Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/) describes what internal platforms for cloud computing are and the values they promise to deliver to enterprises. But to achieve those values an organization must reflect and deliberately pursue outcomes and practices that are impactful for them, keeping in mind that every organization relies on an internal platform crafted for its own organization - even if that platform is just documentation on how to use third party services. This maturity model provides a framework for that reflection and for identifying opportunities for improvement in any organization.
-- Focus on product thinking and developer experience, treating development teams as customers
+- **Focus on product thinking and developer experience, treating development teams as customers**
   - [Sprinkle your Devops platform with product thinking](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
-- Accelerate and simplify software delivery for teams using the platform
+- **Accelerate and simplify software delivery for teams using the platform**
   - [r/ExperiencedDevs: Curious what peoples experiences with Platform Teams are - what does your Platform Team do and how do they help other teams deliver?](https://www.reddit.com/r/ExperiencedDevs/comments/1dtwsij/curious_what_peoples_experiences_with_platform/)
-- Build only what is necessary - "thinnest viable"
+- **Build only what is _necessary_ - "thinnest viable"**
+  – Differentiate between customer needs and customer wants
+    – Customers may not always get what they want because it doesn’t _necessarily_ address their actual needs
 
 As Matthew Skelton [explains](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
