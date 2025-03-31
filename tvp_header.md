@@ -8,11 +8,15 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 - Use modern software development techniques within the platform team
   - [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
+    > Inspired by the cross-functional cooperation promised by DevOps, platform engineering has begun to emerge in enterprises as an explicit form of that cooperation. Platforms curate and present foundational capabilities, frameworks and experiences to facilitate and accelerate the work of internal customers such as application developers, data scientists and information workers. Particularly in cloud computing, platforms have helped enterprises realize values long promised by the cloud like fast product releases, portability across infrastructures, more secure and resilient products, and greater developer productivity.
+    >
+    > This paper intends to support enterprise leaders, enterprise architects and platform team leaders to advocate for, investigate and plan internal platforms for cloud computing. We believe platforms significantly impact enterprises’ actual value streams, but only indirectly, so leadership consensus and support is vital to the long-term sustainability and success of platform teams. In this paper we’ll enable that support by discussing what the value of platforms is, how to measure that value, and how to implement platform teams that maximize it.
     - [[WG Platforms] Platforms Def - What is a platform #273](https://github.com/cncf/tag-app-delivery/issues/273)
     - [What Is a Platform Modifications #301](https://github.com/cncf/tag-app-delivery/pull/301)
     - [[Platforms] Add paragraph on TVP and "internal" #308](https://github.com/cncf/tag-app-delivery/pull/308)
     - [Platforms white paper](https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper)
   - [Platform Engineering Maturity Model](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/)
+    > CNCF’s initial [Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/) describes what internal platforms for cloud computing are and the values they promise to deliver to enterprises. But to achieve those values an organization must reflect and deliberately pursue outcomes and practices that are impactful for them, keeping in mind that every organization relies on an internal platform crafted for its own organization - even if that platform is just documentation on how to use third party services. This maturity model provides a framework for that reflection and for identifying opportunities for improvement in any organization.
 - Focus on product thinking and developer experience, treating development teams as customers
   - [Sprinkle your Devops platform with product thinking](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
 - Accelerate and simplify software delivery for teams using the platform
