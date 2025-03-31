@@ -1,15 +1,15 @@
 import os
 
 mermaid_files = [
-    "component-diagram.mermaid",
-    "api-structure-diagram.mermaid",
-    "argocd-authentication-sequence.mermaid",
-    "kubernetes-proxy-sequence.mermaid",
-    "tvp-reconciliation-sequence.mermaid",
-    "health-check-sequence.mermaid",
-    "tvp-architecture-diagram.mermaid",
-    "app-deployment-workflow.mermaid",
-    "data-flow-diagram.mermaid"
+    "mermaid/component-diagram.mermaid",
+    "mermaid/api-structure-diagram.mermaid",
+    "mermaid/argocd-authentication-sequence.mermaid",
+    "mermaid/kubernetes-proxy-sequence.mermaid",
+    "mermaid/tvp-reconciliation-sequence.mermaid",
+    "mermaid/health-check-sequence.mermaid",
+    "mermaid/tvp-architecture-diagram.mermaid",
+    "mermaid/app-deployment-workflow.mermaid",
+    "mermaid/data-flow-diagram.mermaid"
 ]
 
 titles = [
