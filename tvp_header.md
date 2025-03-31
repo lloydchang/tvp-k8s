@@ -23,7 +23,7 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
 
 - A wiki [page](https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples) defining which cloud services to use and how to use them
 - [Documentation](https://github.com/sbalnojan/TVP-example) and tools focused on [reducing](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) cognitive load for development teams
-- A set of curated APIs with simplified access to infrastructure
+- A set of curated [APIs](https://github.com/lloydchang/tvp) with simplified access to infrastructure
 
 ## System Architecture Documentation
 
