@@ -15,7 +15,7 @@ As Matthew Skelton explains:
 
 > The interesting thing about platform is - it's maybe not the platform's of the past, because platforms of the past often in many organizations were great big great massive things, very difficult to use... The platforms we're talking about have placed a strong focus on developer experience, they see other development teams as their customers effectively.
 
-### TVP Definition
+### TVP Definition:
 
 A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools needed to accelerate the teams developing modern software services and systems.
 
