@@ -25,9 +25,16 @@ titles = [
 ]
 
 with open("README.md", "w") as readme:
-    readme.write("# System Architecture Documentation\n\n")
-    readme.write("This README provides a visual overview of the system architecture using various diagrams.\n\n")
+    # Read and write the TVP header from the separate file
+    try:
+        with open("tvp_header.md", "r") as header_file:
+            tvp_header = header_file.read()
+            readme.write(tvp_header + "\n\n")
+    except FileNotFoundError:
+        readme.write("# System Architecture Documentation\n\n")
+        readme.write("This README provides a visual overview of the system architecture using various diagrams.\n\n")
     
+    # Then write the diagrams
     for i, (filename, title) in enumerate(zip(mermaid_files, titles)):
         readme.write(f"## {i+1}. {title}\n\n")
         readme.write("```mermaid\n")
