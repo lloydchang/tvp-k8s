@@ -11,6 +11,8 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
   - https://github.com/cncf/tag-app-delivery/pull/301
   - https://github.com/cncf/tag-app-delivery/pull/308
   - https://github.com/cncf/tag-app-delivery/tree/main/platforms-whitepaper
+  - https://tag-app-delivery.cncf.io/whitepapers/platforms/
+  - https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/
 - Focus on product thinking and developer experience, treating development teams as customers
   - https://www.youtube.com/watch?v=rgV4HLSd1dk
 - Accelerate and simplify software delivery for teams using the platform
