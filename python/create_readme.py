@@ -24,7 +24,7 @@ titles = [
     "Data Flow Diagram"
 ]
 
-with open("README.md", "w") as readme:
+with open("../README.md", "w") as readme:
     # Read and write the TVP header from the separate file
     try:
         with open("tvp_header.md", "r") as header_file:
