@@ -8,8 +8,6 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 - **Use modern software development techniques within the platform team**
   - [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
-    > Inspired by the cross-functional cooperation promised by DevOps, platform engineering has begun to emerge in enterprises as an explicit form of that cooperation. Platforms curate and present foundational capabilities, frameworks and experiences to facilitate and accelerate the work of internal customers such as application developers, data scientists and information workers. Particularly in cloud computing, platforms have helped enterprises realize values long promised by the cloud like fast product releases, portability across infrastructures, more secure and resilient products, and greater developer productivity.
-    >
     > This paper intends to support enterprise leaders, enterprise architects and platform team leaders to advocate for, investigate and plan internal platforms for cloud computing. We believe platforms significantly impact enterprises’ actual value streams, but only indirectly, so leadership consensus and support is vital to the long-term sustainability and success of platform teams. In this paper we’ll enable that support by discussing what the value of platforms is, how to measure that value, and how to implement platform teams that maximize it.
     - [[WG Platforms] Platforms Def - What is a platform #273](https://github.com/cncf/tag-app-delivery/issues/273)
     - [What Is a Platform Modifications #301](https://github.com/cncf/tag-app-delivery/pull/301)
