@@ -29,8 +29,8 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
 ### Examples of TVP:
 
 - A wiki page defining which cloud services to use and how to use them
-  - https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples
   - https://github.com/TeamTopologies/Thin-Platform-template
+  - https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples
   - https://github.com/sbalnojan/TVP-example
 - Documentation and tools focused on reducing cognitive load for development teams
   - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
