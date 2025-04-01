@@ -12,7 +12,6 @@ and inserts them into the README.md with appropriate section headers.
 """
 
 import os
-import re
 
 # List of Mermaid diagram files and their corresponding section titles
 mermaid_files = [
@@ -24,7 +23,7 @@ mermaid_files = [
     "mermaid/health-check-sequence.mermaid",
     "mermaid/tvp-architecture-diagram.mermaid",
     "mermaid/app-deployment-workflow.mermaid",
-    "mermaid/data-flow-diagram.mermaid"
+    "mermaid/data-flow-diagram.mermaid",
 ]
 
 titles = [
@@ -36,7 +35,7 @@ titles = [
     "Health Check Sequence",
     "TVP GitOps Architecture",
     "Application Deployment Workflow",
-    "Data Flow Diagram"
+    "Data Flow Diagram",
 ]
 
 def create_toc_link(title, index):

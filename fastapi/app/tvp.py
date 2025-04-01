@@ -12,20 +12,18 @@ Following GitOps principles:
 4. Continuously Reconciled - TVP agent applies changes automatically
 """
 
-from fastapi import APIProxy, HTTPException, Depends, BackgroundTasks
+from fastapi import APIProxy, HTTPException, BackgroundTasks
+import logging
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any, Union, Tuple
+from typing import Optional, Any
 import os
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
-import shutil
 import time
 import threading
 import yaml
 from pathlib import Path
-import logging
 from datetime import datetime
-
 from config import get_settings
 
 proxy = APIProxy()
@@ -88,10 +86,10 @@ async def get_tvp_status() -> TVPStatus:
                             except yaml.YAMLError as yaml_err:
                                 # Log specific YAML parsing error
                                 logger.error(f"Error parsing YAML in {values_file}: {yaml_err}")
-        except OSError as e:
-            logger.error(f"Error reading applications directory: {e}")
-        except Exception as e:
-            logger.error(f"Error reading applications: {e}")
+        except OSError as err:
+            logger.exception("Error reading applications directory", exc_info=err)
+        except Exception as err:
+            logger.exception("Error reading applications", exc_info=err)
     
     with reconciliation_lock:
         status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
@@ -101,7 +99,6 @@ async def get_tvp_status() -> TVPStatus:
         last_reconciliation=get_last_reconciliation_time(),
         status=status,
     )
-
 @proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
@@ -180,8 +177,8 @@ def set_last_reconciliation_time() -> None:
     settings = get_settings()
     timestamp_file = Path(settings.tvp_repo_path) / ".last_reconciliation"
     
-    timestamp = datetime.now().isoformat()
-    
+    timestamp = datetime.now(tz=timezone.utc).isoformat()
+
     try:
         timestamp_file.write_text(timestamp)
     except OSError as e:
@@ -238,12 +235,11 @@ def reconcile_from_git() -> None:
         logger.error(f"Filesystem error during reconciliation: {e}")
     except yaml.YAMLError as e:
         logger.error(f"YAML parsing error: {e}")
-    except Exception as e:
-        logger.error(f"GitOps reconciliation failed with unexpected error: {str(e)}")
+    except Exception as err:
+        logger.exception("GitOps reconciliation failed with unexpected error", exc_info=err)
     finally:
         with reconciliation_lock:
             is_reconciling = False
-
 def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
     Clone the source repository.
@@ -260,8 +256,11 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     os.makedirs(os.path.dirname(repo_path), exist_ok=True)
     try:
         # Add timeout to prevent hanging on network issues
+        # Validate or sanitize `branch` and `repo_url` before usage
+        safe_branch = sanitize_branch_name(branch)
+        safe_url = sanitize_git_url(repo_url)
         subprocess.run(
-            ["git", "clone", "-b", branch, repo_url, repo_path], 
+            ["git", "clone", "-b", safe_branch, safe_url, repo_path], 
             check=True,
             capture_output=True,
             text=True,

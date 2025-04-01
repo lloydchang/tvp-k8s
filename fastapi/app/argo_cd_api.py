@@ -5,18 +5,15 @@ This module provides direct API operations and pass-through proxy functionality
 for Argo CD application management.
 """
 
-from fastapi import APIProxy, Request, Depends, HTTPException
+from fastapi import APIProxy, Request, HTTPException
 from pydantic import BaseModel
-from kubernetes import client
-from typing import Optional, Dict, Any, List
+from typing import Any
 import httpx
-
 from config import get_settings, get_kubernetes_client
 
 proxy = APIProxy()
 
 try:
-    import yaml
 except ImportError:
     raise ImportError("PyYAML is required. Install it with 'pip install pyyaml'")
 

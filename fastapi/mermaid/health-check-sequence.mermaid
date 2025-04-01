@@ -22,7 +22,7 @@ sequenceDiagram
         FastAPI->>FastAPI: Argo CD status = "healthy"
     else Argo CD Unhealthy
         ArgoCD-->>FastAPI: Error
-        FastAPI->>FastAPI: Argo  CD status = "unhealthy"
+        FastAPI->>FastAPI: Argo CD status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     

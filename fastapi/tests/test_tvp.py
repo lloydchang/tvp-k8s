@@ -1,10 +1,5 @@
-import pytest
 from unittest.mock import patch, MagicMock
-from pathlib import Path
-import os
-import threading
-
-def test_tvp_status_endpoint(test_client, mock_settings):
+def test_tvp_status_endpoint(test_client) -> None:
     """Test the TVP status endpoint"""
     # Mock Path.exists and Path.iterdir
     with patch("pathlib.Path.exists") as mock_exists, \
@@ -60,7 +55,6 @@ def test_tvp_status_endpoint(test_client, mock_settings):
         assert data["applications"][0]["namespace"] == "test-namespace"
         assert data["applications"][0]["image"] == "test-image"
         assert data["applications"][0]["tag"] == "v1.0.0"
-
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
@@ -78,12 +72,12 @@ def test_trigger_reconciliation(test_client):
         # Test that background task was added (can't directly verify)
         # but we can check that reconcile_from_git was imported
 
-def test_trigger_reconciliation_already_running(test_client):
+def test_trigger_reconciliation_already_running(test_client) -> None:
     """Test the reconciliation trigger when already in progress"""
     # Set global flag to simulate already reconciling
     import app.tvp as tvp
     tvp.is_reconciling = True
-    
+
     # Test the reconciliation endpoint
     response = test_client.post("/tvp/reconcile")
     
@@ -92,8 +86,7 @@ def test_trigger_reconciliation_already_running(test_client):
     
     # Reset the flag for other tests
     tvp.is_reconciling = False
-
-def test_trigger_reconciliation_background_task(test_client):
+def test_trigger_reconciliation_background_task(test_client) -> None:
     """Test that the reconciliation task is properly added to background tasks"""
     import app.tvp as tvp
     tvp.is_reconciling = False
@@ -111,7 +104,6 @@ def test_trigger_reconciliation_background_task(test_client):
         # Check the response
         assert response.status_code == 200
         assert response.json()["status"] == "started"
-
 def test_get_deployment_status(test_client, mock_settings):
     """Test getting deployment status for a specific app"""
     # Mock Path operations

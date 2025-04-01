@@ -1,4 +1,5 @@
 sequenceDiagram
+    title: Kubernetes Proxy Request Flow
     participant Client
     participant FastAPI
     participant KubernetesProxy
@@ -11,6 +12,7 @@ sequenceDiagram
     Config-->>KubernetesProxy: Returns settings
     
     KubernetesProxy->>KubernetesProxy: Get Kubernetes token
+    Note over KubernetesProxy: Authentication using service account token
     KubernetesProxy->>KubernetesAPI: Proxied request with token
     KubernetesAPI-->>KubernetesProxy: JSON response
     KubernetesProxy-->>FastAPI: Formatted response

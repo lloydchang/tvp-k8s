@@ -11,7 +11,8 @@ The application provides:
 - Health checking for dependent services
 """
 
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
+
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
@@ -119,7 +120,6 @@ async def health_check():
         health_status["status"] = "degraded"
     
     # Check Argo CD connectivity
-    settings = get_settings()
     try:
         # Use the helper function we created for Argo CD auth
         token = await get_argo_cd_token()

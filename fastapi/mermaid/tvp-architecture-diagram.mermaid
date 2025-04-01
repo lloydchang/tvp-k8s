@@ -1,4 +1,6 @@
 flowchart TB
+    title[Thinnest Viable Platform Architecture]
+    style title fill:none,stroke:none,font-size:18px,font-weight:bold
     subgraph "Thinnest Viable Platform"
         API[FastAPI Application]
         RT[Reconciliation Thread]
@@ -12,18 +14,18 @@ flowchart TB
     RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
     
     subgraph "Kubernetes Cluster"
-        Kubernetes
+        KubernetesAPI[Kubernetes API Server]
         ArgoCD[Argo CD]
     end
     
     Client[Client Application] --> API
-    API -->|Proxy| Kubernetes
-    API -->|Proxy| ArgoCD
+    API <-->|Proxy Requests/Responses| KubernetesAPI
+    API <-->|Proxy Requests/Responses| ArgoCD
     
     classDef platform fill:#f9f,stroke:#333,stroke-width:2px
     classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     
     class API,RT platform
-    class Kubernetes,ArgoCD,GitRepo external
+    class KubernetesAPI,ArgoCD,GitRepo external
     class Dev,Client user

@@ -1,4 +1,5 @@
 stateDiagram-v2
+    title: Application Deployment Workflow
     [*] --> GitRepoUpdate: Developer commits changes
     
     GitRepoUpdate --> Reconciliation: TVP periodic reconciliation
@@ -17,6 +18,8 @@ stateDiagram-v2
     ManualSync --> KubernetesDeployment
     
     KubernetesDeployment --> [*]: Application deployed
+    KubernetesDeployment --> FailedDeployment: Deployment errors
+    FailedDeployment --> Reconciliation: Retry
     
     state Reconciliation {
         [*] --> GitClone: First time
