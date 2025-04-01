@@ -382,7 +382,7 @@ sequenceDiagram
     TVP-->>Dev: Application status information
 ```
 
-**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
+**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
 
 While this workflow appears simple from the developer's perspective, there's sophisticated automation working behind the scenes. Let's examine the reconciliation process that makes this seamless experience possible.
 
@@ -424,7 +424,7 @@ sequenceDiagram
     ReconcileThread->>ReconcileThread: is_reconciling = false
 ```
 
-**Leverage Point:** This component structure demonstrates the leverage principle of TVP by separating concerns and enabling multiple teams to work independently. Each component acts as a force multiplier by providing standardized functionality that would otherwise be duplicated across teams.
+**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
 
 To understand how reconciliation works at a deeper level, we need to look at the individual components that make up our platform.
 
@@ -464,7 +464,7 @@ flowchart TB
     class Kubernetes,ArgoCD,GitRepo external
 ```
 
-**Leverage Point:** The data flow design creates leverage by standardizing how information moves through the system. This eliminates redundant data handling code across applications and ensures consistent security practices without requiring each team to become security experts.
+**Leverage Point:** This component structure demonstrates the leverage principle of TVP by separating concerns and enabling multiple teams to work independently. Each component acts as a force multiplier by providing standardized functionality that would otherwise be duplicated across teams.
 
 With these components identified, we can follow how data flows through the system, creating patterns that developers can rely on.
 
@@ -503,7 +503,7 @@ flowchart TD
     class Kubernetes,ArgoCD,Git,KA,AA,Auth external
 ```
 
-**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Development teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
+**Leverage Point:** The data flow design creates leverage by standardizing how information moves through the system. This eliminates redundant data handling code across applications and ensures consistent security practices without requiring each team to become security experts.
 
 As our exploration deepens, we arrive at the crucial API structure that serves as the interface between users and platform functionality.
 
@@ -583,7 +583,7 @@ classDiagram
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 ```
 
-**Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
+**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Development teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
 
 A sophisticated platform needs to be reliable. Let's see how health monitoring ensures the system remains operational even as complexity increases.
 
@@ -623,7 +623,7 @@ sequenceDiagram
     FastAPI-->>Client: Health status response
 ```
 
-**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each developer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
+**Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
 
 Now we reach the crucial capability that delivers immense leverage: abstracting away Kubernetes complexity through our proxy system.
 
@@ -653,7 +653,7 @@ sequenceDiagram
     FastAPI-->>Client: API response
 ```
 
-**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
+**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each developer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
 
 With Kubernetes access solved, we complete our core capabilities by providing similar abstraction for GitOps workflows through the Argo CD proxy.
 
@@ -685,7 +685,7 @@ sequenceDiagram
     FastAPI-->>Client: API response
 ```
 
-**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
+**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
 
 With all these elements in place, we can now see how they combine to create a complete application deployment workflow - the ultimate value proposition of our platform.
 
@@ -726,9 +726,59 @@ stateDiagram-v2
     }
 ```
 
-**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
+**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
 Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.
+
+## 11. Test Coverage Structure
+
+To ensure this system remains stable and can evolve over time, comprehensive testing underpins everything. This final diagram shows how test coverage validates each component, creating confidence that the platform will continue to deliver leverage:
+
+```mermaid
+flowchart TD
+    subgraph Tests
+        conftest[conftest.py]
+        test_main[test_main.py]
+        test_tvp[test_tvp.py]
+        test_kubernetes[test_kubernetes_api.py]
+        test_argo[test_argo_cd_api.py]
+    end
+
+    subgraph "Application Code"
+        main[main.py]
+        tvp[tvp.py]
+        kubernetes[kubernetes_api.py]
+        argo[argo_cd_api.py]
+        config[config.py]
+    end
+
+    conftest --> |fixtures| test_main
+    conftest --> |fixtures| test_tvp
+    conftest --> |fixtures| test_kubernetes
+    conftest --> |fixtures| test_argo
+
+    test_main --> |tests| main
+    test_tvp --> |tests| tvp
+    test_kubernetes --> |tests| kubernetes
+    test_argo --> |tests| argo
+
+    main --> |imports| tvp
+    main --> |imports| kubernetes
+    main --> |imports| argo
+    main --> |imports| config
+
+    tvp --> |imports| config
+    kubernetes --> |imports| config
+    argo --> |imports| config
+
+    classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
+    classDef appFile fill:#bef,stroke:#333,stroke-width:1px
+    
+    class conftest,test_main,test_tvp,test_kubernetes,test_argo testFile
+    class main,tvp,kubernetes,argo,config appFile
+```
+
+**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
 
 ## 12. Measuring Platform Leverage
 

@@ -106,7 +106,7 @@ section_transitions = [
 leverage_points = [
     "**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts dozens of application developers.",
     
-    "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations."
+    "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.",
 
     "**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.",
     
