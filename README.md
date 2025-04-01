@@ -1,11 +1,13 @@
-![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
-- **To stabilize this roof, would you remove one block or add several blocks?**
-  - Image: University of Virginia
-  - https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/
-
 ---
 
 # Thinnest Viable Platform (TVP)
+
+---
+
+![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
+- **To stabilize this roof, would you remove one block or add several blocks?**
+  - Image: University of Virginia
+  - [This Lego experiment shows our brains prefer adding. Here's why it matters](https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/)
 
 # Backstory:
 
@@ -29,7 +31,7 @@
 
 # Defining _Platform_ and Other Important Terms:
 
-- [**O'Reilly: Platform Engineering: A Guide for Technical, Product, and People Leaders**](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html) by [Camille Fournier](https://www.linkedin.com/in/camille-fournier-9011812/) and [Ian Nowland](https://www.linkedin.com/in/inowland/)
+- [**O'Reilly: _Platform Engineering: A Guide for Technical, Product, and People Leaders_**](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html) by [Camille Fournier](https://www.linkedin.com/in/camille-fournier-9011812/) and [Ian Nowland](https://www.linkedin.com/in/inowland/)
 
 ## Platform:
 
@@ -53,11 +55,13 @@
 
 ## Why Less Toil is Better:
 
-- [**O'Reilly: Site Reliability Engineering: How Google Runs Production Systems**](https://sre.google/sre-book/eliminating-toil/) by [Jennifer Petoff](https://www.linkedin.com/in/jpetoff/), [Betsy Beyer](https://www.linkedin.com/in/betsy-beyer/), [Chris Jones](https://www.linkedin.com/in/chrisjonessre/) and [Niall Murphy](https://www.linkedin.com/in/niallm/)
+- [**O'Reilly: _Site Reliability Engineering: How Google Runs Production Systems_**](https://sre.google/sre-book/eliminating-toil/) by [Jennifer Petoff](https://www.linkedin.com/in/jpetoff/), [Betsy Beyer](https://www.linkedin.com/in/betsy-beyer/), [Chris Jones](https://www.linkedin.com/in/chrisjonessre/) and [Niall Murphy](https://www.linkedin.com/in/niallm/)
 
 > The work of reducing toil and scaling up services is the "Engineering" in Site Reliability Engineering. Engineering work is what enables the SRE organization to scale up **_sublinearly_** with service size and to manage services more efficiently than either a pure Dev team or a pure Ops team.
 
-- [**USENIX SREcon: Sublinear Scaling in Practice: The 1k SRE Project**](https://www.usenix.org/conference/srecon19americas/presentation/rath) by [Nikolaus Rath](https://www.linkedin.com/in/nikolaus-rath-85342235/)
+## Sublinear Scaling:
+
+- [**USENIX SREcon: _Sublinear Scaling in Practice: The 1k SRE Project_**](https://www.usenix.org/conference/srecon19americas/presentation/rath) by [Nikolaus Rath](https://www.linkedin.com/in/nikolaus-rath-85342235/)
 
 > At Google, one of the primary objectives of SRE teams is **_sublinear_** scaling: the size and number of SRE teams should grow more slowly than the number of supported services.
 
@@ -96,10 +100,8 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - [Examples of a Thinnest Viable Platform (TVP) as defined in the book Team Topologies](https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples)
   - [A Thinnest Viable Platform (TVP) as described in Team Topologies, using just a Wiki page for a data platform](https://github.com/sbalnojan/TVP-example)
 - Documentation and tools focused on reducing cognitive load for development teams
-  - [Trade Me’s Journey Towards a Thinnest Viable Platform (TVP)](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
-  - [CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
-    - [Spin up a complete internal developer platform with only Docker required as a dependency](https://github.com/cnoe-io/idpbuilder)
-  - [Backstage is an open framework for building developer portals](https://github.com/backstage/backstage)
+  - [Trade Me's Journey Towards a Thinnest Viable Platform (TVP)](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
+  - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
 - **A set of _curated_ APIs with simplified access to infrastructure**
   - https://github.com/lloydchang/tvp
 
