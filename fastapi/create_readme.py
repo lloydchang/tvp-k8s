@@ -234,7 +234,7 @@ def main():
         # Enhanced metrics section with more dramatic impact
         readme.write(f"## {len(titles)+1}. Measuring Platform Leverage\n\n")
         readme.write("**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. ")
-        readme.write("Here are the concrete outcomes our TVP approach delivers:\n\n")
+        readme.write("Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:\n\n")
         readme.write("1. **Developer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.\n\n")
         readme.write("2. **Deployment Frequency**: Teams using our platform deploy 4x more frequently than teams managing their own infrastructure.\n\n")
         readme.write("3. **Onboarding Acceleration**: New developers become productive in 3 days versus 3 weeks without the platform.\n\n")
