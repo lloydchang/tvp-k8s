@@ -93,11 +93,13 @@ async def get_tvp_status() -> TVPStatus:
         except Exception as e:
             logger.error(f"Error reading applications: {e}")
     
+    with reconciliation_lock:
+        status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
+    
     return TVPStatus(
         is_reconciling=is_reconciling,
         last_reconciliation=get_last_reconciliation_time(),
-        status="active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive",
-        applications=applications
+        status=status,
     )
 
 @proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
