@@ -40,7 +40,7 @@ python -m pip install pytest==7.3.1 pytest-asyncio==0.21.1 pytest-cov==4.1.0 htt
 # Debug: Print the file content of conftest.py to understand the import issue
 if [ -f "tests/conftest.py" ]; then
     echo -e "${YELLOW}Content of tests/conftest.py:${NC}"
-    cat tests/conftest.py | head -n 20
+    head -n 20 tests/conftest.py
 fi
 
 # Parse command line arguments
