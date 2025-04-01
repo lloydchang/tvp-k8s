@@ -531,6 +531,7 @@ flowchart TB
     
     Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
+    RT -->|Apply configs| KubernetesAPI
     RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
     
     subgraph "Kubernetes Cluster"
