@@ -80,7 +80,10 @@ async def kubernetes_proxy(path: str, request: Request):
         headers = {
             "Authorization": f"Bearer {kubernetes_token}",
         }
-    except:
+    except FileNotFoundError:
+        # For local development using kubeconfig
+        headers = {}
+    except PermissionError:
         # For local development using kubeconfig
         headers = {}
     
