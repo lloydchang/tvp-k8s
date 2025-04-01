@@ -12,6 +12,7 @@ and inserts them into the README.md with appropriate section headers.
 """
 
 import os
+import re
 
 # List of Mermaid diagram files and their corresponding section titles
 mermaid_files = [

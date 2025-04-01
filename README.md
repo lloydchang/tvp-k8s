@@ -271,3 +271,374 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 
 ## Table of Contents
 
+- [1. Component Interaction Diagram](#1-component-interaction-diagram)
+- [2. API Structure Diagram](#2-api-structure-diagram)
+- [3. Argo CD Authentication Sequence](#3-argo-cd-authentication-sequence)
+- [4. Kubernetes Proxy Sequence](#4-kubernetes-proxy-sequence)
+- [5. TVP GitOps Reconciliation Sequence](#5-tvp-gitops-reconciliation-sequence)
+- [6. Health Check Sequence](#6-health-check-sequence)
+- [7. TVP GitOps Architecture](#7-tvp-gitops-architecture)
+- [8. Application Deployment Workflow](#8-application-deployment-workflow)
+- [9. Data Flow Diagram](#9-data-flow-diagram)
+
+## 1. Component Interaction Diagram
+
+```mermaid
+flowchart TB
+    title[Component Architecture Diagram]
+    style title fill:none,stroke:none,font-size:18px,font-weight:bold
+    Client[Client Application] --> API[FastAPI Application]
+    
+    subgraph "FastAPI Application"
+        API --> KR[Kubernetes Proxy]
+        API --> AR[Argo CD Proxy]
+        API --> TR[TVP (Thinnest Viable Platform)]
+        API --> Health[Health Check]
+        TR --> RT[Reconciliation Thread]
+    end
+    
+    KR --> KC[Kubernetes Client]
+    AR --> AT[Argo CD Token]
+    TR --> GitRepo[(Git Repository)]
+    
+    KC --> Kubernetes[(Kubernetes API)]
+    AT --> ArgoCD[(Argo CD API)]
+    RT <--> GitRepo
+    RT <--> Kubernetes
+    
+    classDef component fill:#f9f,stroke:#333,stroke-width:2px
+    classDef api fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    
+    class API,KR,AR,TR,Health component
+    class KC,AT,RT api
+    class Kubernetes,ArgoCD,GitRepo external
+
+```
+
+## 2. API Structure Diagram
+
+```mermaid
+classDiagram
+    class FastAPI {
+        +title: str
+        +description: str
+        +version: str
+        +startup_event()
+        +root()
+        +health_check()
+    }
+    
+    class KubernetesProxy {
+        +kubernetes_proxy()
+        +get_kubernetes_client()
+        +get_apps_v1_client()
+    }
+    
+    class ArgoCDProxy {
+        +argo_cd_proxy()
+        +get_argo_cd_token()
+    }
+    
+    class TVP {
+        +get_tvp_status()
+        +trigger_reconciliation()
+        +get_deployment_status()
+    }
+    
+    class Config {
+        +Settings
+        +get_settings()
+        +get_kubernetes_client()
+        +get_kubernetes_token()
+    }
+
+    class TVPStatus {
+        +is_reconciling: bool
+        +last_reconciliation: Optional[str]
+        +status: str
+        +applications: List[Dict]
+    }
+
+    class DeploymentRequest {
+        +name: str
+        +image: str
+        +replicas: int
+        +namespace: str
+    }
+
+    class ArgoCDApplicationRequest {
+        +name: str
+        +repo_url: str
+        +path: str
+        +target_namespace: str
+        +target_revision: str
+        +sync_policy_automated: bool
+        +sync_policy_prune: bool
+        +sync_policy_self_heal: bool
+    }
+    
+    FastAPI --> KubernetesProxy : includes
+    FastAPI --> ArgoCDProxy : includes
+    FastAPI --> TVP : includes
+    KubernetesProxy --> Config : depends on
+    ArgoCDProxy --> Config : depends on
+    TVP --> Config : depends on
+    FastAPI --> Config : depends on
+    TVP --> TVPStatus : returns
+    KubernetesProxy --> DeploymentRequest : accepts
+    ArgoCDProxy --> ArgoCDApplicationRequest : accepts
+
+```
+
+## 3. Argo CD Authentication Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Argo CD Proxy
+    participant Config
+    participant Argo CD
+    
+    Client->>FastAPI: Request to /argo/cd/...
+    FastAPI->>Argo CD Proxy: Forward request
+    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Argo CD Proxy->>Config: get_settings()
+    Config-->>Argo CD Proxy: Returns settings
+    
+    Argo CD Proxy->>Argo CD: POST /api/v1/session
+    Note over Argo CD Proxy,Argo CD: {username, password}
+    Argo CD-->>Argo CD Proxy: Authentication token
+    
+    Argo CD Proxy->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Proxy: Response data
+    Argo CD Proxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
+
+```
+
+## 4. Kubernetes Proxy Sequence
+
+```mermaid
+sequenceDiagram
+    title: Kubernetes Proxy Request Flow
+    participant Client
+    participant FastAPI
+    participant KubernetesProxy
+    participant Config
+    participant KubernetesAPI
+    
+    Client->>FastAPI: Request to /kubernetes/...
+    FastAPI->>KubernetesProxy: Forward to kubernetes_proxy()
+    KubernetesProxy->>Config: get_settings()
+    Config-->>KubernetesProxy: Returns settings
+    
+    KubernetesProxy->>KubernetesProxy: Get Kubernetes token
+    Note over KubernetesProxy: Authentication using service account token
+    KubernetesProxy->>KubernetesAPI: Proxied request with token
+    KubernetesAPI-->>KubernetesProxy: JSON response
+    KubernetesProxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
+
+```
+
+## 5. TVP GitOps Reconciliation Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant TVP
+    participant ReconcileThread
+    participant GitRepo
+    participant KubernetesCluster
+    
+    Client->>FastAPI: POST /tvp/reconcile
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
+    FastAPI-->>Client: Response
+    
+    ReconcileThread->>ReconcileThread: is_reconciling = true
+    
+    alt Repository doesn't exist
+        ReconcileThread->>GitRepo: git clone
+    else Repository exists
+        ReconcileThread->>GitRepo: git fetch
+        ReconcileThread->>GitRepo: git checkout branch
+        ReconcileThread->>GitRepo: git pull
+    end
+    
+    loop For each namespace/app
+        ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>KubernetesCluster: Apply configuration
+    end
+    
+    ReconcileThread->>ReconcileThread: Update last_reconciliation
+    ReconcileThread->>ReconcileThread: is_reconciling = false
+
+```
+
+## 6. Health Check Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Kubernetes as Kubernetes Cluster
+    participant ArgoCD as Argo CD
+    
+    Client->>FastAPI: GET /health
+    
+    FastAPI->>Kubernetes: list_namespace()
+    alt Kubernetes Healthy
+        Kubernetes-->>FastAPI: Success response
+        FastAPI->>FastAPI: Kubernetes status = "healthy"
+    else Kubernetes Unhealthy
+        Kubernetes-->>FastAPI: Error
+        FastAPI->>FastAPI: Kubernetes status = "unhealthy"
+        FastAPI->>FastAPI: Overall status = "degraded"
+    end
+    
+    FastAPI->>ArgoCD: get_argo_cd_token()
+    alt Argo CD Healthy
+        ArgoCD-->>FastAPI: Valid token
+        FastAPI->>FastAPI: Argo CD status = "healthy"
+    else Argo CD Unhealthy
+        ArgoCD-->>FastAPI: Error
+        FastAPI->>FastAPI: Argo CD status = "unhealthy"
+        FastAPI->>FastAPI: Overall status = "degraded"
+    end
+    
+    FastAPI-->>Client: Health status response
+
+```
+
+## 7. TVP GitOps Architecture
+
+```mermaid
+flowchart TB
+    title[Thinnest Viable Platform Architecture]
+    style title fill:none,stroke:none,font-size:18px,font-weight:bold
+    subgraph "Thinnest Viable Platform"
+        API[FastAPI Application]
+        RT[Reconciliation Thread]
+        
+        API --> RT
+        RT --> API
+    end
+    
+    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
+    GitRepo -->|Pull| RT
+    RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
+    
+    subgraph "Kubernetes Cluster"
+        KubernetesAPI[Kubernetes API Server]
+        ArgoCD[Argo CD]
+    end
+    
+    Client[Client Application] --> API
+    API <-->|Proxy Requests/Responses| KubernetesAPI
+    API <-->|Proxy Requests/Responses| ArgoCD
+    
+    classDef platform fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    
+    class API,RT platform
+    class KubernetesAPI,ArgoCD,GitRepo external
+    class Dev,Client user
+
+```
+
+## 8. Application Deployment Workflow
+
+```mermaid
+stateDiagram-v2
+    title: Application Deployment Workflow
+    [*] --> GitRepoUpdate: Developer commits changes
+    
+    GitRepoUpdate --> Reconciliation: TVP periodic reconciliation
+    GitRepoUpdate --> ManualReconcile: Manual trigger
+    
+    ManualReconcile --> Reconciliation
+    
+    Reconciliation --> ConfigReading: Read values.yaml
+    ConfigReading --> ApplicationDeployment: Prepare deployment
+    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
+    
+    ArgoCD --> ApplicationSync: Auto-sync
+    ArgoCD --> ManualSync: Manual sync
+    
+    ApplicationSync --> KubernetesDeployment
+    ManualSync --> KubernetesDeployment
+    
+    KubernetesDeployment --> [*]: Application deployed
+    KubernetesDeployment --> FailedDeployment: Deployment errors
+    FailedDeployment --> Reconciliation: Retry
+    
+    state Reconciliation {
+        [*] --> GitClone: First time
+        [*] --> GitPull: Repository exists
+        GitClone --> ProcessApps
+        GitPull --> ProcessApps
+        ProcessApps --> [*]
+    }
+
+```
+
+## 9. Data Flow Diagram
+
+```mermaid
+flowchart TD
+    User[User/Client] -->|API Request| API[FastAPI App]
+    
+    API -->|/kubernetes/*| KP[Kubernetes Proxy]
+    API -->|/argo/cd/*| AP[Argo CD Proxy]
+    API -->|/tvp/*| TVP[TVP]
+    
+    KP -->|Auth token| KA[Kubernetes API]
+    AP -->|Login| Auth[Argo CD Auth]
+    Auth -->|Token| AP
+    AP -->|Auth token| AA[Argo CD API]
+    
+    TVP -->|Status| TS[TVP Status]
+    TVP -->|Reconcile| R[Reconciliation]
+    
+    TS --> Git[Git Repository]
+    R --> Git
+    R --> KA
+    
+    KA --> Kubernetes[(Kubernetes Cluster)]
+    AA --> ArgoCD[(Argo CD Service)]
+    
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef app fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    
+    class User user
+    class API,KP,AP,TVP,TS,R,Auth app
+    class Kubernetes,ArgoCD,Git,KA,AA external
+
+```
+
+---
+
+# *Leverage* Analogies: What Makes Things Move?
+
+---
+
+> A [lever](https://en.wikipedia.org/wiki/Lever) amplifies an input force to provide a greater output force, which is said to provide [**_leverage_**](https://en.wikipedia.org/wiki/Leverage), which is [mechanical advantage](https://en.wikipedia.org/wiki/Mechanical_advantage) gained in the system, equal to the ratio of the output force to the input force.
+
+> A [lever](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html) consists of a rigid bar that can rotate about a fixed point called a fulcrum.
+
+> [Depending](https://teachersinstitute.yale.edu/curriculum/units/2014/4/14.04.04/2) on the positions of fulcrum, input force and applied force, one can define three types of levers: first class, second class and third class.
+
+![FirstClass](https://github.com/user-attachments/assets/b3340481-77d0-4987-8330-2601f0467a91)
+
+![SecondClass](https://github.com/user-attachments/assets/b3ec6f68-d472-4b23-93e4-0318ea169aef)
+
+![ThirdClass](https://github.com/user-attachments/assets/6b6e2ed2-ccc1-41f5-ba30-dde585bf7160)
+
+**Lever Images:** [**Geocities: _Mechanical Systems_** by R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)
