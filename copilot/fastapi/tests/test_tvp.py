@@ -1,9 +1,4 @@
-import pytest
 from unittest.mock import patch, MagicMock
-from pathlib import Path
-import os
-import threading
-
 def test_tvp_status_endpoint(test_client, mock_settings):
     """Test the TVP status endpoint"""
     # Mock Path.exists and Path.iterdir
