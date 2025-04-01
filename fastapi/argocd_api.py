@@ -1,8 +1,8 @@
 """
-ArgoCD API Module
+Argo CD API Module
 
 This module provides direct API operations and pass-through proxy functionality
-for ArgoCD application management.
+for Argo CD application management.
 """
 
 from fastapi import APIRouter, Request, Depends, HTTPException
@@ -32,11 +32,11 @@ class ArgoCDApplicationRequest(BaseModel):
     sync_policy_self_heal: bool = True
 
 async def get_argocd_token():
-    """Helper function to get ArgoCD authentication token."""
+    """Helper function to get Argo CD authentication token."""
     settings = get_settings()
     
     if not settings.argocd_password:
-        raise HTTPException(status_code=500, detail="ArgoCD password not configured")
+        raise HTTPException(status_code=500, detail="Argo CD password not configured")
     
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
         try:
@@ -48,17 +48,17 @@ async def get_argocd_token():
             if auth_response.status_code != 200:
                 raise HTTPException(
                     status_code=401, 
-                    detail=f"ArgoCD Authentication Failed: {auth_response.text}"
+                    detail=f"Argo CD Authentication Failed: {auth_response.text}"
                 )
             return auth_response.json().get("token")
         except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"ArgoCD service unavailable: {str(e)}")
+            raise HTTPException(status_code=503, detail=f"Argo CD service unavailable: {str(e)}")
 
-# ArgoCD True Pass-Through Proxy
+# Argo CD True Pass-Through Proxy
 @router.api_route("/argocd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def argocd_proxy(path: str, request: Request):
     """
-    Provides a true pass-through proxy to the ArgoCD API.
+    Provides a true pass-through proxy to the Argo CD API.
     """
     settings = get_settings()
     token = await get_argocd_token()
@@ -91,4 +91,4 @@ async def argocd_proxy(path: str, request: Request):
             # Return the raw response
             return response.json()
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=503, detail=f"ArgoCD API unavailable: {str(e)}")
+            raise HTTPException(status_code=503, detail=f"Argo CD API unavailable: {str(e)}")
