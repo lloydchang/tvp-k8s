@@ -1,6 +1,6 @@
 ---
 
-# **_Thinnest_** Viable Platform (TVP) with **_Leverage_**
+# Thinnest Viable Platform (TVP) with Leverage
 
 ---
 
