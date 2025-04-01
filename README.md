@@ -452,7 +452,7 @@ sequenceDiagram
     participant TVP
     participant ReconcileThread
     participant GitRepo
-    participant KubernetesCluster
+    participant KubernetesApiServer
     
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVP: trigger_reconciliation()
@@ -472,7 +472,7 @@ sequenceDiagram
     
     loop For each namespace/app
         ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>KubernetesCluster: Apply configuration
+        ReconcileThread->>KubernetesApiServer: Apply configuration
     end
     
     ReconcileThread->>ReconcileThread: Update last_reconciliation
@@ -486,7 +486,7 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant Kubernetes as Kubernetes Cluster
+    participant Kubernetes as Kubernetes API Server
     participant ArgoCD as Argo CD
     
     Client->>FastAPI: GET /health
@@ -610,7 +610,7 @@ flowchart TD
     R --> Git
     R --> KA
     
-    KA --> Kubernetes[(Kubernetes Cluster)]
+    KA --> Kubernetes[(Kubernetes API Server)]
     AA --> ArgoCD[(Argo CD Service)]
     
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
