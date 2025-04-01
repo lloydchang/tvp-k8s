@@ -185,7 +185,7 @@ computing:
 
 ---
 
-## What is a **_Thinnest_** Viable Platform (TVP)?
+## What is a **_Thinnest Viable_** Platform (TVP)?
 
 A TVP is a careful balance between keeping the platform small and ensuring that the platform is helping to accelerate and simplify software delivery for teams building on the platform. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
@@ -250,7 +250,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A **_Thinnest_** Viable Platform is the **_smallest set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A **_Thinnest Viable_** Platform is the **_smallest set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
 
 ### Examples of TVP:
 
