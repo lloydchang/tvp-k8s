@@ -79,7 +79,7 @@ def get_kubernetes_token():
     """
     Retrieve the Kubernetes service account token.
     
-    This function reads the token from the file specified by kubernetes_TOKEN_PATH and returns
+    This function reads the token from the file specified by kubernetes_token_path and returns
     it as a stripped string. If the token cannot be read, it raises an HTTPException
     with a 500 status code.
     """

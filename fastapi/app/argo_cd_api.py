@@ -31,7 +31,7 @@ class ArgoCDApplicationRequest(BaseModel):
     sync_policy_prune: bool = True
     sync_policy_self_heal: bool = True
 
-async def get_argo_cd_token():
+async def get_argo_cd_auth_token():
     """Helper function to get Argo CD authentication token."""
     settings = get_settings()
     
@@ -61,7 +61,7 @@ async def argo_cd_proxy(path: str, request: Request):
     Provides a true pass-through proxy to the Argo CD API.
     """
     settings = get_settings()
-    token = await get_argo_cd_token()
+    token = await get_argo_cd_auth_token()
 
     # Create base headers with authentication
     headers = {
