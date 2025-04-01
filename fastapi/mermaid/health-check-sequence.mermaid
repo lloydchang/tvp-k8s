@@ -1,18 +1,18 @@
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant K8sClient
+    participant KubernetesClient
     participant ArgoCD
     
     Client->>FastAPI: GET /health
     
-    FastAPI->>K8sClient: list_namespace()
-    alt K8s Healthy
-        K8sClient-->>FastAPI: Success response
-        FastAPI->>FastAPI: K8s status = "healthy"
-    else K8s Unhealthy
-        K8sClient-->>FastAPI: Error
-        FastAPI->>FastAPI: K8s status = "unhealthy"
+    FastAPI->>KubernetesClient: list_namespace()
+    alt Kubernetes Healthy
+        KubernetesClient-->>FastAPI: Success response
+        FastAPI->>FastAPI: Kubernetes status = "healthy"
+    else Kubernetes Unhealthy
+        KubernetesClient-->>FastAPI: Error
+        FastAPI->>FastAPI: Kubernetes status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     

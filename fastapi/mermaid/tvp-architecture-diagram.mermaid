@@ -9,15 +9,15 @@ flowchart TB
     
     Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
-    RT -->|Apply configs| K8s[(Kubernetes Cluster)]
+    RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
     
     subgraph "Kubernetes Cluster"
-        K8s
+        Kubernetes
         ArgoCD[Argo CD]
     end
     
     Client[Client Application] --> API
-    API -->|Proxy| K8s
+    API -->|Proxy| Kubernetes
     API -->|Proxy| ArgoCD
     
     classDef platform fill:#f9f,stroke:#333,stroke-width:2px
@@ -25,5 +25,5 @@ flowchart TB
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     
     class API,RT platform
-    class K8s,ArgoCD,GitRepo external
+    class Kubernetes,ArgoCD,GitRepo external
     class Dev,Client user

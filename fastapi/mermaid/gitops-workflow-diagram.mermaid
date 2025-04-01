@@ -3,7 +3,7 @@ sequenceDiagram
     participant Git as Git Repository
     participant TVP as TVP API
     participant Thread as Reconciliation Thread
-    participant K8s as Kubernetes Cluster
+    participant Kubernetes as Kubernetes Cluster
     
     Dev->>Git: Push application changes
     
@@ -19,7 +19,7 @@ sequenceDiagram
     Thread->>Thread: Parse configuration
     
     loop For each application
-        Thread->>K8s: Apply configuration
+        Thread->>Kubernetes: Apply configuration
     end
     
     Thread->>Thread: Update last_reconciliation timestamp

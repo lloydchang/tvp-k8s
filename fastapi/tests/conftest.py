@@ -9,7 +9,7 @@ def mock_settings():
     with patch("app.config.get_settings") as mock_get_settings:
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
-        settings.kubernetes_token_path = "/tmp/test-k8s-token"
+        settings.kubernetes_token_path = "/tmp/test-kubernetes-token"
         settings.argo_cd_url = "https://test-argo-cd.local"
         settings.argo_cd_username = "test-user"
         settings.argo_cd_password = "test-password"
@@ -25,10 +25,10 @@ def mock_settings():
 def mock_kubernetes_client():
     """Fixture to mock Kubernetes client"""
     with patch("app.config.get_kubernetes_client") as mock_client:
-        k8s_client = MagicMock()
-        k8s_client.list_namespace.return_value = MagicMock()
-        mock_client.return_value = k8s_client
-        yield k8s_client
+        kubernetes_client = MagicMock()
+        kubernetes_client.list_namespace.return_value = MagicMock()
+        mock_client.return_value = kubernetes_client
+        yield kubernetes_client
 
 @pytest.fixture
 def mock_argo_cd_token():

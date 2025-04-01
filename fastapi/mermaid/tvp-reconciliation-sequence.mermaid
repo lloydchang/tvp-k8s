@@ -4,7 +4,7 @@ sequenceDiagram
     participant TVPRouter
     participant ReconcileThread
     participant GitRepo
-    participant K8sCluster
+    participant KubernetesCluster
     
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVPRouter: trigger_reconciliation()
@@ -24,7 +24,7 @@ sequenceDiagram
     
     loop For each namespace/app
         ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>K8sCluster: Apply configuration
+        ReconcileThread->>KubernetesCluster: Apply configuration
     end
     
     ReconcileThread->>ReconcileThread: Update last_reconciliation

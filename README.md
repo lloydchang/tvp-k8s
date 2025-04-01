@@ -128,10 +128,10 @@ flowchart TB
     AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
-    KC --> K8s[(Kubernetes API)]
+    KC --> Kubernetes[(Kubernetes API)]
     AT --> ArgoCD[(Argo CD API)]
     RT --> GitRepo
-    RT --> K8s
+    RT --> Kubernetes
     
     classDef component fill:#f9f,stroke:#333,stroke-width:2px
     classDef api fill:#bbf,stroke:#33f,stroke-width:2px
@@ -139,7 +139,7 @@ flowchart TB
     
     class API,KR,AR,TR,Health component
     class KC,AT,RT api
-    class K8s,ArgoCD,GitRepo external
+    class Kubernetes,ArgoCD,GitRepo external
 
 ```
 
@@ -251,19 +251,19 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant K8sRouter
+    participant KubernetesRouter
     participant Config
-    participant K8sAPI
+    participant KubernetesAPI
     
     Client->>FastAPI: Request to /kubernetes/...
-    FastAPI->>K8sRouter: Forward to kubernetes_proxy()
-    K8sRouter->>Config: get_settings()
-    Config-->>K8sRouter: Returns settings
+    FastAPI->>KubernetesRouter: Forward to kubernetes_proxy()
+    KubernetesRouter->>Config: get_settings()
+    Config-->>KubernetesRouter: Returns settings
     
-    K8sRouter->>K8sRouter: Read K8s token from file
-    K8sRouter->>K8sAPI: Proxied request with token
-    K8sAPI-->>K8sRouter: JSON response
-    K8sRouter-->>FastAPI: Formatted response
+    KubernetesRouter->>KubernetesRouter: Read Kubernetes token from file
+    KubernetesRouter->>KubernetesAPI: Proxied request with token
+    KubernetesAPI-->>KubernetesRouter: JSON response
+    KubernetesRouter-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
 
 ```
@@ -277,7 +277,7 @@ sequenceDiagram
     participant TVPRouter
     participant ReconcileThread
     participant GitRepo
-    participant K8sCluster
+    participant KubernetesCluster
     
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVPRouter: trigger_reconciliation()
@@ -297,7 +297,7 @@ sequenceDiagram
     
     loop For each namespace/app
         ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>K8sCluster: Apply configuration
+        ReconcileThread->>KubernetesCluster: Apply configuration
     end
     
     ReconcileThread->>ReconcileThread: Update last_reconciliation
@@ -311,18 +311,18 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant K8sClient
+    participant KubernetesClient
     participant ArgoCD
     
     Client->>FastAPI: GET /health
     
-    FastAPI->>K8sClient: list_namespace()
-    alt K8s Healthy
-        K8sClient-->>FastAPI: Success response
-        FastAPI->>FastAPI: K8s status = "healthy"
-    else K8s Unhealthy
-        K8sClient-->>FastAPI: Error
-        FastAPI->>FastAPI: K8s status = "unhealthy"
+    FastAPI->>KubernetesClient: list_namespace()
+    alt Kubernetes Healthy
+        KubernetesClient-->>FastAPI: Success response
+        FastAPI->>FastAPI: Kubernetes status = "healthy"
+    else Kubernetes Unhealthy
+        KubernetesClient-->>FastAPI: Error
+        FastAPI->>FastAPI: Kubernetes status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     
@@ -354,15 +354,15 @@ flowchart TB
     
     Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
-    RT -->|Apply configs| K8s[(Kubernetes Cluster)]
+    RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
     
     subgraph "Kubernetes Cluster"
-        K8s
+        Kubernetes
         ArgoCD[Argo CD]
     end
     
     Client[Client Application] --> API
-    API -->|Proxy| K8s
+    API -->|Proxy| Kubernetes
     API -->|Proxy| ArgoCD
     
     classDef platform fill:#f9f,stroke:#333,stroke-width:2px
@@ -370,7 +370,7 @@ flowchart TB
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     
     class API,RT platform
-    class K8s,ArgoCD,GitRepo external
+    class Kubernetes,ArgoCD,GitRepo external
     class Dev,Client user
 
 ```
@@ -388,15 +388,15 @@ stateDiagram-v2
     
     Reconciliation --> ConfigReading: Read values.yaml
     ConfigReading --> ApplicationDeployment: Prepare deployment
-    ApplicationDeployment --> ArgoCD: Create/Update ArgoCD application
+    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
     
     ArgoCD --> ApplicationSync: Auto-sync
     ArgoCD --> ManualSync: Manual sync
     
-    ApplicationSync --> K8sDeployment
-    ManualSync --> K8sDeployment
+    ApplicationSync --> KubernetesDeployment
+    ManualSync --> KubernetesDeployment
     
-    K8sDeployment --> [*]: Application deployed
+    KubernetesDeployment --> [*]: Application deployed
     
     state Reconciliation {
         [*] --> GitClone: First time
@@ -430,7 +430,7 @@ flowchart TD
     R --> Git
     R --> KA
     
-    KA --> K8s[(Kubernetes Cluster)]
+    KA --> Kubernetes[(Kubernetes Cluster)]
     AA --> ArgoCD[(Argo CD Service)]
     
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
@@ -439,7 +439,7 @@ flowchart TD
     
     class User user
     class API,KP,AP,TVP,TS,R,Auth app
-    class K8s,ArgoCD,Git,KA,AA external
+    class Kubernetes,ArgoCD,Git,KA,AA external
 
 ```
 

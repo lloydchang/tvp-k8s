@@ -1,17 +1,17 @@
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant K8sRouter
+    participant KubernetesRouter
     participant Config
-    participant K8sAPI
+    participant KubernetesAPI
     
     Client->>FastAPI: Request to /kubernetes/...
-    FastAPI->>K8sRouter: Forward to kubernetes_proxy()
-    K8sRouter->>Config: get_settings()
-    Config-->>K8sRouter: Returns settings
+    FastAPI->>KubernetesRouter: Forward to kubernetes_proxy()
+    KubernetesRouter->>Config: get_settings()
+    Config-->>KubernetesRouter: Returns settings
     
-    K8sRouter->>K8sRouter: Read K8s token from file
-    K8sRouter->>K8sAPI: Proxied request with token
-    K8sAPI-->>K8sRouter: JSON response
-    K8sRouter-->>FastAPI: Formatted response
+    KubernetesRouter->>KubernetesRouter: Read Kubernetes token from file
+    KubernetesRouter->>KubernetesAPI: Proxied request with token
+    KubernetesAPI-->>KubernetesRouter: JSON response
+    KubernetesRouter-->>FastAPI: Formatted response
     FastAPI-->>Client: API response

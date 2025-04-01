@@ -8,15 +8,15 @@ stateDiagram-v2
     
     Reconciliation --> ConfigReading: Read values.yaml
     ConfigReading --> ApplicationDeployment: Prepare deployment
-    ApplicationDeployment --> ArgoCD: Create/Update ArgoCD application
+    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
     
     ArgoCD --> ApplicationSync: Auto-sync
     ArgoCD --> ManualSync: Manual sync
     
-    ApplicationSync --> K8sDeployment
-    ManualSync --> K8sDeployment
+    ApplicationSync --> KubernetesDeployment
+    ManualSync --> KubernetesDeployment
     
-    K8sDeployment --> [*]: Application deployed
+    KubernetesDeployment --> [*]: Application deployed
     
     state Reconciliation {
         [*] --> GitClone: First time

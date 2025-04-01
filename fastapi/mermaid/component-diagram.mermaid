@@ -13,10 +13,10 @@ flowchart TB
     AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
-    KC --> K8s[(Kubernetes API)]
+    KC --> Kubernetes[(Kubernetes API)]
     AT --> ArgoCD[(Argo CD API)]
     RT --> GitRepo
-    RT --> K8s
+    RT --> Kubernetes
     
     classDef component fill:#f9f,stroke:#333,stroke-width:2px
     classDef api fill:#bbf,stroke:#33f,stroke-width:2px
@@ -24,4 +24,4 @@ flowchart TB
     
     class API,KR,AR,TR,Health component
     class KC,AT,RT api
-    class K8s,ArgoCD,GitRepo external
+    class Kubernetes,ArgoCD,GitRepo external
