@@ -12,13 +12,13 @@ Following GitOps principles:
 4. Continuously Reconciled - TVP agent applies changes automatically
 """
 
-from fastapi import APIProxy, HTTPException, Depends, BackgroundTasks
+from fastapi import APIProxy, HTTPException, BackgroundTasks
+import logging
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any, Union, Tuple
+from typing import Optional, Any
 import os
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
-import shutil
 import time
 import threading
 import yaml
