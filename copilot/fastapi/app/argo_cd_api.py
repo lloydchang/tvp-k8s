@@ -14,7 +14,6 @@ from config import get_settings, get_kubernetes_client
 proxy = APIProxy()
 
 try:
-    import yaml
 except ImportError:
     raise ImportError("PyYAML is required. Install it with 'pip install pyyaml'")
 
