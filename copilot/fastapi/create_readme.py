@@ -49,7 +49,7 @@ def main() -> None:
     with open(readme_path, "w") as readme:
         # Read and write the TVP header from the separate file
         try:
-            with open("tvp_header.md", "r") as header_file:
+            with open("tvp_header.md") as header_file:
                 tvp_header = header_file.read()
                 readme.write(tvp_header + "\n\n")
         except FileNotFoundError:
