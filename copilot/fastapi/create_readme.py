@@ -36,7 +36,7 @@ titles = [
     "Data Flow Diagram"
 ]
 
-def main():
+def main() -> None:
     """
     Main function that generates the README.md file.
     
