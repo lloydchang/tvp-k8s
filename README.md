@@ -286,17 +286,18 @@ The following diagrams provide a comprehensive overview of the TVP architecture.
 ## Table of Contents
 
 - [1. TVP GitOps Architecture](#1-tvp-gitops-architecture)
-- [2. TVP GitOps Workflow SequenceTVP GitOps Reconciliation Sequence](#2-tvp-gitops-workflow-sequencetvp-gitops-reconciliation-sequence)
-- [3. Component Interaction Diagram](#3-component-interaction-diagram)
-- [4. Data Flow Diagram](#4-data-flow-diagram)
-- [5. API Structure Diagram](#5-api-structure-diagram)
-- [6. Health Check Sequence](#6-health-check-sequence)
-- [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
-- [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
-- [9. Application Deployment Workflow](#9-application-deployment-workflow)
-- [10. Test Coverage Structure](#10-test-coverage-structure)
-- [11. Measuring Platform Leverage](#11-measuring-platform-leverage)
-- [12. Conclusion](#12-conclusion)
+- [2. TVP GitOps Workflow Sequence](#2-tvp-gitops-workflow-sequence)
+- [3. TVP GitOps Reconciliation Sequence](#3-tvp-gitops-reconciliation-sequence)
+- [4. Component Interaction Diagram](#4-component-interaction-diagram)
+- [5. Data Flow Diagram](#5-data-flow-diagram)
+- [6. API Structure Diagram](#6-api-structure-diagram)
+- [7. Health Check Sequence](#7-health-check-sequence)
+- [8. Kubernetes Proxy Sequence](#8-kubernetes-proxy-sequence)
+- [9. Argo CD Proxy Sequence](#9-argo-cd-proxy-sequence)
+- [10. Application Deployment Workflow](#10-application-deployment-workflow)
+- [11. Test Coverage Structure](#11-test-coverage-structure)
+- [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
+- [13. Conclusion](#13-conclusion)
 
 ## 1. TVP GitOps Architecture
 
@@ -341,12 +342,39 @@ flowchart TB
 
 With the architecture overview in mind, we can now explore how the platform handles GitOps reconciliation.
 
-## 2. TVP GitOps Workflow SequenceTVP GitOps Reconciliation Sequence
+## 2. TVP GitOps Workflow Sequence
 
 Now that we've seen the architecture, let's examine how the GitOps reconciliation process works in practice. This sequence diagram shows the steps involved when synchronizing the platform with the Git repository - a key automation that creates leverage:
 
 ```mermaid
-# File mermaid/tvp-gitops-workflow-diagram.mermaidmermaid/tvp-reconciliation-sequence.mermaid not found
+sequenceDiagram
+    actor Dev as Developer
+    participant Git as Git Repository
+    participant TVP as TVP API
+    participant Thread as Reconciliation Thread
+    participant Kubernetes as Kubernetes API Server
+    
+    Dev->>Git: Push application changes
+    
+    alt Manual Trigger
+        Dev->>TVP: POST /tvp/reconcile
+        TVP->>Thread: background_tasks.add_task(reconcile_from_git)
+        TVP-->>Dev: {"status": "started"}
+    else Automatic Reconciliation
+        Note over Thread: Periodic check<br>(every 5 min)
+    end
+    
+    Thread->>Git: Pull latest changes
+    Thread->>Thread: Parse configuration
+    
+    loop For each application
+        Thread->>Kubernetes: Apply configuration
+    end
+    
+    Thread->>Thread: Update last_reconciliation timestamp
+    
+    Dev->>TVP: GET /tvp/status
+    TVP-->>Dev: Application status information
 
 ```
 
@@ -354,9 +382,52 @@ Now that we've seen the architecture, let's examine how the GitOps reconciliatio
 
 Understanding the reconciliation process helps us see how changes propagate through the system. Let's now look at the component structure in more detail.
 
-## 3. Component Interaction Diagram
+## 3. TVP GitOps Reconciliation Sequence
 
 To better understand how the TVP creates leverage, the following component interaction diagram breaks down the FastAPI application into its functional parts and shows how they communicate to reduce duplicated work across teams:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant TVP
+    participant ReconcileThread
+    participant GitRepo
+    participant KubernetesApiServer
+    
+    Client->>FastAPI: POST /tvp/reconcile
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
+    FastAPI-->>Client: Response
+    
+    ReconcileThread->>ReconcileThread: is_reconciling = true
+    
+    alt Repository doesn't exist
+        ReconcileThread->>GitRepo: git clone
+    else Repository exists
+        ReconcileThread->>GitRepo: git fetch
+        ReconcileThread->>GitRepo: git checkout branch
+        ReconcileThread->>GitRepo: git pull
+    end
+    
+    loop For each namespace/app
+        ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>KubernetesApiServer: Apply configuration
+    end
+    
+    ReconcileThread->>ReconcileThread: Update last_reconciliation
+    ReconcileThread->>ReconcileThread: is_reconciling = false
+
+```
+
+**Leverage Point:** This component structure demonstrates the leverage principle of TVP by separating concerns and enabling multiple teams to work independently. Each component acts as a force multiplier by providing standardized functionality that would otherwise be duplicated across teams.
+
+These components work together to facilitate various data flows within the platform.
+
+## 4. Component Interaction Diagram
+
+The data flows through the system in a specific pattern, creating efficiency through standardization. This diagram illustrates how information moves between different components of the platform:
 
 ```mermaid
 flowchart TB
@@ -391,13 +462,13 @@ flowchart TB
 
 ```
 
-**Leverage Point:** This component structure demonstrates the leverage principle of TVP by separating concerns and enabling multiple teams to work independently. Each component acts as a force multiplier by providing standardized functionality that would otherwise be duplicated across teams.
+**Leverage Point:** The data flow design creates leverage by standardizing how information moves through the system. This eliminates redundant data handling code across applications and ensures consistent security practices without requiring each team to become security experts.
 
-These components work together to facilitate various data flows within the platform.
+Now that we understand the data flow, let's examine the API structure that enables these interactions.
 
-## 4. Data Flow Diagram
+## 5. Data Flow Diagram
 
-The data flows through the system in a specific pattern, creating efficiency through standardization. This diagram illustrates how information moves between different components of the platform:
+Our API is structured to provide clear separation of concerns while maintaining simplicity - a core TVP principle. The following class diagram shows the architecture of our API endpoints and their supporting classes:
 
 ```mermaid
 flowchart TD
@@ -431,13 +502,13 @@ flowchart TD
 
 ```
 
-**Leverage Point:** The data flow design creates leverage by standardizing how information moves through the system. This eliminates redundant data handling code across applications and ensures consistent security practices without requiring each team to become security experts.
+**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Development teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
 
-Now that we understand the data flow, let's examine the API structure that enables these interactions.
+One of the key aspects of our API is the ability to monitor system health.
 
-## 5. API Structure Diagram
+## 6. API Structure Diagram
 
-Our API is structured to provide clear separation of concerns while maintaining simplicity - a core TVP principle. The following class diagram shows the architecture of our API endpoints and their supporting classes:
+Reliability is essential for any platform that aims to provide leverage. The health check mechanism ensures that all services are operating correctly, reducing the monitoring burden on application teams:
 
 ```mermaid
 classDiagram
@@ -512,13 +583,13 @@ classDiagram
 
 ```
 
-**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Development teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
+**Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
 
-One of the key aspects of our API is the ability to monitor system health.
+In addition to health monitoring, our platform provides secure access to the underlying Kubernetes API.
 
-## 6. Health Check Sequence
+## 7. Health Check Sequence
 
-Reliability is essential for any platform that aims to provide leverage. The health check mechanism ensures that all services are operating correctly, reducing the monitoring burden on application teams:
+The Kubernetes Proxy allows application developers to interact with the Kubernetes API through our platform, providing leverage by abstracting away complexity. This sequence diagram shows how requests are securely proxied:
 
 ```mermaid
 sequenceDiagram
@@ -553,13 +624,13 @@ sequenceDiagram
 
 ```
 
-**Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
+**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each developer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
 
-In addition to health monitoring, our platform provides secure access to the underlying Kubernetes API.
+Similarly, our platform facilitates interaction with Argo CD for GitOps operations.
 
-## 7. Kubernetes Proxy Sequence
+## 8. Kubernetes Proxy Sequence
 
-The Kubernetes Proxy allows application developers to interact with the Kubernetes API through our platform, providing leverage by abstracting away complexity. This sequence diagram shows how requests are securely proxied:
+Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform, reducing the cognitive load for developers. The sequence diagram below shows the authentication flow:
 
 ```mermaid
 sequenceDiagram
@@ -584,13 +655,13 @@ sequenceDiagram
 
 ```
 
-**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each developer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
+**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
 
-Similarly, our platform facilitates interaction with Argo CD for GitOps operations.
+All these components and interactions come together in the application deployment workflow.
 
-## 8. Argo CD Proxy Sequence
+## 9. Argo CD Proxy Sequence
 
-Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform, reducing the cognitive load for developers. The sequence diagram below shows the authentication flow:
+Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform, demonstrating how the TVP provides leverage throughout the deployment process:
 
 ```mermaid
 sequenceDiagram
@@ -617,13 +688,13 @@ sequenceDiagram
 
 ```
 
-**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
+**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
-All these components and interactions come together in the application deployment workflow.
+Behind the scenes, comprehensive testing ensures the reliability of each component.
 
-## 9. Application Deployment Workflow
+## 10. Application Deployment Workflow
 
-Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform, demonstrating how the TVP provides leverage throughout the deployment process:
+Quality assurance is a critical aspect of platform reliability. Our test coverage structure ensures that all components are properly tested, which increases platform stability and reduces maintenance overhead:
 
 ```mermaid
 stateDiagram-v2
@@ -659,13 +730,13 @@ stateDiagram-v2
 
 ```
 
-**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
+**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
 
-Behind the scenes, comprehensive testing ensures the reliability of each component.
+The test coverage is critical for supporting our GitOps workflow, which ties everything together for developers.
 
-## 10. Test Coverage Structure
+## 11. Test Coverage Structure
 
-Quality assurance is a critical aspect of platform reliability. Our test coverage structure ensures that all components are properly tested, which increases platform stability and reduces maintenance overhead:
+The GitOps workflow is a key part of our platform's leverage strategy. This sequence diagram illustrates how developers interact with the system to deploy applications through git-based workflows:
 
 ```mermaid
 flowchart TD
@@ -712,9 +783,9 @@ flowchart TD
 
 ```
 
-**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
+**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
 
-## 11. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
+## 12. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
 
 Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:
 
@@ -732,7 +803,7 @@ Leverage from a platform can be quantified in several ways. Here are some metric
 
 These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
 
-## 12. Conclusion
+## 13. Conclusion
 
 The diagrams and metrics presented above provide a comprehensive view of our Thinnest Viable Platform architecture and the leverage it creates throughout the organization. By implementing a GitOps approach with careful attention to component interaction and data flow, we've created a platform that provides significant leverage through self-service APIs while maintaining simplicity and ease of use. 
 

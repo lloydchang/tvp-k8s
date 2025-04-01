@@ -19,7 +19,7 @@ from datetime import datetime
 # List of Mermaid diagram files and their corresponding section titles
 mermaid_files = [
     "mermaid/tvp-architecture-diagram.mermaid",
-    "mermaid/tvp-gitops-workflow-diagram.mermaid"
+    "mermaid/tvp-gitops-workflow-diagram.mermaid",
     "mermaid/tvp-reconciliation-sequence.mermaid",
     "mermaid/component-diagram.mermaid",
     "mermaid/data-flow-diagram.mermaid",
@@ -34,7 +34,7 @@ mermaid_files = [
 # Titles organized in a logical flow for the narrative
 titles = [
     "TVP GitOps Architecture",
-    "TVP GitOps Workflow Sequence"
+    "TVP GitOps Workflow Sequence",
     "TVP GitOps Reconciliation Sequence",
     "Component Interaction Diagram",
     "Data Flow Diagram", 
