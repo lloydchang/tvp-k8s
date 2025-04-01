@@ -236,12 +236,11 @@ def reconcile_from_git() -> None:
         logger.error(f"Filesystem error during reconciliation: {e}")
     except yaml.YAMLError as e:
         logger.error(f"YAML parsing error: {e}")
-    except Exception as e:
-        logger.error(f"GitOps reconciliation failed with unexpected error: {str(e)}")
+    except Exception as err:
+        logger.exception("GitOps reconciliation failed with unexpected error", exc_info=err)
     finally:
         with reconciliation_lock:
             is_reconciling = False
-
 def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
     Clone the source repository.
