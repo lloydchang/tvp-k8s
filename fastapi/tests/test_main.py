@@ -33,8 +33,8 @@ def test_health_check_kubernetes_unhealthy(test_client, mock_kubernetes_client):
     assert "error" in data["services"]["kubernetes"]
 
 def test_health_check_argo_cd_unhealthy(test_client, mock_argo_cd_token):
-    """Test health check when argo_cd is not available"""
-    mock_argo_cd_token.side_effect = Exception("argo_cd unavailable")
+    """Test health check when Argo CD is not available"""
+    mock_argo_cd_token.side_effect = Exception("Argo CD unavailable")
     
     response = test_client.get("/health")
     assert response.status_code == 200

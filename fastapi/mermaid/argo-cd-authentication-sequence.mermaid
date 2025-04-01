@@ -1,21 +1,21 @@
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant ArgoCDRouter
+    participant Argo CD Router
     participant Config
-    participant ArgoCD
+    participant Argo CD
     
     Client->>FastAPI: Request to /argocd/...
-    FastAPI->>ArgoCDRouter: Forward request
-    ArgoCDRouter->>ArgoCDRouter: get_argocd_token()
-    ArgoCDRouter->>Config: get_settings()
-    Config-->>ArgoCDRouter: Returns settings
+    FastAPI->>Argo CD Router: Forward request
+    Argo CD Router->>Argo CD Router: get_argocd_token()
+    Argo CD Router->>Config: get_settings()
+    Config-->>Argo CD Router: Returns settings
     
-    ArgoCDRouter->>ArgoCD: POST /api/v1/session
-    Note over ArgoCDRouter,ArgoCD: {username, password}
-    ArgoCD-->>ArgoCDRouter: Authentication token
+    Argo CD Router->>Argo CD: POST /api/v1/session
+    Note over Argo CD Router,Argo CD: {username, password}
+    Argo CD-->>Argo CD Router: Authentication token
     
-    ArgoCDRouter->>ArgoCD: Original request with token
-    ArgoCD-->>ArgoCDRouter: Response data
-    ArgoCDRouter-->>FastAPI: Formatted response
+    Argo CD Router->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Router: Response data
+    Argo CD Router-->>FastAPI: Formatted response
     FastAPI-->>Client: API response

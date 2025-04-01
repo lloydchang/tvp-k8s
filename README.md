@@ -41,11 +41,11 @@
 
 ## Platform Engineering:
 
-> Platform engineering is the discipline of developing and operating platforms. The goal of this discipline is to manage overall system complexity in order to deliver leverage to the business. It does this by taking a **_curated_** product approach to developing platforms as software-based abstractions that serve a broad base of application developers, operating them as foundations of the business. We will elaborate on this in [Chapter 2](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch02.html#ch02_the_pillars_of_platform_engineering_1724889300873458).
+> Platform engineering is the discipline of developing and operating platforms. The goal of this discipline is to manage overall system complexity in order to deliver **_leverage_** to the business. It does this by taking a **_curated_** product approach to developing platforms as software-based abstractions that serve a broad base of application developers, operating them as foundations of the business. We will elaborate on this in [Chapter 2](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch02.html#ch02_the_pillars_of_platform_engineering_1724889300873458).
 
 ## Leverage:
 
-> Core to the value of platform engineering is the concept of leverage—meaning, the work of a few engineers on a platform team reduces the work of the greater organization. Platforms achieve leverage in two ways: making applications engineers more productive as they go about their jobs creating business value, and making the engineering organization more efficient by eliminating duplicate work across application engineering teams.
+> Core to the value of platform engineering is the concept of **_leverage_**—meaning, the work of a few engineers on a platform team reduces the work of the greater organization. Platforms achieve **_leverage_** in two ways: making applications engineers more productive as they go about their jobs creating business value, and making the engineering organization more efficient by eliminating duplicate work across application engineering teams.
 
 ## Product:
 
@@ -118,18 +118,18 @@ flowchart TB
     
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Router]
-        API --> AR[ArgoCD Router]
+        API --> AR[Argo CD Router]
         API --> TR[TVP Router]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
     
     KR --> KC[Kubernetes Client]
-    AR --> AT[ArgoCD Token]
+    AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
     KC --> K8s[(Kubernetes API)]
-    AT --> ArgoCD[(ArgoCD API)]
+    AT --> ArgoCD[(Argo CD API)]
     RT --> GitRepo
     RT --> K8s
     
@@ -224,23 +224,23 @@ classDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant ArgoCDRouter
+    participant Argo CD Router
     participant Config
-    participant ArgoCD
+    participant Argo CD
     
     Client->>FastAPI: Request to /argocd/...
-    FastAPI->>ArgoCDRouter: Forward request
-    ArgoCDRouter->>ArgoCDRouter: get_argocd_token()
-    ArgoCDRouter->>Config: get_settings()
-    Config-->>ArgoCDRouter: Returns settings
+    FastAPI->>Argo CD Router: Forward request
+    Argo CD Router->>Argo CD Router: get_argocd_token()
+    Argo CD Router->>Config: get_settings()
+    Config-->>Argo CD Router: Returns settings
     
-    ArgoCDRouter->>ArgoCD: POST /api/v1/session
-    Note over ArgoCDRouter,ArgoCD: {username, password}
-    ArgoCD-->>ArgoCDRouter: Authentication token
+    Argo CD Router->>Argo CD: POST /api/v1/session
+    Note over Argo CD Router,Argo CD: {username, password}
+    Argo CD-->>Argo CD Router: Authentication token
     
-    ArgoCDRouter->>ArgoCD: Original request with token
-    ArgoCD-->>ArgoCDRouter: Response data
-    ArgoCDRouter-->>FastAPI: Formatted response
+    Argo CD Router->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Router: Response data
+    Argo CD Router-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
 
 ```
@@ -358,7 +358,7 @@ flowchart TB
     
     subgraph "Kubernetes Cluster"
         K8s
-        ArgoCD
+        ArgoCD[Argo CD]
     end
     
     Client[Client Application] --> API
@@ -415,13 +415,13 @@ flowchart TD
     User[User/Client] -->|API Request| API[FastAPI App]
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
-    API -->|/argocd/*| AP[ArgoCD Proxy]
+    API -->|/argocd/*| AP[Argo CD Proxy]
     API -->|/tvp/*| TVP[TVP Router]
     
     KP -->|Auth token| KA[Kubernetes API]
-    AP -->|Login| Auth[ArgoCD Auth]
+    AP -->|Login| Auth[Argo CD Auth]
     Auth -->|Token| AP
-    AP -->|Auth token| AA[ArgoCD API]
+    AP -->|Auth token| AA[Argo CD API]
     
     TVP -->|Status| TS[TVP Status]
     TVP -->|Reconcile| R[Reconciliation]
@@ -431,7 +431,7 @@ flowchart TD
     R --> KA
     
     KA --> K8s[(Kubernetes Cluster)]
-    AA --> ArgoCD[(ArgoCD Service)]
+    AA --> ArgoCD[(Argo CD Service)]
     
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     classDef app fill:#f9f,stroke:#333,stroke-width:2px

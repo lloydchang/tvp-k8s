@@ -3,18 +3,18 @@ flowchart TB
     
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Router]
-        API --> AR[ArgoCD Router]
+        API --> AR[Argo CD Router]
         API --> TR[TVP Router]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
     
     KR --> KC[Kubernetes Client]
-    AR --> AT[ArgoCD Token]
+    AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
     KC --> K8s[(Kubernetes API)]
-    AT --> ArgoCD[(ArgoCD API)]
+    AT --> ArgoCD[(Argo CD API)]
     RT --> GitRepo
     RT --> K8s
     
