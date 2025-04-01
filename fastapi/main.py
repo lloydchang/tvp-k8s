@@ -3,6 +3,12 @@ Kubernetes & ArgoCD Platform API - Main Application
 
 This FastAPI application serves as a unified API for interacting with Kubernetes
 and ArgoCD, supporting both direct operations and pass-through proxy capabilities.
+
+The application provides:
+- Kubernetes API pass-through and operations 
+- ArgoCD API pass-through and operations
+- TVP GitOps reconciliation functionality
+- Health checking for dependent services
 """
 
 from fastapi import FastAPI, Request, Depends, HTTPException
@@ -39,14 +45,23 @@ app.include_router(tvp_router, prefix="/tvp", tags=["TVP"])
 async def startup_event():
     """
     Runs when the application starts.
+    
     Initializes background tasks like the GitOps reconciliation thread.
+    This ensures the TVP reconciliation process begins automatically
+    when the API service starts.
     """
     # Start the TVP GitOps reconciliation thread
     start_reconciliation_thread()
 
 @app.get("/", tags=["Health"])
 async def root():
-    """Root endpoint providing basic platform information."""
+    """
+    Root endpoint providing basic platform information.
+    
+    Returns:
+        dict: Information about the platform API including name, version,
+              status, and available endpoints.
+    """
     return {
         "name": "Kubernetes Platform API",
         "description": "Unified API for Kubernetes and ArgoCD operations",
@@ -63,6 +78,22 @@ async def root():
 async def health_check():
     """
     Health check endpoint that verifies connectivity to Kubernetes and ArgoCD services.
+    
+    Performs live checks against dependent services to determine
+    if the application is fully operational.
+    
+    Returns:
+        dict: Health status containing overall status and individual 
+              service states.
+              
+    Service states can be:
+    - "healthy": Service is responding properly
+    - "unhealthy": Service is unreachable or responding with errors
+    - "unknown": Service status could not be determined
+    
+    Overall status can be:
+    - "healthy": All services are healthy
+    - "degraded": One or more services are unhealthy
     """
     health_status = {
         "status": "healthy",
@@ -75,7 +106,8 @@ async def health_check():
     # Check Kubernetes connectivity
     try:
         kubernetes_client = get_kubernetes_client()
-        kubernetes_client.list_namespace()  # Removed timeout_seconds parameter
+        # Add timeout for the API call to prevent hanging
+        kubernetes_client.list_namespace(timeout_seconds=5)
         health_status["services"]["kubernetes"] = {
             "status": "healthy"
         }

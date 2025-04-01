@@ -1,0 +1,30 @@
+flowchart TD
+    main[main.py] --> tvp[tvp.py]
+    main --> k8s[kubernetes_api.py]
+    main --> argo[argocd_api.py]
+    main --> config[config.py]
+    
+    tvp --> git[git commands]
+    tvp --> config
+    tvp --> k8s_api[(Kubernetes API)]
+    
+    k8s --> config
+    k8s --> k8s_api
+    
+    argo --> config
+    argo --> argocd_api[(ArgoCD API)]
+    
+    config --> k8s_client[Kubernetes Client Library]
+    config --> env[Environment Variables]
+    
+    client[Client Applications] --> main
+    
+    classDef appModule fill:#bef,stroke:#333,stroke-width:2px
+    classDef externalSys fill:#f96,stroke:#333,stroke-width:2px
+    classDef config fill:#9e9,stroke:#333,stroke-width:2px
+    classDef client fill:#f8d,stroke:#333,stroke-width:2px
+    
+    class main,tvp,k8s,argo appModule
+    class k8s_api,argocd_api,git externalSys
+    class config,k8s_client,env config
+    class client client

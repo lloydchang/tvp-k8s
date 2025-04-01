@@ -3,6 +3,12 @@ Kubernetes API Module
 
 This module provides direct API operations and pass-through proxy functionality
 for Kubernetes cluster management.
+
+Features:
+- Transparent proxy to the Kubernetes API
+- Authentication handling for cluster access
+- Models for Kubernetes resource creation
+- Helper functions for accessing the Kubernetes API clients
 """
 
 from fastapi import APIRouter, Request, Depends, HTTPException
@@ -18,6 +24,15 @@ router = APIRouter()
 
 # Models
 class DeploymentRequest(BaseModel):
+    """
+    Model for Kubernetes deployment requests.
+    
+    Attributes:
+        name (str): Name of the deployment.
+        image (str): Container image to deploy.
+        replicas (int): Number of replicas to maintain, defaults to 3.
+        namespace (str): Target Kubernetes namespace, defaults to "default".
+    """
     name: str
     image: str
     replicas: int = 3
@@ -26,6 +41,12 @@ class DeploymentRequest(BaseModel):
 def get_apps_v1_client():
     """
     Returns a Kubernetes AppsV1Api client.
+    
+    This client provides access to Deployments, DaemonSets, StatefulSets, 
+    and other app resources.
+    
+    Returns:
+        kubernetes.client.AppsV1Api: Configured Kubernetes Apps V1 API client.
     """
     # Use the same configuration method as get_kubernetes_client
     get_kubernetes_client()  # This sets up the configuration
@@ -36,6 +57,19 @@ def get_apps_v1_client():
 async def kubernetes_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Kubernetes API.
+    
+    Forwards the incoming request to the Kubernetes API with proper authentication,
+    preserving the HTTP method, headers, and body content.
+    
+    Args:
+        path (str): The path component of the URL to forward to the Kubernetes API.
+        request (Request): The incoming FastAPI request object.
+        
+    Returns:
+        dict: The JSON response from the Kubernetes API.
+        
+    Raises:
+        HTTPException: If the Kubernetes API is unavailable or returns an error.
     """
     settings = get_settings()
     

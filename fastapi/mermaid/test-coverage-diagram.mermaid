@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph Tests
+        conftest[conftest.py]
+        test_main[test_main.py]
+        test_tvp[test_tvp.py]
+        test_k8s[test_kubernetes_api.py]
+        test_argo[test_argocd_api.py]
+    end
+
+    subgraph "Application Code"
+        main[main.py]
+        tvp[tvp.py]
+        k8s[kubernetes_api.py]
+        argo[argocd_api.py]
+        config[config.py]
+    end
+
+    conftest --> |fixtures| test_main
+    conftest --> |fixtures| test_tvp
+    conftest --> |fixtures| test_k8s
+    conftest --> |fixtures| test_argo
+
+    test_main --> |tests| main
+    test_tvp --> |tests| tvp
+    test_k8s --> |tests| k8s
+    test_argo --> |tests| argo
+
+    main --> |imports| tvp
+    main --> |imports| k8s
+    main --> |imports| argo
+    main --> |imports| config
+
+    tvp --> |imports| config
+    k8s --> |imports| config
+    argo --> |imports| config
+
+    classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
+    classDef appFile fill:#bef,stroke:#333,stroke-width:1px
+    
+    class conftest,test_main,test_tvp,test_k8s,test_argo testFile
+    class main,tvp,k8s,argo,config appFile

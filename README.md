@@ -141,6 +141,7 @@ classDiagram
     class KubernetesRouter {
         +kubernetes_proxy()
         +get_kubernetes_client()
+        +get_apps_v1_client()
     }
     
     class ArgoCDRouter {
@@ -160,6 +161,31 @@ classDiagram
         +get_kubernetes_client()
         +get_kubernetes_token()
     }
+
+    class TVPStatus {
+        +is_reconciling: bool
+        +last_reconciliation: Optional[str]
+        +status: str
+        +applications: List[Dict]
+    }
+
+    class DeploymentRequest {
+        +name: str
+        +image: str
+        +replicas: int
+        +namespace: str
+    }
+
+    class ArgoCDApplicationRequest {
+        +name: str
+        +repo_url: str
+        +path: str
+        +target_namespace: str
+        +target_revision: str
+        +sync_policy_automated: bool
+        +sync_policy_prune: bool
+        +sync_policy_self_heal: bool
+    }
     
     FastAPI --> KubernetesRouter : includes
     FastAPI --> ArgoCDRouter : includes
@@ -168,6 +194,9 @@ classDiagram
     ArgoCDRouter --> Config : depends on
     TVPRouter --> Config : depends on
     FastAPI --> Config : depends on
+    TVPRouter --> TVPStatus : returns
+    KubernetesRouter --> DeploymentRequest : accepts
+    ArgoCDRouter --> ArgoCDApplicationRequest : accepts
 
 ```
 
