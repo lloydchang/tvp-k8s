@@ -285,7 +285,7 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 
 ```mermaid
 flowchart TB
-    title[Component Architecture Diagram]
+    title[Component Interaction Diagram]
     style title fill:none,stroke:none,font-size:18px,font-weight:bold
     Client[Client Application] --> API[FastAPI Application]
     
