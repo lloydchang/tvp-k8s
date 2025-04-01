@@ -81,9 +81,9 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
   - **Differentiate between customer wants and customer needs**
     - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
 
-As Matthew Skelton [explains](https://www.youtube.com/watch?v=8AQPSR09bxk):
+As Matthew Skelton [explained](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
-> The interesting thing about platform is - it's maybe not the platform's of the past, because platforms of the past often in many organizations were great big great massive things, very difficult to use... The platforms we're talking about have placed a strong focus on developer experience, they see other development teams as their customers effectively.
+> The interesting thing about platform is - it's maybe not the platforms of the past, because platforms of the past often in many organizations were great big great massive things; very difficult to use... The platforms we're talking about have placed a strong focus on developer experience; they see other development teams as their customers effectively.
 
 ### TVP Definition:
 
@@ -97,7 +97,7 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - https://github.com/sbalnojan/TVP-example
 - Documentation and tools focused on reducing cognitive load for development teams
   - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
-  - https://cnoe.io/
+  - [CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
     - https://github.com/cnoe-io/idpbuilder
   - https://github.com/backstage/backstage
     - https://github.com/backstage
