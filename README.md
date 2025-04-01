@@ -390,8 +390,8 @@ stateDiagram-v2
     ConfigReading --> ApplicationDeployment: Prepare deployment
     ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
     
-    Argo CD --> ApplicationSync: Auto-sync
-    Argo CD --> ManualSync: Manual sync
+    ArgoCD --> ApplicationSync: Auto-sync
+    ArgoCD --> ManualSync: Manual sync
     
     ApplicationSync --> KubernetesDeployment
     ManualSync --> KubernetesDeployment
