@@ -75,7 +75,11 @@ async def kubernetes_proxy(path: str, request: Request):
     
     # Determine headers
     try:
-        with open(settings.kubernetes_token_path, "r") as f:
+import aiofiles
+
+try:
+    async with aiofiles.open(settings.kubernetes_token_path, "r") as f:
+        kubernetes_token = (await f.read()).strip()
             kubernetes_token = f.read().strip()
         headers = {
             "Authorization": f"Bearer {kubernetes_token}",
