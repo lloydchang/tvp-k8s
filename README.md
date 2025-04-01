@@ -228,9 +228,9 @@ sequenceDiagram
     participant Config
     participant Argo CD
     
-    Client->>FastAPI: Request to /argocd/...
+    Client->>FastAPI: Request to /argo/cd/...
     FastAPI->>Argo CD Router: Forward request
-    Argo CD Router->>Argo CD Router: get_argocd_token()
+    Argo CD Router->>Argo CD Router: get_argo_cd_token()
     Argo CD Router->>Config: get_settings()
     Config-->>Argo CD Router: Returns settings
     
