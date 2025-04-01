@@ -191,7 +191,7 @@ def reconcile_from_git() -> None:
     This is the core GitOps reconciliation function. It handles:
     1. Cloning or updating the Git repository
     2. Reading configuration from YAML files
-    3. Applying configurations to the Kubernetes cluster
+    3. Applying configurations to the Kubernetes API server
     4. Updating the reconciliation timestamp
     
     The function is thread-safe and prevents concurrent reconciliations.
@@ -220,7 +220,7 @@ def reconcile_from_git() -> None:
         else:
             _update_repository(settings.tvp_repo_path, settings.tvp_branch)
         
-        # Apply configurations from Git to the cluster
+        # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
         
         # Update reconciliation timestamp
@@ -297,7 +297,7 @@ def _update_repository(repo_path: str, branch: str) -> None:
 
 def _apply_configurations_from_git(repo_path: Path) -> None:
     """
-    Apply configurations from Git to the cluster.
+    Apply configurations from Git to the Kubernetes API server.
     
     This function implements the actual reconciliation logic,
     applying Kubernetes resources from the Git repository.
@@ -380,7 +380,7 @@ async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]
                     "last_reconciliation": get_last_reconciliation_time()
                 })
                 
-                # In a real implementation, we would check the actual deployment status in the cluster
+                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
                 # For now, we'll just assume it's deployed if it's in the repo
                 app_info["status"] = "deployed"
         except yaml.YAMLError as e:
