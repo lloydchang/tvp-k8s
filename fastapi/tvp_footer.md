@@ -1,6 +1,6 @@
 ---
 
-# Analogies: What Makes Things Move?
+# *Leverage* Analogies: What Makes Things Move?
 
 ---
 

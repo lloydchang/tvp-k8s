@@ -3,14 +3,16 @@ README.md Generator Script
 
 This script generates the project README.md file by combining:
 1. The TVP header documentation from tvp_header.md
-2. System architecture diagrams rendered from Mermaid syntax files
-3. The TVP footer documentation from tvp_footer.md
+2. A table of contents for easy navigation
+3. System architecture diagrams rendered from Mermaid syntax files
+4. The TVP footer documentation from tvp_footer.md
 
 The script reads Mermaid diagram files from the mermaid/ directory
 and inserts them into the README.md with appropriate section headers.
 """
 
 import os
+import re
 
 # List of Mermaid diagram files and their corresponding section titles
 mermaid_files = [
@@ -37,13 +39,28 @@ titles = [
     "Data Flow Diagram"
 ]
 
+def create_toc_link(title, index):
+    """
+    Convert a title to a GitHub-compatible markdown anchor link.
+    
+    Args:
+        title: The section title
+        index: The section number
+        
+    Returns:
+        A string containing the markdown link to the section
+    """
+    # Convert the title to lowercase and replace spaces with hyphens for the anchor
+    anchor = f"{index+1}-{re.sub(r'[^\w\s-]', '', title).lower().replace(' ', '-')}"
+    return f"- [{index+1}. {title}](#{anchor})"
+
 def main():
     """
     Main function that generates the README.md file.
     
     Reads the TVP header content and Mermaid diagram files,
-    then writes them to the README.md file in the correct order.
-    Finally, appends the TVP footer content if available.
+    creates a table of contents, writes them to the README.md file,
+    and finally appends the TVP footer content if available.
     
     If a file is missing, it will include a placeholder message.
     """
@@ -57,6 +74,13 @@ def main():
         except FileNotFoundError:
             readme.write("# System Architecture Documentation:\n\n")
             readme.write("This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n")
+        
+        # Create and write the table of contents
+        readme.write("## Table of Contents\n\n")
+        for i, title in enumerate(titles):
+            toc_link = create_toc_link(title, i)
+            readme.write(f"{toc_link}\n")
+        readme.write("\n")
         
         # Then write the diagrams
         for i, (filename, title) in enumerate(zip(mermaid_files, titles)):

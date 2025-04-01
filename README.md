@@ -268,6 +268,18 @@ A **_Thinnest_** Viable Platform is the **_smallest set of APIs_**, documentatio
 This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.
 
 
+## Table of Contents
+
+- [1. Component Interaction Diagram](#1-component-interaction-diagram)
+- [2. API Structure Diagram](#2-api-structure-diagram)
+- [3. Argo CD Authentication Sequence](#3-argo-cd-authentication-sequence)
+- [4. Kubernetes Proxy Sequence](#4-kubernetes-proxy-sequence)
+- [5. TVP GitOps Reconciliation Sequence](#5-tvp-gitops-reconciliation-sequence)
+- [6. Health Check Sequence](#6-health-check-sequence)
+- [7. TVP GitOps Architecture](#7-tvp-gitops-architecture)
+- [8. Application Deployment Workflow](#8-application-deployment-workflow)
+- [9. Data Flow Diagram](#9-data-flow-diagram)
+
 ## 1. Component Interaction Diagram
 
 ```mermaid
@@ -603,7 +615,7 @@ flowchart TD
 
 ---
 
-# Analogies: What Makes Things Move?
+# *Leverage* Analogies: What Makes Things Move?
 
 ---
 
