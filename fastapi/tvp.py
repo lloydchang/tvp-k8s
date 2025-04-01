@@ -142,7 +142,7 @@ def start_reconciliation_thread() -> None:
                 reconcile_from_git()
             except Exception as e:
                 logger.error(f"Error in periodic reconciliation: {e}")
-            time.sleep(300)  # Reconcile every 5 minutes
+            time.sleep(60)  # Reconcile every minute
     
     reconciliation_thread = threading.Thread(target=periodic_reconcile, daemon=True)
     reconciliation_thread.start()
