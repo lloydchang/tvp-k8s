@@ -21,8 +21,13 @@ if [ -d "../venv" ]; then
 fi
 
 # Check if required packages are installed
-echo -e "${YELLOW}Checking required packages...${NC}"
-python -m pip install pytest pytest-cov httpx pyyaml kubernetes fastapi uvicorn -q
+echo -e "${YELLOW}Installing/upgrading required packages...${NC}"
+
+# First uninstall any existing pytest and pytest-asyncio to avoid version conflicts
+python -m pip uninstall -y pytest pytest-asyncio pytest-cov
+
+# Install specific compatible versions
+python -m pip install pytest==7.3.1 pytest-asyncio==0.21.1 pytest-cov==4.1.0 httpx pyyaml kubernetes fastapi uvicorn -q
 
 # Parse command line arguments
 COVERAGE=""
