@@ -227,7 +227,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 ---
 
 ### Focus on _Product Thinking_, viewing internal teams as customers
-- [**DevOpsDays Melbourne**: Sprinkle your DevOps platform with **_product thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
+- [**DevOpsDays Melbourne**: Sprinkle your DevOps platform with **_Product Thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
 - [**r/ProductManagement**: How applicable are Marty Cagan's thoughts on the real world?](https://www.reddit.com/r/ProductManagement/comments/1c5qztz/how_applicable_are_marty_cagan_thoughts_on_the/)
 
 ---
