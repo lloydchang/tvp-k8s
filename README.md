@@ -260,7 +260,7 @@ sequenceDiagram
     KubernetesProxy->>Config: get_settings()
     Config-->>KubernetesProxy: Returns settings
     
-    KubernetesProxy->>KubernetesProxy: Read Kubernetes token
+    KubernetesProxy->>KubernetesProxy: Get Kubernetes token
     KubernetesProxy->>KubernetesAPI: Proxied request with token
     KubernetesAPI-->>KubernetesProxy: JSON response
     KubernetesProxy-->>FastAPI: Formatted response
