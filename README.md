@@ -221,7 +221,7 @@ classDiagram
 ## 3. Argo CD Authentication Sequence
 
 ```mermaid
-# File mermaid/argo-cd-authentication-sequence.mermaid not found
+# File mermaid/argocd-authentication-sequence.mermaid not found
 
 ```
 
