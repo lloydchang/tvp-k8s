@@ -519,7 +519,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    title[Thinnest Viable Platform Architecture]
+    title[Thinnest Viable Platform GitOps Architecture]
     style title fill:none,stroke:none,font-size:18px,font-weight:bold
     subgraph "Thinnest Viable Platform"
         API[FastAPI Application]
