@@ -62,7 +62,7 @@ def main() -> None:
             readme.write("```mermaid\n")
             
             try:
-                with open(filename, "r") as mermaid_file:
+                with open(filename) as mermaid_file:
                     mermaid_content = mermaid_file.read()
                     readme.write(mermaid_content)
             except FileNotFoundError:
