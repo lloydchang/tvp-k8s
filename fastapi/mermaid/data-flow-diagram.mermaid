@@ -13,7 +13,7 @@ flowchart TD
     R --> KA
 
     KP -->|Auth token| KA[Kubernetes API Server]
-    AP -->|Auth token| AA[Argo CD API]
+    AA -->|Auth token| AA[Argo CD API]
     AA -->|Login| Auth[Argo CD Auth]
     Auth -->|Token| AP
 
