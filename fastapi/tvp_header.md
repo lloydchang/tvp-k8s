@@ -33,6 +33,117 @@
 
 ![Relationships between Products, Platforms, and Capability Providers](https://github.com/user-attachments/assets/be20e9ec-c203-451b-a954-c736e489a7d1)
 
+> We've focused in this paper on how to construct a good platform and platform
+team; now in this last section we'll describe the capabilities a platform may
+actually offer. This list is intended to guide platform builders and includes
+capabilities typically required by cloud-native applications. As we've noted
+throughout though, a good platform reflects its users' needs, so ultimately
+platform teams should choose and prioritize the capabilities their platform
+offers together with its users.
+
+> Capabilities may comprise several _features_, meaning aspects or attributes of
+the parent capability's domain. For example, observability may include features
+for gathering and publishing metrics, traces and logs as well as for observing
+costs and energy consumption. Consider the need and priority for each feature or
+aspect in your organization. Later CNCF publications may expand on each
+domain further.
+
+> Here are capability domains to consider when building platforms for cloud-native
+computing:
+
+> 1. **Web portals** for observing and provisioning products and capabilities
+> 1. **APIs** (and CLIs) for automatically provisioning products and capabilities
+> 1. **"Golden path" templates and docs** enabling optimal use of capabilities in products
+> 1. **Automation for building and testing** services and products
+> 1. **Automation for delivering and verifying** services and products
+> 1. **Development environments** such as hosted IDEs and remote connection tools
+> 1. **Observability** for services and products using instrumentation and
+>    dashboards, including observation of functionality, performance and costs
+> 1. **Infrastructure** services including compute runtimes, programmable
+>    networks, and block and volume storage
+> 1. **Data** services including databases, caches, and object stores
+> 1. **Messaging** and event services including brokers, queues, and event fabrics
+> 1. **Identity and secret** management services such as service and user identity
+>    and authorization, certificate and key issuance, and static secret storage
+> 1. **Security** services including static analysis of code and artifacts,
+>    runtime analysis, and policy enforcement
+> 1. **Artifact storage** including storage of container image and
+   language-specific packages, custom binaries and libraries, and source code
+
+> The following table is intended to help readers grasp each capability by loosely
+> relating it to existing CNCF or CDF projects.
+
+<table>
+  <thead>
+    <tr><td>Capability</td><td>Description</td><td>Example CNCF/CDF Projects</td></tr>
+  </thead>
+  <tr>
+    <td>Web portals for provisioning and observing capabilities</td>
+    <td>Publish documentation, service catalogs, and project templates. Publish telemetry about systems and capabilities.</td>
+    <td>Backstage, Skooner, Ortelius</td>
+  </tr>
+  <tr>
+    <td>APIs for automatically provisioning capabilities</td>
+    <td>Structured formats for automatically creating, updating, deleting and observing capabilities.</td>
+    <td>Kubernetes, Crossplane, Operator Framework, Helm, KubeVela</td>
+  </tr>
+  <tr>
+    <td>Golden path templates and docs</td>
+    <td>Templated compositions of well-integrated code and capabilities for rapid project development.</td>
+    <td>ArtifactHub</td>
+  </tr>
+  <tr>
+    <td>Automation for building and testing products</td>
+    <td>Automate build and test of digital products and services.</td>
+    <td>Tekton, Jenkins, Buildpacks, ko, Carvel</td>
+  </tr>
+  <tr>
+    <td>Automation for delivering and verifying services</td>
+    <td>Automate and observe delivery of services.</td>
+    <td>Argo, Flux, Keptn, Flagger, OpenFeature</td>
+  </tr>
+  <tr>
+    <td>Development environments</td>
+    <td>Enable research and development of applications and systems.</td>
+    <td>Devfile, Nocalhost, Telepresence, DevSpace</td>
+  </tr>
+  <tr>
+    <td>Application observability</td>
+    <td>Instrument applications, gather and analyze telemetry and publish info to stakeholders.</td>
+    <td>OpenTelemetry, Jaeger, Prometheus, Thanos, Fluentd, Grafana, OpenCost</td>
+  </tr>
+  <tr>
+    <td>Infrastructure services</td>
+    <td>Run application code, connect application components and persist data for applications</td>
+    <td>Kubernetes, Kubevirt, Knative, WasmEdge, KEDA<br />CNI, Istio, Cilium, Envoy, Linkerd, CoreDNS<br />Rook, Longhorn, Etcd</td>
+  </tr>
+  <tr>
+    <td>Data services</td>
+    <td>Persist structured data for applications</td>
+    <td>TiKV, Vitess, SchemaHero</td>
+  </tr>
+  <tr>
+    <td>Messaging and event services</td>
+    <td>Enable applications to communicate with each other asynchronously</td>
+    <td>Strimzi, NATS, gRPC, Knative, Dapr</td>
+  </tr>
+  <tr>
+    <td>Identity and secret services</td>
+    <td>Ensure workloads have locators and secrets to use resources and capabilities. Enable services to identify themselves to other services</td>
+    <td>Keycloak, Dex, External Secrets, SPIFFE/SPIRE, Teller, cert-manager</td>
+  </tr>
+  <tr>
+    <td>Security services</td>
+    <td>Observe runtime behavior and report/remediate anomalies. Verify builds and artifacts don't contain vulnerabilities. Constrain activities on the platform per enterprise requirements; notify and/or remediate aberrations</td>
+    <td>Falco, In-toto, KubeArmor, OPA, Kyverno, Cloud Custodian</td>
+  </tr>
+  <tr>
+    <td>Artifact storage </td>
+    <td>Store, publish and secure built artifacts for use in production. Cache and analyze third-party artifacts. Store source code.</td>
+    <td>ArtifactHub, Harbor, Distribution, Porter</td>
+  </tr>
+</table>
+
 ---
 
 # Defining _Platform_ and Other Important Terms:
@@ -77,21 +188,62 @@
 
 A TVP is a careful balance between keeping the platform small and ensuring that the platform is helping to accelerate and simplify software delivery for teams building on the platform. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
-### Key Principles of TVP:
+---
 
-- **Use modern software development techniques within the platform team**
-  - [**Platform Engineering Maturity Model**](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/)
-    > CNCF's initial [Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/) describes what internal platforms for cloud computing are and the values they promise to deliver to enterprises. But to achieve those values an organization must reflect and deliberately pursue outcomes and practices that are impactful for them, keeping in mind that every organization relies on an internal platform crafted for its own organization - even if that platform is just documentation on how to use third party services. This maturity model provides a framework for that reflection and for identifying opportunities for improvement in any organization.
-- **Focus on _product thinking_, viewing internal teams as customers**
-  - [Sprinkle your DevOps platform with **_product thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
-  - [**r/ProductManagement**: How applicable are Marty Cagan's thoughts on the real world?](https://www.reddit.com/r/ProductManagement/comments/1c5qztz/how_applicable_are_marty_cagan_thoughts_on_the/)
-- **Accelerate and simplify software delivery for teams using the platform**
-  - [**r/ExperiencedDevs**: Curious what peoples experiences with Platform Teams are - what does your Platform Team do and how do they help other teams deliver?](https://www.reddit.com/r/ExperiencedDevs/comments/1dtwsij/curious_what_peoples_experiences_with_platform/)
-- **Build only what is _necessary_ - _Thinnest Viable_**
-  - **Differentiate between customer wants and customer needs**
-    - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
+## Key Principles of TVP:
 
-As Matthew Skelton [explained](https://www.youtube.com/watch?v=8AQPSR09bxk):
+---
+
+### Use modern software development techniques within the platform team:
+
+#### [**Platform Engineering Maturity Model**](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/):
+
+> CNCF's initial [Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/) describes what internal platforms for cloud computing are and the values they promise to deliver to enterprises. But to achieve those values an organization must reflect and deliberately pursue outcomes and practices that are impactful for them, keeping in mind that every organization relies on an internal platform crafted for its own organization - even if that platform is just documentation on how to use third party services. This maturity model provides a framework for that reflection and for identifying opportunities for improvement in any organization.
+
+#### How to use this model:
+
+> As platform engineering has risen in prominence over the last few years, some patterns have become apparent. By organizing those patterns and observations into a progressive maturity model, we aim to orient [platform teams](https://tag-app-delivery.cncf.io/wgs/platforms/glossary/#platform-team) to the challenges they may face and opportunities to aim for. Each aspect is described by a continuum of characteristics of different teams and organizations at each level within the aspect. We expect readers to find themselves in the model and identify opportunities in adjacent levels.
+
+> Of note, each additional level of maturity is accompanied by greater requirements for funding and people's time. Therefore, reaching the highest level should not be a goal in itself. Each level describes qualities that should appear at that stage. Readers must consider if their organization and their current context would benefit from these qualities given the required investment.
+
+> Keep in mind that each aspect is meant to be evaluated and evolved independently. However, as in any socio-technical system these aspects are complex and interrelated. Thus you may find that to improve in one aspect you must reach a minimum level in another aspect too.
+
+> It's also important to recognize that implementations of platforms vary from organization to organization. Make sure to evaluate the current state of _your_ group’s overall cloud native transformation. A phenomenal resource to leverage for this evaluation is the [Cloud Native Maturity Model](https://maturitymodel.cncf.io/).
+
+> Finally, this model encourages organizations to mature their platform engineering discipline and their resulting platforms through intentional planning. Such planning and discipline themselves are a requirement for mature platform development and ongoing evolution.
+
+> In general, keep in mind that mapping your organization into a model captures current state _to enable_ progressive iteration and improvement. [Martin Fowler](https://martinfowler.com/bliki/MaturityModel.html) says it well: "The true outcome of a maturity model assessment isn't what level you are at but the list of things you need to work on to improve. Your current level is merely a piece of intermediate work in order to determine that list of skills to acquire next." In that vein, seek to find yourself in the model then identify opportunities in adjacent levels.
+
+#### Model table:
+
+| <div style="width:120px">Aspect </div> |                                                                                            | Provisional            | Operational           | Scalable               | Optimizing                   |
+|:---------------------------------------|:-------------------------------------------------------------------------------------------|:-----------------------|:----------------------|:-----------------------|:-----------------------------|
+| [Investment](#Investment)     | _How are staff and funds allocated to platform capabilities?_                              | Voluntary or temporary | Dedicated team        | As product             | Enabled ecosystem            |
+| [Adoption](#Adoption)         | _Why and how do users discover and use internal platforms and platform capabilities?_      | Erratic                | Extrinsic push        | Intrinsic pull         | Participatory                |
+| [Interfaces](#Interfaces)     | _How do users interact with and consume platform capabilities?_                            | Custom processes       | Standard tooling      | Self-service solutions | Integrated services          |
+| [Operations](#Operations)     | _How are platforms and their capabilities planned, prioritized, developed and maintained?_ | By request             | Centrally tracked     | Centrally enabled      | Managed services             |
+| [Measurement](#Measurement)   | _What is the process for gathering and incorporating feedback and learning?_               | Ad hoc                 | Consistent collection | Insights               | Quantitative and qualitative |
+
+---
+
+### Focus on _Product Thinking_, viewing internal teams as customers
+- [Sprinkle your DevOps platform with **_product thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
+- [**r/ProductManagement**: How applicable are Marty Cagan's thoughts on the real world?](https://www.reddit.com/r/ProductManagement/comments/1c5qztz/how_applicable_are_marty_cagan_thoughts_on_the/)
+
+---
+
+### Accelerate and simplify software delivery for teams using the platform
+- [**r/ExperiencedDevs**: Curious what peoples experiences with Platform Teams are - what does your Platform Team do and how do they help other teams deliver?](https://www.reddit.com/r/ExperiencedDevs/comments/1dtwsij/curious_what_peoples_experiences_with_platform/)
+
+---
+
+### Build only what is _necessary_ - _Thinnest Viable_
+- **Differentiate between customer wants and customer needs**
+  - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
+
+---
+
+As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 > The interesting thing about platform is - it's maybe not the platforms of the past, because platforms of the past often in many organizations were great big great massive things; very difficult to use... The platforms we're talking about have placed a strong focus on developer experience; they see other development teams as their customers effectively.
 
