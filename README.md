@@ -271,17 +271,91 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 
 ## Table of Contents
 
-- [1. Component Interaction Diagram](#1-component-interaction-diagram)
-- [2. API Structure Diagram](#2-api-structure-diagram)
-- [3. Argo CD Authentication Sequence](#3-argo-cd-authentication-sequence)
-- [4. Kubernetes Proxy Sequence](#4-kubernetes-proxy-sequence)
-- [5. TVP GitOps Reconciliation Sequence](#5-tvp-gitops-reconciliation-sequence)
+- [1. TVP GitOps Architecture](#1-tvp-gitops-architecture)
+- [2. TVP GitOps Reconciliation Sequence](#2-tvp-gitops-reconciliation-sequence)
+- [3. Component Interaction Diagram](#3-component-interaction-diagram)
+- [4. API Structure Diagram](#4-api-structure-diagram)
+- [5. Data Flow Diagram](#5-data-flow-diagram)
 - [6. Health Check Sequence](#6-health-check-sequence)
-- [7. TVP GitOps Architecture](#7-tvp-gitops-architecture)
-- [8. Application Deployment Workflow](#8-application-deployment-workflow)
-- [9. Data Flow Diagram](#9-data-flow-diagram)
+- [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
+- [8. Argo CD Authentication Sequence](#8-argo-cd-authentication-sequence)
+- [9. Application Deployment Workflow](#9-application-deployment-workflow)
 
-## 1. Component Interaction Diagram
+## 1. TVP GitOps Architecture
+
+```mermaid
+flowchart TB
+    title[Thinnest Viable Platform GitOps Architecture]
+    style title fill:none,stroke:none,font-size:18px,font-weight:bold
+    subgraph "Thinnest Viable Platform"
+        API[FastAPI Application]
+        RT[Reconciliation Thread]
+        
+        API --> RT
+        RT --> API
+    end
+    
+    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
+    GitRepo -->|Pull| RT
+    RT -->|Apply configs| KubernetesAPI
+    
+    subgraph "Kubernetes Cluster"
+        KubernetesAPI[Kubernetes API Server]
+        ArgoCD[Argo CD API]
+    end
+    
+    Client[Client Application] --> API
+    API <-->|Proxy Requests/Responses| KubernetesAPI
+    API <-->|Proxy Requests/Responses| ArgoCD
+    
+    classDef platform fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    
+    class API,RT platform
+    class KubernetesAPI,ArgoCD,GitRepo external
+    class Dev,Client user
+
+```
+
+## 2. TVP GitOps Reconciliation Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant TVP
+    participant ReconcileThread
+    participant GitRepo
+    participant KubernetesApiServer
+    
+    Client->>FastAPI: POST /tvp/reconcile
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
+    FastAPI-->>Client: Response
+    
+    ReconcileThread->>ReconcileThread: is_reconciling = true
+    
+    alt Repository doesn't exist
+        ReconcileThread->>GitRepo: git clone
+    else Repository exists
+        ReconcileThread->>GitRepo: git fetch
+        ReconcileThread->>GitRepo: git checkout branch
+        ReconcileThread->>GitRepo: git pull
+    end
+    
+    loop For each namespace/app
+        ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>KubernetesApiServer: Apply configuration
+    end
+    
+    ReconcileThread->>ReconcileThread: Update last_reconciliation
+    ReconcileThread->>ReconcileThread: is_reconciling = false
+
+```
+
+## 3. Component Interaction Diagram
 
 ```mermaid
 flowchart TB
@@ -316,7 +390,7 @@ flowchart TB
 
 ```
 
-## 2. API Structure Diagram
+## 4. API Structure Diagram
 
 ```mermaid
 classDiagram
@@ -391,92 +465,37 @@ classDiagram
 
 ```
 
-## 3. Argo CD Authentication Sequence
+## 5. Data Flow Diagram
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant Argo CD Proxy
-    participant Config
-    participant Argo CD
+flowchart TD
+    User[User/Client] -->|API Request| API[FastAPI App]
     
-    Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Proxy: Forward request
-    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
-    Argo CD Proxy->>Config: get_settings()
-    Config-->>Argo CD Proxy: Returns settings
+    API -->|/kubernetes/*| KP[Kubernetes Proxy]
+    API -->|/argo/cd/*| AP[Argo CD Proxy]
+    API -->|/tvp/*| TVP[TVP]
+        
+    TVP -->|Status| TS[TVP Status]
+    TVP -->|Reconcile| R[Reconciliation]
     
-    Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {username, password}
-    Argo CD-->>Argo CD Proxy: Authentication token
-    
-    Argo CD Proxy->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Proxy: Response data
-    Argo CD Proxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
-
-```
-
-## 4. Kubernetes Proxy Sequence
-
-```mermaid
-sequenceDiagram
-    title: Kubernetes Proxy Request Flow
-    participant Client
-    participant FastAPI
-    participant KubernetesProxy
-    participant Config
-    participant KubernetesAPI
-    
-    Client->>FastAPI: Request to /kubernetes/...
-    FastAPI->>KubernetesProxy: Forward to kubernetes_proxy()
-    KubernetesProxy->>Config: get_settings()
-    Config-->>KubernetesProxy: Returns settings
-    
-    KubernetesProxy->>KubernetesProxy: Get Kubernetes token
-    Note over KubernetesProxy: Authentication using service account token
-    KubernetesProxy->>KubernetesAPI: Proxied request with token
-    KubernetesAPI-->>KubernetesProxy: JSON response
-    KubernetesProxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
-
-```
-
-## 5. TVP GitOps Reconciliation Sequence
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant TVP
-    participant ReconcileThread
-    participant GitRepo
-    participant KubernetesApiServer
-    
-    Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVP: trigger_reconciliation()
-    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVP-->>FastAPI: {"status": "started"}
-    FastAPI-->>Client: Response
-    
-    ReconcileThread->>ReconcileThread: is_reconciling = true
-    
-    alt Repository doesn't exist
-        ReconcileThread->>GitRepo: git clone
-    else Repository exists
-        ReconcileThread->>GitRepo: git fetch
-        ReconcileThread->>GitRepo: git checkout branch
-        ReconcileThread->>GitRepo: git pull
+    TS --> Git[Git Repository]
+    R --> Git
+    R --> KA
+    TVP -->|Auth token| KA[Kubernetes API Server]
+    KP -->|Auth token| KA[Kubernetes API Server]
+    AP -->|Auth token| AA[Argo CD API]
+    subgraph "Kubernetes Cluster"
+        KA --> Kubernetes[(Kubernetes Microservices)]
+        AA --> ArgoCD[(Argo CD Service)]
     end
+
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef app fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
     
-    loop For each namespace/app
-        ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>KubernetesApiServer: Apply configuration
-    end
-    
-    ReconcileThread->>ReconcileThread: Update last_reconciliation
-    ReconcileThread->>ReconcileThread: is_reconciling = false
+    class User user
+    class API,KP,AP,TVP,TS,R app
+    class Kubernetes,ArgoCD,Git,KA,AA,Auth external
 
 ```
 
@@ -515,44 +534,59 @@ sequenceDiagram
 
 ```
 
-## 7. TVP GitOps Architecture
+## 7. Kubernetes Proxy Sequence
 
 ```mermaid
-flowchart TB
-    title[Thinnest Viable Platform GitOps Architecture]
-    style title fill:none,stroke:none,font-size:18px,font-weight:bold
-    subgraph "Thinnest Viable Platform"
-        API[FastAPI Application]
-        RT[Reconciliation Thread]
-        
-        API --> RT
-        RT --> API
-    end
+sequenceDiagram
+    title: Kubernetes Proxy Request Flow
+    participant Client
+    participant FastAPI
+    participant KubernetesProxy
+    participant Config
+    participant KubernetesAPI
     
-    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
-    GitRepo -->|Pull| RT
-    RT -->|Apply configs| KubernetesAPI
+    Client->>FastAPI: Request to /kubernetes/...
+    FastAPI->>KubernetesProxy: Forward to kubernetes_proxy()
+    KubernetesProxy->>Config: get_settings()
+    Config-->>KubernetesProxy: Returns settings
     
-    subgraph "Kubernetes Cluster"
-        KubernetesAPI[Kubernetes API Server]
-        ArgoCD[Argo CD API]
-    end
-    
-    Client[Client Application] --> API
-    API <-->|Proxy Requests/Responses| KubernetesAPI
-    API <-->|Proxy Requests/Responses| ArgoCD
-    
-    classDef platform fill:#f9f,stroke:#333,stroke-width:2px
-    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
-    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
-    
-    class API,RT platform
-    class KubernetesAPI,ArgoCD,GitRepo external
-    class Dev,Client user
+    KubernetesProxy->>KubernetesProxy: Get Kubernetes token
+    Note over KubernetesProxy: Authentication using service account token
+    KubernetesProxy->>KubernetesAPI: Proxied request with token
+    KubernetesAPI-->>KubernetesProxy: JSON response
+    KubernetesProxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
 
 ```
 
-## 8. Application Deployment Workflow
+## 8. Argo CD Authentication Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Argo CD Proxy
+    participant Config
+    participant Argo CD
+    
+    Client->>FastAPI: Request to /argo/cd/...
+    FastAPI->>Argo CD Proxy: Forward request
+    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Argo CD Proxy->>Config: get_settings()
+    Config-->>Argo CD Proxy: Returns settings
+    
+    Argo CD Proxy->>Argo CD: POST /api/v1/session
+    Note over Argo CD Proxy,Argo CD: {username, password}
+    Argo CD-->>Argo CD Proxy: Authentication token
+    
+    Argo CD Proxy->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Proxy: Response data
+    Argo CD Proxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
+
+```
+
+## 9. Application Deployment Workflow
 
 ```mermaid
 stateDiagram-v2
@@ -585,40 +619,6 @@ stateDiagram-v2
         GitPull --> ProcessApps
         ProcessApps --> [*]
     }
-
-```
-
-## 9. Data Flow Diagram
-
-```mermaid
-flowchart TD
-    User[User/Client] -->|API Request| API[FastAPI App]
-    
-    API -->|/kubernetes/*| KP[Kubernetes Proxy]
-    API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP]
-        
-    TVP -->|Status| TS[TVP Status]
-    TVP -->|Reconcile| R[Reconciliation]
-    
-    TS --> Git[Git Repository]
-    R --> Git
-    R --> KA
-    TVP -->|Auth token| KA[Kubernetes API Server]
-    KP -->|Auth token| KA[Kubernetes API Server]
-    AP -->|Auth token| AA[Argo CD API]
-    subgraph "Kubernetes Cluster"
-        KA --> Kubernetes[(Kubernetes Microservices)]
-        AA --> ArgoCD[(Argo CD Service)]
-    end
-
-    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
-    classDef app fill:#f9f,stroke:#333,stroke-width:2px
-    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
-    
-    class User user
-    class API,KP,AP,TVP,TS,R app
-    class Kubernetes,ArgoCD,Git,KA,AA,Auth external
 
 ```
 
