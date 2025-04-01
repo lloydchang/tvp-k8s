@@ -726,7 +726,7 @@ stateDiagram-v2
     }
 ```
 
-**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
+**Leverage Point:** This Application Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
 Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.
 
