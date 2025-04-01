@@ -17,10 +17,10 @@ sequenceDiagram
     end
     
     FastAPI->>ArgoCD: get_argo_cd_token()
-    alt ArgoCD Healthy
+    alt Argo CD Healthy
         ArgoCD-->>FastAPI: Valid token
         FastAPI->>FastAPI: Argo CD status = "healthy"
-    else ArgoCD Unhealthy
+    else Argo CD Unhealthy
         ArgoCD-->>FastAPI: Error
         FastAPI->>FastAPI: Argo  CD status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
