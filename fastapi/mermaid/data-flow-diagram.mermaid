@@ -19,7 +19,8 @@ flowchart TD
         AA -->|Login| Auth[Argo CD Auth]
     end
     Auth -->|Response| AP
-    
+    Auth -->|Response| KP
+
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     classDef app fill:#f9f,stroke:#333,stroke-width:2px
     classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
