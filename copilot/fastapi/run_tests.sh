@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 echo -e "${YELLOW}Setting up test environment...${NC}"
 
 # Set working directory to the script location
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Make sure we're using the correct Python path
 # Update to include the app directory explicitly in addition to parent and current dir
