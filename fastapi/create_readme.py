@@ -4,6 +4,7 @@ README.md Generator Script
 This script generates the project README.md file by combining:
 1. The TVP header documentation from tvp_header.md
 2. System architecture diagrams rendered from Mermaid syntax files
+3. The TVP footer documentation from tvp_footer.md
 
 The script reads Mermaid diagram files from the mermaid/ directory
 and inserts them into the README.md with appropriate section headers.
@@ -42,6 +43,7 @@ def main():
     
     Reads the TVP header content and Mermaid diagram files,
     then writes them to the README.md file in the correct order.
+    Finally, appends the TVP footer content if available.
     
     If a file is missing, it will include a placeholder message.
     """
@@ -69,6 +71,15 @@ def main():
                 readme.write(f"# File {filename} not found\n")
             
             readme.write("\n```\n\n")
+            
+        # Finally, append the TVP footer if it exists
+        try:
+            with open("tvp_footer.md", "r") as footer_file:
+                tvp_footer = footer_file.read()
+                readme.write(tvp_footer + "\n")
+        except FileNotFoundError:
+            # If footer file is not found, just continue without it
+            pass
 
 if __name__ == "__main__":
     main()
