@@ -29,7 +29,7 @@
 
 # Defining _Platform_ and Other Important Terms:
 
-- [**O'Reilly: Platform Engineering: A Guide for Technical, Product, and People Leaders**](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html)
+- [**O'Reilly: Platform Engineering: A Guide for Technical, Product, and People Leaders**](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html) by [Camille Fournier](https://www.linkedin.com/in/camille-fournier-9011812/) and [Ian Nowland](https://www.linkedin.com/in/inowland/)
 
 ## Platform:
 
@@ -51,13 +51,13 @@
 
 ---
 
-## Why Less Toil Is Better:
+## Why Less Toil is Better:
 
-- [**O'Reilly: Site Reliability Engineering: How Google Runs Production Systems**](https://sre.google/sre-book/eliminating-toil/)
+- [**O'Reilly: Site Reliability Engineering: How Google Runs Production Systems**](https://sre.google/sre-book/eliminating-toil/) by [Jennifer Petoff](https://www.linkedin.com/in/jpetoff/), [Betsy Beyer](https://www.linkedin.com/in/betsy-beyer/), [Chris Jones](https://www.linkedin.com/in/chrisjonessre/) and [Niall Murphy](https://www.linkedin.com/in/niallm/)
 
 > The work of reducing toil and scaling up services is the "Engineering" in Site Reliability Engineering. Engineering work is what enables the SRE organization to scale up **_sublinearly_** with service size and to manage services more efficiently than either a pure Dev team or a pure Ops team.
 
-- [**Sublinear Scaling in Practice: The 1k SRE Project**](https://www.usenix.org/conference/srecon19americas/presentation/rath)
+- [**Sublinear Scaling in Practice: The 1k SRE Project**](https://www.usenix.org/conference/srecon19americas/presentation/rath) by [Nikolaus Rath](https://www.linkedin.com/in/nikolaus-rath-85342235/)
 
 > At Google, one of the primary objectives of SRE teams is **_sublinear_** scaling: the size and number of SRE teams should grow more slowly than the number of supported services.
 
