@@ -58,7 +58,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
   - [**r/ProductManagement**: How applicable are Marty Cagan thoughts on the real world](https://www.reddit.com/r/ProductManagement/comments/1c5qztz/how_applicable_are_marty_cagan_thoughts_on_the/)
 - **Accelerate and simplify software delivery for teams using the platform**
   - [**r/ExperiencedDevs**: Curious what peoples experiences with Platform Teams are - what does your Platform Team do and how do they help other teams deliver?](https://www.reddit.com/r/ExperiencedDevs/comments/1dtwsij/curious_what_peoples_experiences_with_platform/)
-- **Build only what is _necessary_ - "thinnest viable"**
+- **Build only what is _necessary_ - _Thinnest Viable_**
   - **Differentiate between customer wants and customer needs**
     - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
 
