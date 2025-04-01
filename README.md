@@ -100,8 +100,6 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - [CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
     - [Spin up a complete internal developer platform with only Docker required as a dependency](https://github.com/cnoe-io/idpbuilder)
   - [Backstage is an open framework for building developer portals](https://github.com/backstage/backstage)
-    - [Commercial Product: Roadie: Taken the open-source version of Backstage and used it to build a comprehensive and maintenance-free IDP](https://roadie.io/)
-  - [Commercial Product: Compass: Catalog everything your developers need to stay in the flow and improve software health with Atlassian’s out-of-the-box internal developer platform](https://www.atlassian.com/software/compass)
 - **A set of _curated_ APIs with simplified access to infrastructure**
   - https://github.com/lloydchang/tvp
 
