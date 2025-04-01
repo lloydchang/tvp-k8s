@@ -1,0 +1,27 @@
+stateDiagram-v2
+    [*] --> GitRepoUpdate: Developer commits changes
+    
+    GitRepoUpdate --> Reconciliation: TVP periodic reconciliation
+    GitRepoUpdate --> ManualReconcile: Manual trigger
+    
+    ManualReconcile --> Reconciliation
+    
+    Reconciliation --> ConfigReading: Read values.yaml
+    ConfigReading --> ApplicationDeployment: Prepare deployment
+    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
+    
+    ArgoCD --> ApplicationSync: Auto-sync
+    ArgoCD --> ManualSync: Manual sync
+    
+    ApplicationSync --> KubernetesDeployment
+    ManualSync --> KubernetesDeployment
+    
+    KubernetesDeployment --> [*]: Application deployed
+    
+    state Reconciliation {
+        [*] --> GitClone: First time
+        [*] --> GitPull: Repository exists
+        GitClone --> ProcessApps
+        GitPull --> ProcessApps
+        ProcessApps --> [*]
+    }
