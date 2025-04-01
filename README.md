@@ -286,7 +286,7 @@ The following diagrams provide a comprehensive overview of the TVP architecture.
 ## Table of Contents
 
 - [1. TVP GitOps Architecture](#1-tvp-gitops-architecture)
-- [2. TVP GitOps Reconciliation Sequence](#2-tvp-gitops-reconciliation-sequence)
+- [2. TVP GitOps Workflow SequenceTVP GitOps Reconciliation Sequence](#2-tvp-gitops-workflow-sequencetvp-gitops-reconciliation-sequence)
 - [3. Component Interaction Diagram](#3-component-interaction-diagram)
 - [4. Data Flow Diagram](#4-data-flow-diagram)
 - [5. API Structure Diagram](#5-api-structure-diagram)
@@ -295,9 +295,8 @@ The following diagrams provide a comprehensive overview of the TVP architecture.
 - [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
 - [9. Application Deployment Workflow](#9-application-deployment-workflow)
 - [10. Test Coverage Structure](#10-test-coverage-structure)
-- [11. GitOps Workflow Sequence](#11-gitops-workflow-sequence)
-- [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
-- [13. Conclusion](#13-conclusion)
+- [11. Measuring Platform Leverage](#11-measuring-platform-leverage)
+- [12. Conclusion](#12-conclusion)
 
 ## 1. TVP GitOps Architecture
 
@@ -342,42 +341,12 @@ flowchart TB
 
 With the architecture overview in mind, we can now explore how the platform handles GitOps reconciliation.
 
-## 2. TVP GitOps Reconciliation Sequence
+## 2. TVP GitOps Workflow SequenceTVP GitOps Reconciliation Sequence
 
 Now that we've seen the architecture, let's examine how the GitOps reconciliation process works in practice. This sequence diagram shows the steps involved when synchronizing the platform with the Git repository - a key automation that creates leverage:
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant TVP
-    participant ReconcileThread
-    participant GitRepo
-    participant KubernetesApiServer
-    
-    Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVP: trigger_reconciliation()
-    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVP-->>FastAPI: {"status": "started"}
-    FastAPI-->>Client: Response
-    
-    ReconcileThread->>ReconcileThread: is_reconciling = true
-    
-    alt Repository doesn't exist
-        ReconcileThread->>GitRepo: git clone
-    else Repository exists
-        ReconcileThread->>GitRepo: git fetch
-        ReconcileThread->>GitRepo: git checkout branch
-        ReconcileThread->>GitRepo: git pull
-    end
-    
-    loop For each namespace/app
-        ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>KubernetesApiServer: Apply configuration
-    end
-    
-    ReconcileThread->>ReconcileThread: Update last_reconciliation
-    ReconcileThread->>ReconcileThread: is_reconciling = false
+# File mermaid/tvp-gitops-workflow-diagram.mermaidmermaid/tvp-reconciliation-sequence.mermaid not found
 
 ```
 
@@ -745,47 +714,7 @@ flowchart TD
 
 **Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
 
-The test coverage is critical for supporting our GitOps workflow, which ties everything together for developers.
-
-## 11. GitOps Workflow Sequence
-
-The GitOps workflow is a key part of our platform's leverage strategy. This sequence diagram illustrates how developers interact with the system to deploy applications through git-based workflows:
-
-```mermaid
-sequenceDiagram
-    actor Dev as Developer
-    participant Git as Git Repository
-    participant TVP as TVP API
-    participant Thread as Reconciliation Thread
-    participant Kubernetes as Kubernetes API Server
-    
-    Dev->>Git: Push application changes
-    
-    alt Manual Trigger
-        Dev->>TVP: POST /tvp/reconcile
-        TVP->>Thread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>Dev: {"status": "started"}
-    else Automatic Reconciliation
-        Note over Thread: Periodic check<br>(every 5 min)
-    end
-    
-    Thread->>Git: Pull latest changes
-    Thread->>Thread: Parse configuration
-    
-    loop For each application
-        Thread->>Kubernetes: Apply configuration
-    end
-    
-    Thread->>Thread: Update last_reconciliation timestamp
-    
-    Dev->>TVP: GET /tvp/status
-    TVP-->>Dev: Application status information
-
-```
-
-**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
-
-## 12. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
+## 11. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
 
 Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:
 
@@ -803,7 +732,7 @@ Leverage from a platform can be quantified in several ways. Here are some metric
 
 These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
 
-## 13. Conclusion
+## 12. Conclusion
 
 The diagrams and metrics presented above provide a comprehensive view of our Thinnest Viable Platform architecture and the leverage it creates throughout the organization. By implementing a GitOps approach with careful attention to component interaction and data flow, we've created a platform that provides significant leverage through self-service APIs while maintaining simplicity and ease of use. 
 
