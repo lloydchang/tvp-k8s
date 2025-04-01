@@ -208,7 +208,7 @@ def main():
                 readme.write(f"{transition}\n\n")
         
         # Add a section on measuring platform leverage
-        readme.write("## 10. Measuring Platform Leverage\n\n")
+        readme.write("## 10. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)\n\n")
         readme.write("Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:\n\n")
         readme.write("1. **Developer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.\n\n")
         readme.write("2. **Deployment Frequency**: Teams using our platform deploy 4x more frequently than teams managing their own infrastructure.\n\n")
@@ -229,10 +229,7 @@ def main():
         readme.write("without the burden of unnecessary complexity. Just as a physical lever amplifies force, ")
         readme.write("our TVP amplifies the capabilities of both the platform team and development teams, ")
         readme.write("allowing the organization to achieve sublinear scaling while delivering more value to customers.\n\n")
-            
-        # Add metadata with last generation date for better documentation
-        readme.write(f"---\n*This documentation was automatically generated on {datetime.now().strftime('%Y-%m-%d')} using the TVP architecture documentation generator.*\n\n")
-            
+        
         # Finally, append the TVP footer if it exists
         try:
             with open("tvp_footer.md", "r") as footer_file:
