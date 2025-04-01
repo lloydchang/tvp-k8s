@@ -70,10 +70,10 @@ done
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"
     # Add -s to show print outputs which can help with debugging
-    python -m pytest tests/ $VERBOSE $COVERAGE -s
+    python -m pytest tests/ "$VERBOSE" "$COVERAGE" -s
 else
     echo -e "${YELLOW}Running specific test: $SPECIFIC_TEST${NC}"
-    python -m pytest $SPECIFIC_TEST $VERBOSE $COVERAGE -s
+    python -m pytest "$SPECIFIC_TEST" "$VERBOSE" "$COVERAGE" -s
 fi
 
 # Check the test result
