@@ -299,7 +299,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [6. API Structure Diagram](#6-api-structure-diagram)
 - [7. Health Check Sequence](#7-health-check-sequence)
 - [8. Kubernetes Proxy Sequence](#8-kubernetes-proxy-sequence)
-- [9. Argo CD Proxy Flow](#9-argo-cd-proxy-flow)
+- [9. Argo CD Proxy Sequence](#9-argo-cd-proxy-sequence)
 - [10. Application Deployment Workflow](#10-application-deployment-workflow)
 - [11. Test Coverage Structure](#11-test-coverage-structure)
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
@@ -657,7 +657,7 @@ sequenceDiagram
 
 With Kubernetes access solved, we complete our core capabilities by providing similar abstraction for GitOps workflows through the Argo CD proxy.
 
-## 9. Argo CD Proxy Flow
+## 9. Argo CD Proxy Sequence
 
 Similarly critical is our Argo CD integration, which extends the platform's reach to GitOps deployment workflows. The proxy flow shown here creates a seamless experience for developers while maintaining security boundaries:
 
