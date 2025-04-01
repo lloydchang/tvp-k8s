@@ -278,7 +278,7 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 - [5. API Structure Diagram](#5-api-structure-diagram)
 - [6. Health Check Sequence](#6-health-check-sequence)
 - [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
-- [8. Argo CD Authentication Sequence](#8-argo-cd-authentication-sequence)
+- [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
 - [9. Application Deployment Workflow](#9-application-deployment-workflow)
 
 ## 1. TVP GitOps Architecture
@@ -559,7 +559,7 @@ sequenceDiagram
 
 ```
 
-## 8. Argo CD Authentication Sequence
+## 8. Argo CD Proxy Sequence
 
 ```mermaid
 sequenceDiagram
