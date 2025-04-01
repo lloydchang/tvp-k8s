@@ -649,11 +649,11 @@ sequenceDiagram
 
 **Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
 
-In addition to Kubernetes access, our platform provides secure authentication to Argo CD.
+In addition to Kubernetes access, our platform provides secure authentication via Argo CD proxy.
 
 ## 9. Argo CD Proxy Flow
 
-Similar to the Kubernetes proxy, the Argo CD authentication flow enables secure interaction with Argo CD through our platform. The sequence diagram below shows the authentication process:
+Similar to the Kubernetes proxy, the Argo CD proxy flow enables secure interaction with Argo CD through our platform. The sequence diagram below shows the proxy process:
 
 ```mermaid
 sequenceDiagram

@@ -64,7 +64,7 @@ section_intros = [
     
     "The Kubernetes Proxy allows application developers to interact with the Kubernetes API through our platform. This sequence diagram shows how requests are securely proxied, abstracting away complexity:",
     
-    "Similar to the Kubernetes proxy, the Argo CD authentication flow enables secure interaction with Argo CD through our platform. The sequence diagram below shows the authentication process:",
+    "Similar to the Kubernetes proxy, the Argo CD proxy flow enables secure interaction with Argo CD through our platform. The sequence diagram below shows the proxy process:",
     
     "All these components and workflows come together in the application deployment process. This state diagram shows the complete lifecycle of an application deployment through our platform:",
     
@@ -87,7 +87,7 @@ section_transitions = [
     
     "Beyond health checks, our platform also provides secure access to underlying infrastructure through the Kubernetes proxy.",
     
-    "In addition to Kubernetes access, our platform provides secure authentication to Argo CD.",
+    "In addition to Kubernetes access, our platform provides secure authentication via Argo CD proxy.",
     
     "The authentication and proxy capabilities come together to support the full application deployment workflow.",
     
