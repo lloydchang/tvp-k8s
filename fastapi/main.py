@@ -17,7 +17,7 @@ import httpx
 
 # Import our modules
 from kubernetes_api import router as kubernetes_router
-from argocd_api import router as argocd_router, get_argocd_token
+from argo_cd_api import router as argocd_router, get_argocd_token
 from tvp import router as tvp_router, start_reconciliation_thread
 from config import get_settings, get_kubernetes_client
 
