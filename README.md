@@ -1,3 +1,8 @@
+![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
+Picture is from https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/
+
+---
+
 # Thinnest Viable Platform (TVP)
 
 # Backstory:
