@@ -11,6 +11,7 @@ flowchart TD
     TS --> Git[Git Repository]
     R --> Git
     R --> KA
+    TVP -->|Auth token| KA[Kubernetes API Server]
     KP -->|Auth token| KA[Kubernetes API Server]
     AP -->|Auth token| AA[Argo CD API]
     subgraph "Kubernetes Cluster"
