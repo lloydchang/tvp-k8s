@@ -16,7 +16,12 @@ flowchart TD
     TS --> Git[Git Repository]
     R --> Git
     R --> KA
-    
+
+    subgraph "Kubernetes Cluster"
+        KubernetesAPI[Kubernetes API Server]
+        ArgoCD[Argo CD]
+    end
+
     KA --> Kubernetes[(Kubernetes Microservices)]
     AA --> ArgoCD[(Argo CD Service)]
     
