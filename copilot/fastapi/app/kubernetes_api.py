@@ -104,8 +104,13 @@ async def kubernetes_proxy(path: str, request: Request):
                 url=target_url,
                 headers=headers,
                 content=body,
-                follow_redirects=True
-            )
+response = await client.request(
+    method=request.method,
+    url=target_url,
+    headers=headers,
+    content=body,
+    follow_redirects=True,
+)
             
             # Return the raw response
             return response.json()
