@@ -12,7 +12,15 @@ echo -e "${YELLOW}Setting up test environment...${NC}"
 cd "$(dirname "$0")"
 
 # Make sure we're using the correct Python path
-export PYTHONPATH=$(cd .. && pwd):$(pwd)
+# Update to include the app directory explicitly in addition to parent and current dir
+export PYTHONPATH=$(cd .. && pwd):$(pwd):$(pwd)/app
+
+# Debug: Show Python path
+echo -e "${YELLOW}PYTHONPATH: $PYTHONPATH${NC}"
+
+# Debug: Show directory structure
+echo -e "${YELLOW}Directory structure:${NC}"
+find . -type f -name "*.py" | grep -v "__pycache__" | sort | head -n 20
 
 # Check for virtual environment and activate if present
 if [ -d "../venv" ]; then
@@ -28,6 +36,12 @@ python -m pip uninstall -y pytest pytest-asyncio pytest-cov
 
 # Install specific compatible versions
 python -m pip install pytest==7.3.1 pytest-asyncio==0.21.1 pytest-cov==4.1.0 httpx pyyaml kubernetes fastapi uvicorn -q
+
+# Debug: Print the file content of conftest.py to understand the import issue
+if [ -f "tests/conftest.py" ]; then
+    echo -e "${YELLOW}Content of tests/conftest.py:${NC}"
+    cat tests/conftest.py | head -n 20
+fi
 
 # Parse command line arguments
 COVERAGE=""
@@ -54,10 +68,11 @@ done
 # Run the tests
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"
-    python -m pytest tests/ $VERBOSE $COVERAGE
+    # Add -s to show print outputs which can help with debugging
+    python -m pytest tests/ $VERBOSE $COVERAGE -s
 else
     echo -e "${YELLOW}Running specific test: $SPECIFIC_TEST${NC}"
-    python -m pytest $SPECIFIC_TEST $VERBOSE $COVERAGE
+    python -m pytest $SPECIFIC_TEST $VERBOSE $COVERAGE -s
 fi
 
 # Check the test result
@@ -65,5 +80,6 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ All tests passed!${NC}"
 else
     echo -e "${RED}✗ Some tests failed.${NC}"
+    echo -e "${YELLOW}Check the import path in tests/conftest.py. The patch call should use 'app.config.get_settings' or similar, not 'fastapi.config.get_settings'${NC}"
     exit 1
 fi
