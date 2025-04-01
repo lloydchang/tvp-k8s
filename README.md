@@ -282,7 +282,7 @@ This section provides a comprehensive overview of the TVP architecture through a
 - [5. API Structure Diagram](#5-api-structure-diagram)
 - [6. Health Check Sequence](#6-health-check-sequence)
 - [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
-- [8. Argo CD Authentication Sequence](#8-argo-cd-authentication-sequence)
+- [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
 - [9. Application Deployment Workflow](#9-application-deployment-workflow)
 
 ## 1. TVP GitOps Architecture
@@ -591,12 +591,32 @@ sequenceDiagram
 
 Similarly, our platform facilitates interaction with Argo CD for GitOps operations.
 
-## 8. Argo CD Authentication Sequence
+## 8. Argo CD Proxy Sequence
 
 Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform. The sequence diagram below shows the authentication flow:
 
 ```mermaid
-# File mermaid/argo-cd-authentication-sequence.mermaid not found
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Argo CD Proxy
+    participant Config
+    participant Argo CD
+    
+    Client->>FastAPI: Request to /argo/cd/...
+    FastAPI->>Argo CD Proxy: Forward request
+    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Argo CD Proxy->>Config: get_settings()
+    Config-->>Argo CD Proxy: Returns settings
+    
+    Argo CD Proxy->>Argo CD: POST /api/v1/session
+    Note over Argo CD Proxy,Argo CD: {username, password}
+    Argo CD-->>Argo CD Proxy: Authentication token
+    
+    Argo CD Proxy->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Proxy: Response data
+    Argo CD Proxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
 
 ```
 
