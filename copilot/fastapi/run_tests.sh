@@ -9,12 +9,13 @@ NC='\033[0m' # No Color
 echo -e "${YELLOW}Setting up test environment...${NC}"
 
 # Set working directory to the script location
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Make sure we're using the correct Python path
 # Update to include the app directory explicitly in addition to parent and current dir
-export PYTHONPATH=$(cd .. && pwd):$(pwd):$(pwd)/app
-
+parent=$(cd .. && pwd)
+current=$(pwd)
+export PYTHONPATH="$parent:$current:$current/app"
 # Debug: Show Python path
 echo -e "${YELLOW}PYTHONPATH: $PYTHONPATH${NC}"
 
@@ -40,7 +41,7 @@ python -m pip install pytest==7.3.1 pytest-asyncio==0.21.1 pytest-cov==4.1.0 htt
 # Debug: Print the file content of conftest.py to understand the import issue
 if [ -f "tests/conftest.py" ]; then
     echo -e "${YELLOW}Content of tests/conftest.py:${NC}"
-    cat tests/conftest.py | head -n 20
+    head -n 20 tests/conftest.py
 fi
 
 # Parse command line arguments
@@ -69,10 +70,10 @@ done
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"
     # Add -s to show print outputs which can help with debugging
-    python -m pytest tests/ $VERBOSE $COVERAGE -s
+    python -m pytest tests/ "$VERBOSE" "$COVERAGE" -s
 else
     echo -e "${YELLOW}Running specific test: $SPECIFIC_TEST${NC}"
-    python -m pytest $SPECIFIC_TEST $VERBOSE $COVERAGE -s
+    python -m pytest "$SPECIFIC_TEST" "$VERBOSE" "$COVERAGE" -s
 fi
 
 # Check the test result

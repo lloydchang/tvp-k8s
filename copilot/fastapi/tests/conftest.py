@@ -1,4 +1,4 @@
-import os
+# The file is now empty as the unused import has been removed.
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
@@ -50,10 +50,9 @@ def mock_yaml_operations():
     with patch("yaml.safe_load") as mock_yaml_load:
         mock_yaml_load.return_value = {
             "image": "test-image",
-            "tag": "latest"
+            "tag": "latest",
         }
         yield mock_yaml_load
-
 @pytest.fixture
 def test_client(mock_settings, mock_kubernetes_client, mock_argo_cd_token):
     """Fixture to create a FastAPI TestClient"""

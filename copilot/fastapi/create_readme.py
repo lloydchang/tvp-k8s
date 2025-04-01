@@ -21,7 +21,7 @@ mermaid_files = [
     "mermaid/health-check-sequence.mermaid",
     "mermaid/tvp-architecture-diagram.mermaid",
     "mermaid/app-deployment-workflow.mermaid",
-    "mermaid/data-flow-diagram.mermaid"
+    "mermaid/data-flow-diagram.mermaid",
 ]
 
 titles = [
@@ -33,10 +33,10 @@ titles = [
     "Health Check Sequence",
     "TVP GitOps Architecture",
     "Application Deployment Workflow",
-    "Data Flow Diagram"
+    "Data Flow Diagram",
 ]
 
-def main():
+def main() -> None:
     """
     Main function that generates the README.md file.
     
@@ -49,7 +49,7 @@ def main():
     with open(readme_path, "w") as readme:
         # Read and write the TVP header from the separate file
         try:
-            with open("tvp_header.md", "r") as header_file:
+            with open("tvp_header.md") as header_file:
                 tvp_header = header_file.read()
                 readme.write(tvp_header + "\n\n")
         except FileNotFoundError:
@@ -62,7 +62,7 @@ def main():
             readme.write("```mermaid\n")
             
             try:
-                with open(filename, "r") as mermaid_file:
+                with open(filename) as mermaid_file:
                     mermaid_content = mermaid_file.read()
                     readme.write(mermaid_content)
             except FileNotFoundError:

@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch, MagicMock
-import httpx
 
 def test_get_argo_cd_token_success(test_client, mock_settings):
     """Test successful Argo CD token retrieval"""

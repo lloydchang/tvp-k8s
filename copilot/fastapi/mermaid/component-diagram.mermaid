@@ -1,10 +1,12 @@
 flowchart TB
+    title[Component Architecture Diagram]
+    style title fill:none,stroke:none,font-size:18px,font-weight:bold
     Client[Client Application] --> API[FastAPI Application]
     
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Proxy]
         API --> AR[Argo CD Proxy]
-        API --> TR[TVP]
+        API --> TR[TVP (Thinnest Viable Platform)]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
@@ -15,8 +17,8 @@ flowchart TB
     
     KC --> Kubernetes[(Kubernetes API)]
     AT --> ArgoCD[(Argo CD API)]
-    RT --> GitRepo
-    RT --> Kubernetes
+    RT <--> GitRepo
+    RT <--> Kubernetes
     
     classDef component fill:#f9f,stroke:#333,stroke-width:2px
     classDef api fill:#bbf,stroke:#33f,stroke-width:2px
