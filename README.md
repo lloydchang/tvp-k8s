@@ -1,6 +1,6 @@
 ---
 
-# Thinnest Viable Platform (TVP)
+# **_Thinnest_** Viable Platform (TVP)
 
 ---
 
@@ -35,7 +35,7 @@
 
 ## Platform:
 
-> We use [Evan Bottcher's definition from 2018](https://martinfowler.com/articles/talk-about-platforms.html), with a couple of terms updated. A platform is a foundation of self-service APIs, tools, services, knowledge, and support that are arranged as a compelling internal product. Autonomous application teams[1](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html#id316) can make use of the platform to deliver product features at a higher pace, with reduced coordination.
+> We use [Evan Bottcher's definition from 2018](https://martinfowler.com/articles/talk-about-platforms.html), with a couple of terms updated. A platform is a foundation of **_self-service APIs_**, tools, services, knowledge, and support that are arranged as a compelling internal product. Autonomous application teams[1](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html#id316) can make use of the platform to deliver product features at a higher pace, with reduced coordination.
 
 > A corollary here is to ask: **what, then, _isn't_ a platform?** Well, for the purposes of this book, a platform requires you to be doing platform engineering. So, a wiki page isn't a platform, because there's no engineering to be done. "The cloud" also is not a platform by itself; you can bring cloud products together to create an internal platform, but on its own the cloud is an overwhelming array of offerings that is too large to be seen as a coherent platform.
 
@@ -67,7 +67,7 @@
 
 ---
 
-## What is a Thinnest Viable Platform (TVP)?
+## What is a **_Thinnest_** Viable Platform (TVP)?
 
 A TVP is a careful balance between keeping the platform small and ensuring that the platform is helping to accelerate and simplify software delivery for teams building on the platform. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
@@ -91,7 +91,7 @@ As Matthew Skelton [explained](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A Thinnest Viable Platform is the smallest set of Application Programming Interfaces (APIs), documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A **_Thinnest_** Viable Platform is the **_smallest set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
 
 ### Examples of TVP:
 
@@ -102,7 +102,7 @@ A Thinnest Viable Platform is the smallest set of Application Programming Interf
 - Documentation and tools focused on reducing cognitive load for development teams
   - [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures](https://cnoe.io/)
-- **A set of _curated_ APIs with simplified access to infrastructure**
+- **A set of _curated _Application Programming Interfaces (APIs)_ with simplified access to infrastructure**
   - https://github.com/lloydchang/tvp
 
 ## System Architecture Documentation:
