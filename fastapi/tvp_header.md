@@ -231,7 +231,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 #### Model table:
 
-| <div style="width:120px">Aspect </div> |                                                                                            | Provisional            | Operational           | Scalable               | Optimizing                   |
+| <div style="width:120px">Aspect </div> | Question                                                                                   | Provisional            | Operational           | Scalable               | Optimizing                   |
 |:---------------------------------------|:-------------------------------------------------------------------------------------------|:-----------------------|:----------------------|:-----------------------|:-----------------------------|
 | [Investment](#Investment)     | _How are staff and funds allocated to platform capabilities?_                              | Voluntary or temporary | Dedicated team        | As product             | Enabled ecosystem            |
 | [Adoption](#Adoption)         | _Why and how do users discover and use internal platforms and platform capabilities?_      | Erratic                | Extrinsic push        | Intrinsic pull         | Participatory                |
