@@ -1,6 +1,6 @@
 # Thinnest Viable Platform (TVP)
 
-## Backstory:
+# Backstory:
 
 - [**Cloud Native Computing Foundation (CNCF) Platforms White Paper**](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
 
@@ -17,6 +17,32 @@
 ## What is a Platform?
 
 > A platform for cloud-native computing is an integrated collection of capabilities defined and presented according to the needs of the platform’s users. It is a cross-cutting layer that ensures a consistent experience for acquiring and integrating typical capabilities and services for a broad set of applications and use cases. A good platform provides consistent user experiences for using and managing its capabilities and services, such as Web portals, project templates, and self-service APIs.
+
+---
+
+# Defining “Platform” and Other Important Terms:
+
+- [**O'Reilly: Platform Engineering: A Guide for Technical, Product, and People Leaders**](https://www.oreilly.com/library/view/platform-engineering/9781098153632/ch01.html)
+
+## Platform
+
+> We use Evan Bottcher’s definition from 2018, with a couple of terms updated. A platform is a foundation of self-service APIs, tools, services, knowledge, and support that are arranged as a compelling internal product. Autonomous application teams1 can make use of the platform to deliver product features at a higher pace, with reduced coordination.
+
+> A corollary here is to ask: what, then, isn’t a platform? Well, for the purposes of this book, a platform requires you to be doing platform engineering. So, a wiki page isn’t a platform, because there’s no engineering to be done. “The cloud” also is not a platform by itself; you can bring cloud products together to create an internal platform, but on its own the cloud is an overwhelming array of offerings that is too large to be seen as a coherent platform.
+
+## Platform engineering
+
+> Platform engineering is the discipline of developing and operating platforms. The goal of this discipline is to manage overall system complexity in order to deliver leverage to the business. It does this by taking a curated product approach to developing platforms as software-based abstractions that serve a broad base of application developers, operating them as foundations of the business. We will elaborate on this in Chapter 2.
+
+## Leverage
+
+> Core to the value of platform engineering is the concept of leverage—meaning, the work of a few engineers on a platform team reduces the work of the greater organization. Platforms achieve leverage in two ways: making applications engineers more productive as they go about their jobs creating business value, and making the engineering organization more efficient by eliminating duplicate work across application engineering teams.
+
+## Product
+
+> We believe that it is essential to view a platform as a product. Developing platforms as compelling products means that we take a customer-centric approach when deciding on the features of a platform. This implies a core focus on the users, but it requires more than just performatively hiring product managers and calling it a day. With the word “product” we strive to achieve for platforms what Steve Jobs created with Apple products: against a broad range of demand for features the product is deliberately and tastefully curated, both through what it does and, more importantly, through what it leaves out.
+
+---
 
 ## What is a Thinnest Viable Platform (TVP)?
 
