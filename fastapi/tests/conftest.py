@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def mock_settings():
     """Fixture to mock application settings"""
-    with patch("fastapi.config.get_settings") as mock_get_settings:
+    with patch("app.config.get_settings") as mock_get_settings:
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
         settings.kubernetes_token_path = "/tmp/test-k8s-token"
@@ -24,7 +24,7 @@ def mock_settings():
 @pytest.fixture
 def mock_kubernetes_client():
     """Fixture to mock Kubernetes client"""
-    with patch("fastapi.config.get_kubernetes_client") as mock_client:
+    with patch("app.config.get_kubernetes_client") as mock_client:
         k8s_client = MagicMock()
         k8s_client.list_namespace.return_value = MagicMock()
         mock_client.return_value = k8s_client
@@ -33,7 +33,7 @@ def mock_kubernetes_client():
 @pytest.fixture
 def mock_argocd_token():
     """Fixture to mock ArgoCD authentication token"""
-    with patch("fastapi.argocd_api.get_argocd_token") as mock_token:
+    with patch("app.argocd_api.get_argocd_token") as mock_token:
         mock_token.return_value = "test-argocd-token"
         yield mock_token
 
