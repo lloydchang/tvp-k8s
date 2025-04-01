@@ -72,12 +72,12 @@ def test_trigger_reconciliation(test_client):
         # Test that background task was added (can't directly verify)
         # but we can check that reconcile_from_git was imported
 
-def test_trigger_reconciliation_already_running(test_client):
+def test_trigger_reconciliation_already_running(test_client) -> None:
     """Test the reconciliation trigger when already in progress"""
     # Set global flag to simulate already reconciling
     import app.tvp as tvp
     tvp.is_reconciling = True
-    
+
     # Test the reconciliation endpoint
     response = test_client.post("/tvp/reconcile")
     
@@ -86,7 +86,6 @@ def test_trigger_reconciliation_already_running(test_client):
     
     # Reset the flag for other tests
     tvp.is_reconciling = False
-
 def test_trigger_reconciliation_background_task(test_client):
     """Test that the reconciliation task is properly added to background tasks"""
     import app.tvp as tvp
