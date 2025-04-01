@@ -110,4 +110,5 @@ async def kubernetes_proxy(path: str, request: Request):
             # Return the raw response
             return response.json()
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}")
+-            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}")
++            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}") from e
