@@ -86,7 +86,7 @@ def test_trigger_reconciliation_already_running(test_client) -> None:
     
     # Reset the flag for other tests
     tvp.is_reconciling = False
-def test_trigger_reconciliation_background_task(test_client):
+def test_trigger_reconciliation_background_task(test_client) -> None:
     """Test that the reconciliation task is properly added to background tasks"""
     import app.tvp as tvp
     tvp.is_reconciling = False
@@ -104,7 +104,6 @@ def test_trigger_reconciliation_background_task(test_client):
         # Check the response
         assert response.status_code == 200
         assert response.json()["status"] == "started"
-
 def test_get_deployment_status(test_client, mock_settings):
     """Test getting deployment status for a specific app"""
     # Mock Path operations
