@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant TVP
+    participant ReconcileThread
+    participant GitRepo
+    participant KubernetesCluster
+    
+    Client->>FastAPI: POST /tvp/reconcile
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
+    FastAPI-->>Client: Response
+    
+    ReconcileThread->>ReconcileThread: is_reconciling = true
+    
+    alt Repository doesn't exist
+        ReconcileThread->>GitRepo: git clone
+    else Repository exists
+        ReconcileThread->>GitRepo: git fetch
+        ReconcileThread->>GitRepo: git checkout branch
+        ReconcileThread->>GitRepo: git pull
+    end
+    
+    loop For each namespace/app
+        ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>KubernetesCluster: Apply configuration
+    end
+    
+    ReconcileThread->>ReconcileThread: Update last_reconciliation
+    ReconcileThread->>ReconcileThread: is_reconciling = false
