@@ -6,7 +6,7 @@ flowchart TB
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Proxy]
         API --> AR[Argo CD Proxy]
-        API --> TR[TVP (Thinnest Viable Platform)]
+        API --> TR["TVP (Thinnest Viable Platform)"]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
