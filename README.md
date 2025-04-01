@@ -92,17 +92,16 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
 ### Examples of TVP:
 
 - A wiki page defining which cloud services to use and how to use them
-  - https://github.com/TeamTopologies/Thin-Platform-template
-  - https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples
-  - https://github.com/sbalnojan/TVP-example
+  - [A simple template for a wiki page for a TVP (thinnest viable platform) - as explained in the Team Topologies book](https://github.com/TeamTopologies/Thin-Platform-template)
+  - [Examples of a Thinnest Viable Platform (TVP) as defined in the book Team Topologies](https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples)
+  - [A Thinnest Viable Platform (TVP) as described in Team Topologies, using just a Wiki page for a data platform](https://github.com/sbalnojan/TVP-example)
 - Documentation and tools focused on reducing cognitive load for development teams
-  - https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform
+  - [Trade Me’s Journey Towards a Thinnest Viable Platform (TVP)](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
-    - https://github.com/cnoe-io/idpbuilder
-  - https://github.com/backstage/backstage
-    - https://github.com/backstage
-  - https://roadie.io/
-  - https://www.atlassian.com/software/compass
+    - [Spin up a complete internal developer platform with only Docker required as a dependency](https://github.com/cnoe-io/idpbuilder)
+  - [Backstage is an open framework for building developer portals](https://github.com/backstage/backstage)
+    - [Commercial Product: Roadie: Taken the open-source version of Backstage and used it to build a comprehensive and maintenance-free IDP](https://roadie.io/)
+  - [Commercial Product: Compass: Catalog everything your developers need to stay in the flow and improve software health with Atlassian’s out-of-the-box internal developer platform](https://www.atlassian.com/software/compass)
 - **A set of _curated_ APIs with simplified access to infrastructure**
   - https://github.com/lloydchang/tvp
 
