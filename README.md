@@ -782,7 +782,7 @@ flowchart TD
 
 ## 12. Measuring Platform Leverage
 
-**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are the concrete outcomes our TVP approach delivers:
+**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:
 
 1. **Developer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.
 
