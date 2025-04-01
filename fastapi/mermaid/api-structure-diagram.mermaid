@@ -19,7 +19,7 @@ classDiagram
         +get_arg_ocd_token()
     }
     
-    class TVPProxy {
+    class TVP {
         +get_tvp_status()
         +trigger_reconciliation()
         +get_deployment_status()
@@ -59,11 +59,11 @@ classDiagram
     
     FastAPI --> KubernetesProxy : includes
     FastAPI --> ArgoCDProxy : includes
-    FastAPI --> TVPProxy : includes
+    FastAPI --> TVP : includes
     KubernetesProxy --> Config : depends on
     ArgoCDProxy --> Config : depends on
-    TVPProxy --> Config : depends on
+    TVP --> Config : depends on
     FastAPI --> Config : depends on
-    TVPProxy --> TVPStatus : returns
+    TVP --> TVPStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts

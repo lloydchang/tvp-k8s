@@ -1,15 +1,15 @@
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant TVPProxy
+    participant TVP
     participant ReconcileThread
     participant GitRepo
     participant KubernetesCluster
     
     Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVPProxy: trigger_reconciliation()
-    TVPProxy->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVPProxy-->>FastAPI: {"status": "started"}
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
     FastAPI-->>Client: Response
     
     ReconcileThread->>ReconcileThread: is_reconciling = true

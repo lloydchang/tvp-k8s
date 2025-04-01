@@ -167,7 +167,7 @@ classDiagram
         +get_arg_ocd_token()
     }
     
-    class TVPProxy {
+    class TVP {
         +get_tvp_status()
         +trigger_reconciliation()
         +get_deployment_status()
@@ -207,12 +207,12 @@ classDiagram
     
     FastAPI --> KubernetesProxy : includes
     FastAPI --> ArgoCDProxy : includes
-    FastAPI --> TVPProxy : includes
+    FastAPI --> TVP : includes
     KubernetesProxy --> Config : depends on
     ArgoCDProxy --> Config : depends on
-    TVPProxy --> Config : depends on
+    TVP --> Config : depends on
     FastAPI --> Config : depends on
-    TVPProxy --> TVPStatus : returns
+    TVP --> TVPStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
@@ -274,15 +274,15 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant TVPProxy
+    participant TVP
     participant ReconcileThread
     participant GitRepo
     participant KubernetesCluster
     
     Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVPProxy: trigger_reconciliation()
-    TVPProxy->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVPProxy-->>FastAPI: {"status": "started"}
+    FastAPI->>TVP: trigger_reconciliation()
+    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVP-->>FastAPI: {"status": "started"}
     FastAPI-->>Client: Response
     
     ReconcileThread->>ReconcileThread: is_reconciling = true
