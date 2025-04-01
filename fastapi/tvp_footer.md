@@ -16,4 +16,4 @@
 
 ![ThirdClass](https://github.com/user-attachments/assets/6b6e2ed2-ccc1-41f5-ba30-dde585bf7160)
 
-Images: [R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)
+Lever Images: [R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)

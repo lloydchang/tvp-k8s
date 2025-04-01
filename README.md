@@ -6,7 +6,7 @@
 
 ![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
 > - **To stabilize this roof, would you remove one block or add several blocks?**
->   - Image: [University of Virginia](https://www.nature.com/articles/s41586-021-03380-y#Fig5)
+>   - Roof Image: [University of Virginia](https://www.nature.com/articles/s41586-021-03380-y#Fig5)
 >   - [This Lego experiment shows our brains prefer adding. Here's why it matters](https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/)
 
 # Backstory:
@@ -631,4 +631,4 @@ flowchart TD
 
 ![ThirdClass](https://github.com/user-attachments/assets/6b6e2ed2-ccc1-41f5-ba30-dde585bf7160)
 
-Images: [R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)
+Lever Images: [R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)
