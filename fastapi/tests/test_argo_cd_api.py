@@ -16,7 +16,7 @@ def test_get_argo_cd_token_success(test_client, mock_settings):
         mock_client.return_value = mock_client_instance
         
         # Import here to use the patched client
-        from argo_cd_api import get_argo_cd_token
+        from app.argo_cd_api import get_argo_cd_token
         import asyncio
         
         # Execute the function and verify the token
@@ -44,7 +44,7 @@ def test_get_argo_cd_token_failure(test_client, mock_settings):
         mock_client.return_value = mock_client_instance
         
         # Import here to use the patched client
-        from argo_cd_api import get_argo_cd_token
+        from app.argo_cd_api import get_argo_cd_token
         from fastapi import HTTPException
         import asyncio
         

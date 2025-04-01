@@ -64,9 +64,9 @@ def test_tvp_status_endpoint(test_client, mock_settings):
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
-    with patch("fastapi.tvp.reconcile_from_git") as mock_reconcile:
+    with patch("app.tvp.reconcile_from_git") as mock_reconcile:
         # Set global flag to simulate not already reconciling
-        import fastapi.tvp as tvp
+        import app.tvp as tvp
         tvp.is_reconciling = False
         
         # Test the reconciliation endpoint
@@ -81,7 +81,7 @@ def test_trigger_reconciliation(test_client):
 def test_trigger_reconciliation_already_running(test_client):
     """Test the reconciliation trigger when already in progress"""
     # Set global flag to simulate already reconciling
-    import fastapi.tvp as tvp
+    import app.tvp as tvp
     tvp.is_reconciling = True
     
     # Test the reconciliation endpoint
@@ -95,7 +95,7 @@ def test_trigger_reconciliation_already_running(test_client):
 
 def test_trigger_reconciliation_background_task(test_client):
     """Test that the reconciliation task is properly added to background tasks"""
-    import fastapi.tvp as tvp
+    import app.tvp as tvp
     tvp.is_reconciling = False
     
     # Create a mock for background_tasks
@@ -118,7 +118,7 @@ def test_get_deployment_status(test_client, mock_settings):
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("builtins.open", MagicMock()), \
          patch("yaml.safe_load") as mock_yaml_load, \
-         patch("fastapi.tvp.get_last_reconciliation_time") as mock_get_time:
+         patch("app.tvp.get_last_reconciliation_time") as mock_get_time:
         
         # Setup mocks
         mock_exists.return_value = True

@@ -57,6 +57,6 @@ def mock_yaml_operations():
 @pytest.fixture
 def test_client(mock_settings, mock_kubernetes_client, mock_argo_cd_token):
     """Fixture to create a FastAPI TestClient"""
-    from fastapi.main import app
+    from app.main import app
     with TestClient(app) as client:
         yield client
