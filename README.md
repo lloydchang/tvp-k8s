@@ -688,7 +688,7 @@ stateDiagram-v2
 
 **Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
-## 10. Measuring Platform Leverage
+## 10. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
 
 Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:
 
@@ -711,9 +711,6 @@ These metrics demonstrate the true leverage that comes from building a carefully
 The diagrams and metrics presented above provide a comprehensive view of our Thinnest Viable Platform architecture and the leverage it creates throughout the organization. By implementing a GitOps approach with careful attention to component interaction and data flow, we've created a platform that provides significant leverage through self-service APIs while maintaining simplicity and ease of use. 
 
 This platform embodies the TVP concept by offering just enough functionality to accelerate application teams without the burden of unnecessary complexity. Just as a physical lever amplifies force, our TVP amplifies the capabilities of both the platform team and development teams, allowing the organization to achieve sublinear scaling while delivering more value to customers.
-
----
-*This documentation was automatically generated on 2025-04-01 using the TVP architecture documentation generator.*
 
 ---
 
