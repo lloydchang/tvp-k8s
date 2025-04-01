@@ -382,7 +382,7 @@ sequenceDiagram
     TVP-->>Dev: Application status information
 ```
 
-**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
+**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
 
 While this workflow appears simple from the developer's perspective, there's sophisticated automation working behind the scenes. Let's examine the reconciliation process that makes this seamless experience possible.
 
@@ -729,56 +729,6 @@ stateDiagram-v2
 **Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
 
 Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.
-
-## 11. Test Coverage Structure
-
-To ensure this system remains stable and can evolve over time, comprehensive testing underpins everything. This final diagram shows how test coverage validates each component, creating confidence that the platform will continue to deliver leverage:
-
-```mermaid
-flowchart TD
-    subgraph Tests
-        conftest[conftest.py]
-        test_main[test_main.py]
-        test_tvp[test_tvp.py]
-        test_kubernetes[test_kubernetes_api.py]
-        test_argo[test_argo_cd_api.py]
-    end
-
-    subgraph "Application Code"
-        main[main.py]
-        tvp[tvp.py]
-        kubernetes[kubernetes_api.py]
-        argo[argo_cd_api.py]
-        config[config.py]
-    end
-
-    conftest --> |fixtures| test_main
-    conftest --> |fixtures| test_tvp
-    conftest --> |fixtures| test_kubernetes
-    conftest --> |fixtures| test_argo
-
-    test_main --> |tests| main
-    test_tvp --> |tests| tvp
-    test_kubernetes --> |tests| kubernetes
-    test_argo --> |tests| argo
-
-    main --> |imports| tvp
-    main --> |imports| kubernetes
-    main --> |imports| argo
-    main --> |imports| config
-
-    tvp --> |imports| config
-    kubernetes --> |imports| config
-    argo --> |imports| config
-
-    classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
-    classDef appFile fill:#bef,stroke:#333,stroke-width:1px
-    
-    class conftest,test_main,test_tvp,test_kubernetes,test_argo testFile
-    class main,tvp,kubernetes,argo,config appFile
-```
-
-**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
 
 ## 12. Measuring Platform Leverage
 
