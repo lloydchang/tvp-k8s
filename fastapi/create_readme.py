@@ -23,11 +23,11 @@ mermaid_files = [
     "mermaid/api-structure-diagram.mermaid",
     "mermaid/health-check-sequence.mermaid",
     "mermaid/kubernetes-proxy-sequence.mermaid",
-    "mermaid/argo-cd-proxy-sequence.mermaid",
+    "mermaid/argo-cd-authentication-sequence.mermaid",
     "mermaid/app-deployment-workflow.mermaid"
 ]
 
-# I've reordered the titles to create a more logical flow for the narrative
+# Titles organized in a logical flow for the narrative
 titles = [
     "TVP GitOps Architecture",
     "TVP GitOps Reconciliation Sequence",
@@ -97,6 +97,18 @@ def create_toc_link(title, index):
     anchor = f"{index+1}-{re.sub(r'[^\w\s-]', '', title).lower().replace(' ', '-')}"
     return f"- [{index+1}. {title}](#{anchor})"
 
+def contains_architecture_section(content):
+    """
+    Check if content already contains a system architecture section heading.
+    
+    Args:
+        content: The content to check
+        
+    Returns:
+        True if it contains architecture heading, False otherwise
+    """
+    return re.search(r'#+ +System +Architecture', content, re.IGNORECASE) is not None
+
 def main():
     """
     Main function that generates the README.md file.
@@ -108,19 +120,36 @@ def main():
     If a file is missing, it will include a placeholder message.
     """
     readme_path = os.path.join(os.path.dirname(__file__), "../README.md")
+    header_content = ""
+    
+    # Read the TVP header content
+    try:
+        with open("tvp_header.md", "r") as header_file:
+            header_content = header_file.read()
+    except FileNotFoundError:
+        header_content = "# Thinnest Viable Platform (TVP) about Leverage\n\n"
+        header_content += "This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n"
+    
     with open(readme_path, "w") as readme:
-        # Read and write the TVP header from the separate file
-        try:
-            with open("tvp_header.md", "r") as header_file:
-                tvp_header = header_file.read()
-                readme.write(tvp_header + "\n\n")
-        except FileNotFoundError:
-            readme.write("# System Architecture Documentation:\n\n")
-            readme.write("This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n")
-
-        # Add a narrative introduction to the diagrams section
-        readme.write("## System Architecture Documentation:\n\n")
-        readme.write("This section provides a comprehensive overview of the TVP architecture through a series of diagrams and explanations. Each diagram highlights a different aspect of the system, from high-level architecture to specific interaction sequences.\n\n")
+        # Write the header content
+        readme.write(header_content + "\n")
+        
+        # Add a smooth transition from conceptual content to technical diagrams
+        if not contains_architecture_section(header_content):
+            readme.write("## System Architecture Documentation\n\n")
+        else:
+            # Add a bridging paragraph if architecture section already exists
+            readme.write("\n# Implementation of TVP Principles\n\n")
+            readme.write("Now that we've explored the conceptual foundations of Thinnest Viable Platform, ")
+            readme.write("let's examine how these principles are implemented in our architecture. ")
+            readme.write("The following sections illustrate the practical application of TVP concepts ")
+            readme.write("through various architectural and interaction diagrams.\n\n")
+        
+        # Add the general introduction about the diagrams
+        readme.write("The following diagrams provide a comprehensive overview of the TVP architecture. ")
+        readme.write("Each diagram highlights a different aspect of the system, from high-level architecture ")
+        readme.write("to specific interaction sequences, demonstrating how our implementation delivers ")
+        readme.write("leverage through self-service APIs.\n\n")
         
         # Create and write the table of contents
         readme.write("## Table of Contents\n\n")

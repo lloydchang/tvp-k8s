@@ -269,9 +269,11 @@ A **_Thinnest Viable_** Platform is the **_smallest set of APIs_**, documentatio
 This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.
 
 
-## System Architecture Documentation:
+# Implementation of TVP Principles
 
-This section provides a comprehensive overview of the TVP architecture through a series of diagrams and explanations. Each diagram highlights a different aspect of the system, from high-level architecture to specific interaction sequences.
+Now that we've explored the conceptual foundations of Thinnest Viable Platform, let's examine how these principles are implemented in our architecture. The following sections illustrate the practical application of TVP concepts through various architectural and interaction diagrams.
+
+The following diagrams provide a comprehensive overview of the TVP architecture. Each diagram highlights a different aspect of the system, from high-level architecture to specific interaction sequences, demonstrating how our implementation delivers leverage through self-service APIs.
 
 ## Table of Contents
 
@@ -596,27 +598,7 @@ Similarly, our platform facilitates interaction with Argo CD for GitOps operatio
 Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform. The sequence diagram below shows the authentication flow:
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant Argo CD Proxy
-    participant Config
-    participant Argo CD
-    
-    Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Proxy: Forward request
-    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
-    Argo CD Proxy->>Config: get_settings()
-    Config-->>Argo CD Proxy: Returns settings
-    
-    Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {username, password}
-    Argo CD-->>Argo CD Proxy: Authentication token
-    
-    Argo CD Proxy->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Proxy: Response data
-    Argo CD Proxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
+# File mermaid/argo-cd-authentication-sequence.mermaid not found
 
 ```
 
