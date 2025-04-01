@@ -110,7 +110,7 @@ computing:
   <tr>
     <td>Application observability</td>
     <td>Instrument applications, gather and analyze telemetry and publish info to stakeholders.</td>
-    <td>OpenTelemetry, Jaeger, Prometheus, Thanos, Fluentd, Grafana, OpenCost</td>
+    <td>OpenTelemetry, Jaeger, Prometheus, Thanos, Fluentd, Grafana, OpenCost, Pixie</td>
   </tr>
   <tr>
     <td>Infrastructure services</td>
