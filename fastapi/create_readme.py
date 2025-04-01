@@ -52,7 +52,7 @@ def main():
                 tvp_header = header_file.read()
                 readme.write(tvp_header + "\n\n")
         except FileNotFoundError:
-            readme.write("# System Architecture Documentation\n\n")
+            readme.write("# System Architecture Documentation:\n\n")
             readme.write("This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n")
         
         # Then write the diagrams
