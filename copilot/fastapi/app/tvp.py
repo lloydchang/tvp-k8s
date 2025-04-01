@@ -86,10 +86,10 @@ async def get_tvp_status() -> TVPStatus:
                             except yaml.YAMLError as yaml_err:
                                 # Log specific YAML parsing error
                                 logger.error(f"Error parsing YAML in {values_file}: {yaml_err}")
-        except OSError as e:
-            logger.error(f"Error reading applications directory: {e}")
-        except Exception as e:
-            logger.error(f"Error reading applications: {e}")
+        except OSError as err:
+            logger.exception("Error reading applications directory", exc_info=err)
+        except Exception as err:
+            logger.exception("Error reading applications", exc_info=err)
     
     with reconciliation_lock:
         status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
@@ -99,7 +99,6 @@ async def get_tvp_status() -> TVPStatus:
         last_reconciliation=get_last_reconciliation_time(),
         status=status,
     )
-
 @proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
