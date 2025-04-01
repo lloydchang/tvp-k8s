@@ -20,10 +20,9 @@ flowchart TD
     subgraph "Kubernetes Cluster"
         KubernetesAPI[Kubernetes API Server]
         ArgoCD[Argo CD]
+        KA --> Kubernetes[(Kubernetes Microservices)]
+        AA --> ArgoCD[(Argo CD Service)]
     end
-
-    KA --> Kubernetes[(Kubernetes Microservices)]
-    AA --> ArgoCD[(Argo CD Service)]
     
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     classDef app fill:#f9f,stroke:#333,stroke-width:2px
