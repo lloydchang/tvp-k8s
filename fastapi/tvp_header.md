@@ -6,7 +6,7 @@
 
 ![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
 > - **To stabilize this roof, would you remove one block or add several blocks?**
->   - Roof Image: [Nature: University of Virginia, Gabrielle Adams, Benjamin Converse, Andrew Hales and Leidy Klotz](https://www.nature.com/articles/s41586-021-03380-y#Fig5)
+>   - Roof Image: [**Nature: _People systematically overlook subtractive changes_** University of Virginia, Gabrielle Adams, Benjamin Converse, Andrew Hales and Leidy Klotz](https://www.nature.com/articles/s41586-021-03380-y#Fig5)
 >   - [This Lego experiment shows our brains prefer adding. Here's why it matters](https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/)
 
 # Backstory:
