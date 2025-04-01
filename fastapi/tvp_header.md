@@ -91,7 +91,7 @@ As Matthew Skelton [explained](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A Thinnest Viable Platform is the smallest set of Application Programming Interfaces (APIs), documentation, and tools needed to accelerate the teams developing modern software services and systems.
 
 ### Examples of TVP:
 
