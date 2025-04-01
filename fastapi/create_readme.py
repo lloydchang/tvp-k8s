@@ -6,7 +6,7 @@ This script generates the project README.md file by combining:
 2. System architecture diagrams rendered from Mermaid syntax files
 
 The script reads Mermaid diagram files from the mermaid/ directory
-and inserts them into the README with appropriate section headers.
+and inserts them into the README.md with appropriate section headers.
 """
 
 import os
