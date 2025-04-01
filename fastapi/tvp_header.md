@@ -44,6 +44,18 @@
 
 ---
 
+## Why Less Toil Is Better
+
+- [**O'Reilly: Site Reliability Engineering: How Google Runs Production Systems**](https://sre.google/sre-book/eliminating-toil/)
+
+> The work of reducing toil and scaling up services is the "Engineering" in Site Reliability Engineering. Engineering work is what enables the SRE organization to scale up **_sublinearly_** with service size and to manage services more efficiently than either a pure Dev team or a pure Ops team.
+
+- [**Sublinear Scaling in Practice: The 1k SRE Project**](https://www.usenix.org/conference/srecon19americas/presentation/rath)
+
+> At Google, one of the primary objectives of SRE teams is **_sublinear_** scaling: the size and number of SRE teams should grow more slowly than the number of supported services.
+
+---
+
 ## What is a Thinnest Viable Platform (TVP)?
 
 A TVP is a careful balance between keeping the platform small and ensuring that the platform is helping to accelerate and simplify software delivery for teams building on the platform. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
