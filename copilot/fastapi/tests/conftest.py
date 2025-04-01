@@ -1,4 +1,4 @@
-import os
+# The file is now empty as the unused import has been removed.
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
