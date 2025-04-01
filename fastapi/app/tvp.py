@@ -12,7 +12,7 @@ Following GitOps principles:
 4. Continuously Reconciled - TVP agent applies changes automatically
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIProxy, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any, Union, Tuple
 import os
@@ -28,7 +28,7 @@ from datetime import datetime
 
 from config import get_settings
 
-router = APIRouter()
+proxy = APIProxy()
 logger = logging.getLogger(__name__)
 
 # Global reconciliation flag and lock for thread safety
@@ -51,7 +51,7 @@ class TVPStatus(BaseModel):
     status: str
     applications: List[Dict[str, Any]] = []
 
-@router.get("/status", summary="Get TVP GitOps reconciliation status", response_model=TVPStatus)
+@proxy.get("/status", summary="Get TVP GitOps reconciliation status", response_model=TVPStatus)
 async def get_tvp_status() -> TVPStatus:
     """
     Gets the status of the TVP GitOps reconciliation.
@@ -100,7 +100,7 @@ async def get_tvp_status() -> TVPStatus:
         applications=applications
     )
 
-@router.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
+@proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
@@ -338,7 +338,7 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
                 except Exception as e:
                     logger.error(f"Failed to apply {namespace_dir.name}/{app_dir.name}: {str(e)}")
 
-@router.get("/status/{namespace}/{app_name}", summary="Get TVP deployment status")
+@proxy.get("/status/{namespace}/{app_name}", summary="Get TVP deployment status")
 async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]:
     """
     Gets the status of a TVP deployment.

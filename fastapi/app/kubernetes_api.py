@@ -11,7 +11,7 @@ Features:
 - Helper functions for accessing the Kubernetes API clients
 """
 
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIProxy, Request, Depends, HTTPException
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ import httpx
 
 from config import get_settings, get_kubernetes_client
 
-router = APIRouter()
+proxy = APIProxy()
 
 # Models
 class DeploymentRequest(BaseModel):
@@ -53,7 +53,7 @@ def get_apps_v1_client():
     return client.AppsV1Api()
 
 # Kubernetes True Pass-Through Proxy
-@router.api_route("/kubernetes/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+@proxy.api_route("/kubernetes/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def kubernetes_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Kubernetes API.

@@ -8,18 +8,18 @@ classDiagram
         +health_check()
     }
     
-    class KubernetesRouter {
+    class KubernetesProxy {
         +kubernetes_proxy()
         +get_kubernetes_client()
         +get_apps_v1_client()
     }
     
-    class ArgoCDRouter {
+    class ArgoCDProxy {
         +argo_cd_proxy()
         +get_arg_ocd_token()
     }
     
-    class TVPRouter {
+    class TVPProxy {
         +get_tvp_status()
         +trigger_reconciliation()
         +get_deployment_status()
@@ -57,13 +57,13 @@ classDiagram
         +sync_policy_self_heal: bool
     }
     
-    FastAPI --> KubernetesRouter : includes
-    FastAPI --> ArgoCDRouter : includes
-    FastAPI --> TVPRouter : includes
-    KubernetesRouter --> Config : depends on
-    ArgoCDRouter --> Config : depends on
-    TVPRouter --> Config : depends on
+    FastAPI --> KubernetesProxy : includes
+    FastAPI --> ArgoCDProxy : includes
+    FastAPI --> TVPProxy : includes
+    KubernetesProxy --> Config : depends on
+    ArgoCDProxy --> Config : depends on
+    TVPProxy --> Config : depends on
     FastAPI --> Config : depends on
-    TVPRouter --> TVPStatus : returns
-    KubernetesRouter --> DeploymentRequest : accepts
-    ArgoCDRouter --> ArgoCDApplicationRequest : accepts
+    TVPProxy --> TVPStatus : returns
+    KubernetesProxy --> DeploymentRequest : accepts
+    ArgoCDProxy --> ArgoCDApplicationRequest : accepts

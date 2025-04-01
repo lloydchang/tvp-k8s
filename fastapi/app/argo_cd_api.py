@@ -5,7 +5,7 @@ This module provides direct API operations and pass-through proxy functionality
 for Argo CD application management.
 """
 
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIProxy, Request, Depends, HTTPException
 from pydantic import BaseModel
 from kubernetes import client
 from typing import Optional, Dict, Any, List
@@ -13,7 +13,7 @@ import httpx
 
 from config import get_settings, get_kubernetes_client
 
-router = APIRouter()
+proxy = APIProxy()
 
 try:
     import yaml
@@ -55,7 +55,7 @@ async def get_argo_cd_auth_token():
             raise HTTPException(status_code=503, detail=f"Argo CD service unavailable: {str(e)}")
 
 # Argo CD True Pass-Through Proxy
-@router.api_route("/argo/cd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+@proxy.api_route("/argo/cd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def argo_cd_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Argo CD API.

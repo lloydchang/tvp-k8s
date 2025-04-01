@@ -117,9 +117,9 @@ flowchart TB
     Client[Client Application] --> API[FastAPI Application]
     
     subgraph "FastAPI Application"
-        API --> KR[Kubernetes Router]
-        API --> AR[Argo CD Router]
-        API --> TR[TVP Router]
+        API --> KR[Kubernetes Proxy]
+        API --> AR[Argo CD Proxy]
+        API --> TR[TVP Proxy]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
@@ -156,18 +156,18 @@ classDiagram
         +health_check()
     }
     
-    class KubernetesRouter {
+    class KubernetesProxy {
         +kubernetes_proxy()
         +get_kubernetes_client()
         +get_apps_v1_client()
     }
     
-    class ArgoCDRouter {
+    class ArgoCDProxy {
         +argo_cd_proxy()
         +get_arg_ocd_token()
     }
     
-    class TVPRouter {
+    class TVPProxy {
         +get_tvp_status()
         +trigger_reconciliation()
         +get_deployment_status()
@@ -205,16 +205,16 @@ classDiagram
         +sync_policy_self_heal: bool
     }
     
-    FastAPI --> KubernetesRouter : includes
-    FastAPI --> ArgoCDRouter : includes
-    FastAPI --> TVPRouter : includes
-    KubernetesRouter --> Config : depends on
-    ArgoCDRouter --> Config : depends on
-    TVPRouter --> Config : depends on
+    FastAPI --> KubernetesProxy : includes
+    FastAPI --> ArgoCDProxy : includes
+    FastAPI --> TVPProxy : includes
+    KubernetesProxy --> Config : depends on
+    ArgoCDProxy --> Config : depends on
+    TVPProxy --> Config : depends on
     FastAPI --> Config : depends on
-    TVPRouter --> TVPStatus : returns
-    KubernetesRouter --> DeploymentRequest : accepts
-    ArgoCDRouter --> ArgoCDApplicationRequest : accepts
+    TVPProxy --> TVPStatus : returns
+    KubernetesProxy --> DeploymentRequest : accepts
+    ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
 ```
 
@@ -224,23 +224,23 @@ classDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant Argo CD Router
+    participant Argo CD Proxy
     participant Config
     participant Argo CD
     
     Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Router: Forward request
-    Argo CD Router->>Argo CD Router: get_argo_cd_token()
-    Argo CD Router->>Config: get_settings()
-    Config-->>Argo CD Router: Returns settings
+    FastAPI->>Argo CD Proxy: Forward request
+    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Argo CD Proxy->>Config: get_settings()
+    Config-->>Argo CD Proxy: Returns settings
     
-    Argo CD Router->>Argo CD: POST /api/v1/session
-    Note over Argo CD Router,Argo CD: {username, password}
-    Argo CD-->>Argo CD Router: Authentication token
+    Argo CD Proxy->>Argo CD: POST /api/v1/session
+    Note over Argo CD Proxy,Argo CD: {username, password}
+    Argo CD-->>Argo CD Proxy: Authentication token
     
-    Argo CD Router->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Router: Response data
-    Argo CD Router-->>FastAPI: Formatted response
+    Argo CD Proxy->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Proxy: Response data
+    Argo CD Proxy-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
 
 ```
@@ -251,19 +251,19 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant KubernetesRouter
+    participant KubernetesProxy
     participant Config
     participant KubernetesAPI
     
     Client->>FastAPI: Request to /kubernetes/...
-    FastAPI->>KubernetesRouter: Forward to kubernetes_proxy()
-    KubernetesRouter->>Config: get_settings()
-    Config-->>KubernetesRouter: Returns settings
+    FastAPI->>KubernetesProxy: Forward to kubernetes_proxy()
+    KubernetesProxy->>Config: get_settings()
+    Config-->>KubernetesProxy: Returns settings
     
-    KubernetesRouter->>KubernetesRouter: Read Kubernetes token from file
-    KubernetesRouter->>KubernetesAPI: Proxied request with token
-    KubernetesAPI-->>KubernetesRouter: JSON response
-    KubernetesRouter-->>FastAPI: Formatted response
+    KubernetesProxy->>KubernetesProxy: Read Kubernetes token from file
+    KubernetesProxy->>KubernetesAPI: Proxied request with token
+    KubernetesAPI-->>KubernetesProxy: JSON response
+    KubernetesProxy-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
 
 ```
@@ -274,15 +274,15 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant TVPRouter
+    participant TVPProxy
     participant ReconcileThread
     participant GitRepo
     participant KubernetesCluster
     
     Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVPRouter: trigger_reconciliation()
-    TVPRouter->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVPRouter-->>FastAPI: {"status": "started"}
+    FastAPI->>TVPProxy: trigger_reconciliation()
+    TVPProxy->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+    TVPProxy-->>FastAPI: {"status": "started"}
     FastAPI-->>Client: Response
     
     ReconcileThread->>ReconcileThread: is_reconciling = true
@@ -311,17 +311,17 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant KubernetesClient
-    participant ArgoCD
+    participant Kubernetes as Kubernetes Cluster
+    participant ArgoCD as Argo CD
     
     Client->>FastAPI: GET /health
     
-    FastAPI->>KubernetesClient: list_namespace()
+    FastAPI->>Kubernetes: list_namespace()
     alt Kubernetes Healthy
-        KubernetesClient-->>FastAPI: Success response
+        Kubernetes-->>FastAPI: Success response
         FastAPI->>FastAPI: Kubernetes status = "healthy"
     else Kubernetes Unhealthy
-        KubernetesClient-->>FastAPI: Error
+        Kubernetes-->>FastAPI: Error
         FastAPI->>FastAPI: Kubernetes status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
@@ -329,10 +329,10 @@ sequenceDiagram
     FastAPI->>ArgoCD: get_argo_cd_token()
     alt ArgoCD Healthy
         ArgoCD-->>FastAPI: Valid token
-        FastAPI->>FastAPI: ArgoCD status = "healthy"
+        FastAPI->>FastAPI: Argo CD status = "healthy"
     else ArgoCD Unhealthy
         ArgoCD-->>FastAPI: Error
-        FastAPI->>FastAPI: ArgoCD status = "unhealthy"
+        FastAPI->>FastAPI: Argo  CD status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     
@@ -416,7 +416,7 @@ flowchart TD
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP Router]
+    API -->|/tvp/*| TVP[TVP Proxy]
     
     KP -->|Auth token| KA[Kubernetes API]
     AP -->|Login| Auth[Argo CD Auth]

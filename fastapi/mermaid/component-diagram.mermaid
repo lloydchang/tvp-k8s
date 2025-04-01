@@ -2,9 +2,9 @@ flowchart TB
     Client[Client Application] --> API[FastAPI Application]
     
     subgraph "FastAPI Application"
-        API --> KR[Kubernetes Router]
-        API --> AR[Argo CD Router]
-        API --> TR[TVP Router]
+        API --> KR[Kubernetes Proxy]
+        API --> AR[Argo CD Proxy]
+        API --> TR[TVP Proxy]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end

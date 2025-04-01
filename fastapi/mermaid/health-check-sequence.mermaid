@@ -1,17 +1,17 @@
 sequenceDiagram
     participant Client
     participant FastAPI
-    participant KubernetesClient
-    participant ArgoCD
+    participant Kubernetes as Kubernetes Cluster
+    participant ArgoCD as Argo CD
     
     Client->>FastAPI: GET /health
     
-    FastAPI->>KubernetesClient: list_namespace()
+    FastAPI->>Kubernetes: list_namespace()
     alt Kubernetes Healthy
-        KubernetesClient-->>FastAPI: Success response
+        Kubernetes-->>FastAPI: Success response
         FastAPI->>FastAPI: Kubernetes status = "healthy"
     else Kubernetes Unhealthy
-        KubernetesClient-->>FastAPI: Error
+        Kubernetes-->>FastAPI: Error
         FastAPI->>FastAPI: Kubernetes status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
@@ -19,10 +19,10 @@ sequenceDiagram
     FastAPI->>ArgoCD: get_argo_cd_token()
     alt ArgoCD Healthy
         ArgoCD-->>FastAPI: Valid token
-        FastAPI->>FastAPI: ArgoCD status = "healthy"
+        FastAPI->>FastAPI: Argo CD status = "healthy"
     else ArgoCD Unhealthy
         ArgoCD-->>FastAPI: Error
-        FastAPI->>FastAPI: ArgoCD status = "unhealthy"
+        FastAPI->>FastAPI: Argo  CD status = "unhealthy"
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     
