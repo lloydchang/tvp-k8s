@@ -1,0 +1,69 @@
+classDiagram
+    class FastAPI {
+        +title: str
+        +description: str
+        +version: str
+        +startup_event()
+        +root()
+        +health_check()
+    }
+    
+    class KubernetesProxy {
+        +kubernetes_proxy()
+        +get_kubernetes_client()
+        +get_apps_v1_client()
+    }
+    
+    class ArgoCDProxy {
+        +argo_cd_proxy()
+        +get_arg_ocd_token()
+    }
+    
+    class TVP {
+        +get_tvp_status()
+        +trigger_reconciliation()
+        +get_deployment_status()
+    }
+    
+    class Config {
+        +Settings
+        +get_settings()
+        +get_kubernetes_client()
+        +get_kubernetes_token()
+    }
+
+    class TVPStatus {
+        +is_reconciling: bool
+        +last_reconciliation: Optional[str]
+        +status: str
+        +applications: List[Dict]
+    }
+
+    class DeploymentRequest {
+        +name: str
+        +image: str
+        +replicas: int
+        +namespace: str
+    }
+
+    class ArgoCDApplicationRequest {
+        +name: str
+        +repo_url: str
+        +path: str
+        +target_namespace: str
+        +target_revision: str
+        +sync_policy_automated: bool
+        +sync_policy_prune: bool
+        +sync_policy_self_heal: bool
+    }
+    
+    FastAPI --> KubernetesProxy : includes
+    FastAPI --> ArgoCDProxy : includes
+    FastAPI --> TVP : includes
+    KubernetesProxy --> Config : depends on
+    ArgoCDProxy --> Config : depends on
+    TVP --> Config : depends on
+    FastAPI --> Config : depends on
+    TVP --> TVPStatus : returns
+    KubernetesProxy --> DeploymentRequest : accepts
+    ArgoCDProxy --> ArgoCDApplicationRequest : accepts

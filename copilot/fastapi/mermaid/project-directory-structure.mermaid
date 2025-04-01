@@ -1,0 +1,44 @@
+flowchart TD
+    tvp[tvp] --> fastapi
+    tvp --> README.md
+    tvp --> LICENSE
+
+    fastapi --> Python{Python Modules}
+    fastapi --> tests
+    fastapi --> mermaid
+    fastapi --> Scripts{Scripts}
+
+    Python --> main.py
+    Python --> config.py
+    Python --> argo_cd_api.py
+    Python --> kubernetes_api.py
+    Python --> tvp.py
+
+    tests --> conftest.py
+    tests --> test_main.py
+    tests --> test_argo_cd_api.py
+    tests --> test_kubernetes_api.py
+    tests --> test_tvp.py
+
+    mermaid --> comp[component-diagram.mermaid]
+    mermaid --> api[api-structure-diagram.mermaid] 
+    mermaid --> auth[argo-cd-authentication-sequence.mermaid]
+    mermaid --> kubernetes[kubernetes-proxy-sequence.mermaid]
+    mermaid --> tvpseq[tvp-reconciliation-sequence.mermaid]
+    mermaid --> health[health-check-sequence.mermaid]
+    mermaid --> tvparch[tvp-architecture-diagram.mermaid]
+    mermaid --> deploy[app-deployment-workflow.mermaid]
+    mermaid --> data[data-flow-diagram.mermaid]
+
+    Scripts --> create_readme.py
+    Scripts --> run_tests.sh
+    
+    fastapi --> tvp_header.md
+
+    classDef directory fill:#f96,stroke:#333,stroke-width:2px
+    classDef file fill:#fff,stroke:#333,stroke-width:1px
+    classDef group fill:#bbf,stroke:#33f,stroke-width:1px
+    
+    class tvp,fastapi,tests,mermaid directory
+    class README.md,LICENSE,main.py,config.py,argo_cd_api.py,kubernetes_api.py,tvp.py,conftest.py,test_main.py,test_argo_cd_api.py,test_kubernetes_api.py,test_tvp.py,comp,api,auth,kubernetes,tvpseq,health,tvparch,deploy,data,create_readme.py,run_tests.sh,tvp_header.md file
+    class Python,Scripts group
