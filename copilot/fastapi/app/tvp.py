@@ -260,8 +260,11 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     os.makedirs(os.path.dirname(repo_path), exist_ok=True)
     try:
         # Add timeout to prevent hanging on network issues
+        # Validate or sanitize `branch` and `repo_url` before usage
+        safe_branch = sanitize_branch_name(branch)
+        safe_url = sanitize_git_url(repo_url)
         subprocess.run(
-            ["git", "clone", "-b", branch, repo_url, repo_path], 
+            ["git", "clone", "-b", safe_branch, safe_url, repo_path], 
             check=True,
             capture_output=True,
             text=True,
