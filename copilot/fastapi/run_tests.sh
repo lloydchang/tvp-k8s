@@ -13,8 +13,9 @@ cd "$(dirname "$0")" || exit
 
 # Make sure we're using the correct Python path
 # Update to include the app directory explicitly in addition to parent and current dir
-export PYTHONPATH=$(cd .. && pwd):$(pwd):$(pwd)/app
-
+parent=$(cd .. && pwd)
+current=$(pwd)
+export PYTHONPATH="$parent:$current:$current/app"
 # Debug: Show Python path
 echo -e "${YELLOW}PYTHONPATH: $PYTHONPATH${NC}"
 
