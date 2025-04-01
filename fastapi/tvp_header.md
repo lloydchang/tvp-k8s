@@ -227,7 +227,7 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 ---
 
 ### Focus on _Product Thinking_, viewing internal teams as customers
-- [Sprinkle your DevOps platform with **_product thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
+- [**DevOpsDays Melbourne**: Sprinkle your DevOps platform with **_product thinking_**](https://www.youtube.com/watch?v=rgV4HLSd1dk) by [Javier Turegano](https://www.linkedin.com/in/jturegano/) and [Leoren Tanyag Tesaluna](https://www.linkedin.com/in/leoren-tesaluna/)
 - [**r/ProductManagement**: How applicable are Marty Cagan's thoughts on the real world?](https://www.reddit.com/r/ProductManagement/comments/1c5qztz/how_applicable_are_marty_cagan_thoughts_on_the/)
 
 ---
@@ -253,11 +253,11 @@ A **_Thinnest_** Viable Platform is the **_smallest set of APIs_**, documentatio
 
 ### Examples of TVP:
 
-- A wiki page defining which cloud services to use and how to use them
+- **A wiki page defining which cloud services to use and how to use them**
   - [A simple template for a wiki page for a TVP - as explained in the Team Topologies book](https://github.com/TeamTopologies/Thin-Platform-template)
   - [Examples of a TVP as defined in the book Team Topologies](https://github.com/TeamTopologies/Thinnest-Viable-Platform-examples)
   - [A TVP as described in Team Topologies, using just a Wiki page for a data platform](https://github.com/sbalnojan/TVP-example)
-- Documentation and tools focused on reducing cognitive load for development teams
+- **Documentation and tools focused on reducing cognitive load for development teams**
   - [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures](https://cnoe.io/)
 - **A _set of curated Application Programming Interfaces (APIs)_ with simplified access to infrastructure**
