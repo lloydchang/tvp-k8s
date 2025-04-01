@@ -15,7 +15,7 @@ import os
 mermaid_files = [
     "mermaid/component-diagram.mermaid",
     "mermaid/api-structure-diagram.mermaid",
-    "mermaid/argocd-authentication-sequence.mermaid",  # Fixed hyphenation to match actual filename
+    "mermaid/argo-cd-authentication-sequence.mermaid",
     "mermaid/kubernetes-proxy-sequence.mermaid",
     "mermaid/tvp-reconciliation-sequence.mermaid",
     "mermaid/health-check-sequence.mermaid",
