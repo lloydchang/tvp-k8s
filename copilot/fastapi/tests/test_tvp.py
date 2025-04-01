@@ -1,5 +1,5 @@
 from unittest.mock import patch, MagicMock
-def test_tvp_status_endpoint(test_client, mock_settings):
+def test_tvp_status_endpoint(test_client) -> None:
     """Test the TVP status endpoint"""
     # Mock Path.exists and Path.iterdir
     with patch("pathlib.Path.exists") as mock_exists, \
@@ -55,7 +55,6 @@ def test_tvp_status_endpoint(test_client, mock_settings):
         assert data["applications"][0]["namespace"] == "test-namespace"
         assert data["applications"][0]["image"] == "test-image"
         assert data["applications"][0]["tag"] == "v1.0.0"
-
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
