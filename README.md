@@ -269,6 +269,10 @@ A **_Thinnest Viable_** Platform is the **_smallest set of APIs_**, documentatio
 This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.
 
 
+## System Architecture Documentation:
+
+This section provides a comprehensive overview of the TVP architecture through a series of diagrams and explanations. Each diagram highlights a different aspect of the system, from high-level architecture to specific interaction sequences.
+
 ## Table of Contents
 
 - [1. TVP GitOps Architecture](#1-tvp-gitops-architecture)
@@ -278,10 +282,12 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 - [5. API Structure Diagram](#5-api-structure-diagram)
 - [6. Health Check Sequence](#6-health-check-sequence)
 - [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
-- [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
+- [8. Argo CD Authentication Sequence](#8-argo-cd-authentication-sequence)
 - [9. Application Deployment Workflow](#9-application-deployment-workflow)
 
 ## 1. TVP GitOps Architecture
+
+Let's start by understanding the overall architecture of our Thinnest Viable Platform and how it implements GitOps principles. This diagram provides a high-level view of the system components and their interactions:
 
 ```mermaid
 flowchart TB
@@ -318,7 +324,11 @@ flowchart TB
 
 ```
 
+With the architecture overview in mind, we can now explore how the platform handles GitOps reconciliation.
+
 ## 2. TVP GitOps Reconciliation Sequence
+
+Now that we've seen the architecture, let's examine how the GitOps reconciliation process works in practice. This sequence diagram shows the steps involved when synchronizing the platform with the Git repository:
 
 ```mermaid
 sequenceDiagram
@@ -355,7 +365,11 @@ sequenceDiagram
 
 ```
 
+Understanding the reconciliation process helps us see how changes propagate through the system. Let's now look at the component structure in more detail.
+
 ## 3. Component Interaction Diagram
+
+To better understand the internal structure of the TVP, the following component interaction diagram breaks down the FastAPI application into its functional parts and shows how they communicate:
 
 ```mermaid
 flowchart TB
@@ -390,7 +404,11 @@ flowchart TB
 
 ```
 
+These components work together to facilitate various data flows within the platform.
+
 ## 4. Data Flow Diagram
+
+The data flows through the system in a specific pattern. This diagram illustrates how information moves between different components of the platform:
 
 ```mermaid
 flowchart TD
@@ -424,7 +442,11 @@ flowchart TD
 
 ```
 
+Now that we understand the data flow, let's examine the API structure that enables these interactions.
+
 ## 5. API Structure Diagram
+
+Our API is structured to provide clear separation of concerns while maintaining simplicity. The following class diagram shows the architecture of our API endpoints and their supporting classes:
 
 ```mermaid
 classDiagram
@@ -499,7 +521,11 @@ classDiagram
 
 ```
 
+One of the key aspects of our API is the ability to monitor system health.
+
 ## 6. Health Check Sequence
+
+Reliability is essential for any platform. The health check mechanism ensures that all services are operating correctly. Here's how the health check sequence works:
 
 ```mermaid
 sequenceDiagram
@@ -534,7 +560,11 @@ sequenceDiagram
 
 ```
 
+In addition to health monitoring, our platform provides secure access to the underlying Kubernetes API.
+
 ## 7. Kubernetes Proxy Sequence
+
+The Kubernetes Proxy allows users to interact with the Kubernetes API through our platform. This sequence diagram shows how requests are securely proxied:
 
 ```mermaid
 sequenceDiagram
@@ -559,34 +589,22 @@ sequenceDiagram
 
 ```
 
-## 8. Argo CD Proxy Sequence
+Similarly, our platform facilitates interaction with Argo CD for GitOps operations.
+
+## 8. Argo CD Authentication Sequence
+
+Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform. The sequence diagram below shows the authentication flow:
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant Argo CD Proxy
-    participant Config
-    participant Argo CD
-    
-    Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Proxy: Forward request
-    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
-    Argo CD Proxy->>Config: get_settings()
-    Config-->>Argo CD Proxy: Returns settings
-    
-    Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {username, password}
-    Argo CD-->>Argo CD Proxy: Authentication token
-    
-    Argo CD Proxy->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Proxy: Response data
-    Argo CD Proxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
+# File mermaid/argo-cd-authentication-sequence.mermaid not found
 
 ```
 
+All these components and interactions come together in the application deployment workflow.
+
 ## 9. Application Deployment Workflow
+
+Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform:
 
 ```mermaid
 stateDiagram-v2
@@ -621,6 +639,10 @@ stateDiagram-v2
     }
 
 ```
+
+## Conclusion
+
+The diagrams presented above provide a comprehensive view of our Thinnest Viable Platform architecture. By implementing a GitOps approach with careful attention to component interaction and data flow, we've created a platform that provides leverage through self-service APIs while maintaining simplicity and ease of use. This platform embodies the TVP concept by offering just enough functionality to accelerate application teams without the burden of unnecessary complexity.
 
 ---
 
