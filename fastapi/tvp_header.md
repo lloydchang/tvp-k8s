@@ -10,7 +10,7 @@
 >     - [**Nature Scientific Journal: _People systematically overlook subtractive changes_** by University of Virginia, Gabrielle Adams, Benjamin Converse, Andrew Hales and Leidy Klotz](https://www.nature.com/articles/s41586-021-03380-y#Fig5)
 >       - [**World Economic Forum: _This Lego experiment shows our brains prefer adding. Here's why it matters_** by Harry Kretchmer](https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/)
 
-**Leverage Point:** Move the pillar support to reposition its fulcrum and create different classes of leverages.
+**Leverage Point:** Move the pillar support to reposition its fulcrum and create different classes of leverage.
 
 # Backstory:
 
