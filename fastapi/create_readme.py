@@ -41,7 +41,7 @@ titles = [
     "API Structure Diagram",
     "Health Check Sequence",
     "Kubernetes Proxy Sequence",
-    "Argo CD Proxy Flow",
+    "Argo CD Proxy Sequence",
     "Application Deployment Workflow",
     "Test Coverage Structure",
 ]
