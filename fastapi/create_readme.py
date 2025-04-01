@@ -1,5 +1,5 @@
 """
-README Generator Script
+README.md Generator Script
 
 This script generates the project README.md file by combining:
 1. The TVP header documentation from tvp_header.md
