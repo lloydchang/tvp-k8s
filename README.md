@@ -604,7 +604,27 @@ Similarly, our platform facilitates interaction with Argo CD for GitOps operatio
 Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform. The sequence diagram below shows the authentication flow:
 
 ```mermaid
-# File mermaid/argo-cd-authentication-sequence.mermaid not found
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Argo CD Proxy
+    participant Config
+    participant Argo CD
+    
+    Client->>FastAPI: Request to /argo/cd/...
+    FastAPI->>Argo CD Proxy: Forward request
+    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Argo CD Proxy->>Config: get_settings()
+    Config-->>Argo CD Proxy: Returns settings
+    
+    Argo CD Proxy->>Argo CD: POST /api/v1/session
+    Note over Argo CD Proxy,Argo CD: {username, password}
+    Argo CD-->>Argo CD Proxy: Authentication token
+    
+    Argo CD Proxy->>Argo CD: Original request with token
+    Argo CD-->>Argo CD Proxy: Response data
+    Argo CD Proxy-->>FastAPI: Formatted response
+    FastAPI-->>Client: API response
 
 ```
 
