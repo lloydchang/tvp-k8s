@@ -301,7 +301,7 @@ flowchart TB
     AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
-    KC --> Kubernetes[(Kubernetes API)]
+    KC --> Kubernetes[(Kubernetes API Server)]
     AT --> ArgoCD[(Argo CD API)]
     RT <--> GitRepo
     RT <--> Kubernetes
@@ -532,7 +532,6 @@ flowchart TB
     Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
     RT -->|Apply configs| KubernetesAPI
-    RT -->|Apply configs| Kubernetes[(Kubernetes Cluster)]
     
     subgraph "Kubernetes Cluster"
         KubernetesAPI[Kubernetes API Server]
@@ -599,7 +598,7 @@ flowchart TD
     API -->|/argo/cd/*| AP[Argo CD Proxy]
     API -->|/tvp/*| TVP[TVP]
     
-    KP -->|Auth token| KA[Kubernetes API]
+    KP -->|Auth token| KA[Kubernetes API Server]
     AP -->|Login| Auth[Argo CD Auth]
     Auth -->|Token| AP
     AP -->|Auth token| AA[Argo CD API]

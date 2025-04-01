@@ -15,7 +15,7 @@ flowchart TB
     AR --> AT[Argo CD Token]
     TR --> GitRepo[(Git Repository)]
     
-    KC --> Kubernetes[(Kubernetes API)]
+    KC --> Kubernetes[(Kubernetes API Server)]
     AT --> ArgoCD[(Argo CD API)]
     RT <--> GitRepo
     RT <--> Kubernetes
