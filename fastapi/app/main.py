@@ -1,12 +1,12 @@
 """
-Kubernetes & ArgoCD Platform API - Main Application
+Kubernetes & Argo CD Platform API - Main Application
 
 This FastAPI application serves as a unified API for interacting with Kubernetes
-and ArgoCD, supporting both direct operations and pass-through proxy capabilities.
+and Argo CD, supporting both direct operations and pass-through proxy capabilities.
 
 The application provides:
 - Kubernetes API pass-through and operations 
-- ArgoCD API pass-through and operations
+- Argo CD API pass-through and operations
 - TVP GitOps reconciliation functionality
 - Health checking for dependent services
 """
@@ -23,7 +23,7 @@ from config import get_settings, get_kubernetes_client
 
 app = FastAPI(
     title="Kubernetes Platform API",
-    description="A unified API for Kubernetes and ArgoCD operations",
+    description="A unified API for Kubernetes and Argo CD operations",
     version="1.0.0"
 )
 
@@ -38,7 +38,7 @@ app.add_middleware(
 
 # Include routers from different modules
 app.include_router(kubernetes_router, prefix="/kubernetes", tags=["Kubernetes"])
-app.include_router(argocd_router, prefix="/argocd", tags=["ArgoCD"])
+app.include_router(argocd_router, prefix="/argocd", tags=["Argo CD"])
 app.include_router(tvp_router, prefix="/tvp", tags=["TVP"])
 
 @app.on_event("startup")
@@ -64,12 +64,12 @@ async def root():
     """
     return {
         "name": "Kubernetes Platform API",
-        "description": "Unified API for Kubernetes and ArgoCD operations",
+        "description": "Unified API for Kubernetes and Argo CD operations",
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
             {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
-            {"prefix": "/argocd", "description": "ArgoCD API operations"},
+            {"prefix": "/argocd", "description": "Argo CD API operations"},
             {"prefix": "/tvp", "description": "Thinnest Viable Platform operations"}
         ]
     }
@@ -77,7 +77,7 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
-    Health check endpoint that verifies connectivity to Kubernetes and ArgoCD services.
+    Health check endpoint that verifies connectivity to Kubernetes and Argo CD services.
     
     Performs live checks against dependent services to determine
     if the application is fully operational.
@@ -99,7 +99,7 @@ async def health_check():
         "status": "healthy",
         "services": {
             "kubernetes": {"status": "unknown"},
-            "argocd": {"status": "unknown"}
+            "argo_cd": {"status": "unknown"}
         }
     }
     
@@ -118,29 +118,29 @@ async def health_check():
         }
         health_status["status"] = "degraded"
     
-    # Check ArgoCD connectivity
+    # Check Argo CD connectivity
     settings = get_settings()
     try:
-        # Use the helper function we created for ArgoCD auth
+        # Use the helper function we created for Argo CD auth
         token = await get_argocd_token()
         if token:
-            health_status["services"]["argocd"] = {
+            health_status["services"]["argo_cd"] = {
                 "status": "healthy"
             }
         else:
-            health_status["services"]["argocd"] = {
+            health_status["services"]["argo_cd"] = {
                 "status": "unhealthy",
                 "error": "Failed to get authentication token"
             }
             health_status["status"] = "degraded"
     except HTTPException as e:
-        health_status["services"]["argocd"] = {
+        health_status["services"]["argo_cd"] = {
             "status": "unhealthy",
             "error": e.detail
         }
         health_status["status"] = "degraded"
     except Exception as e:
-        health_status["services"]["argocd"] = {
+        health_status["services"]["argo_cd"] = {
             "status": "unhealthy",
             "error": str(e)
         }

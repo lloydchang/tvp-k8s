@@ -31,18 +31,18 @@ class ArgoCDApplicationRequest(BaseModel):
     sync_policy_prune: bool = True
     sync_policy_self_heal: bool = True
 
-async def get_argocd_token():
+async def get_argo_cd_token():
     """Helper function to get Argo CD authentication token."""
     settings = get_settings()
     
-    if not settings.argocd_password:
+    if not settings.argo_cd_password:
         raise HTTPException(status_code=500, detail="Argo CD password not configured")
     
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
         try:
             auth_response = await client.post(
-                f"{settings.argocd_url}/api/v1/session",
-                json={"username": settings.argocd_username, "password": settings.argocd_password},
+                f"{settings.argo_cd_url}/api/v1/session",
+                json={"username": settings.argo_cd_username, "password": settings.argo_cd_password},
                 timeout=10.0  # Add reasonable timeout
             )
             if auth_response.status_code != 200:
@@ -56,12 +56,12 @@ async def get_argocd_token():
 
 # Argo CD True Pass-Through Proxy
 @router.api_route("/argocd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
-async def argocd_proxy(path: str, request: Request):
+async def argo_cd_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Argo CD API.
     """
     settings = get_settings()
-    token = await get_argocd_token()
+    token = await get_argo_cd_token()
 
     # Create base headers with authentication
     headers = {
@@ -74,7 +74,7 @@ async def argocd_proxy(path: str, request: Request):
             headers[header_key] = header_value
     
     # Create target URL
-    target_url = f"{settings.argocd_url}/api/v1/{path}"
+    target_url = f"{settings.argo_cd_url}/api/v1/{path}"
     
     # Pass through the request without modification
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:

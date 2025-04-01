@@ -16,11 +16,11 @@ def test_get_argo_cd_token_success(test_client, mock_settings):
         mock_client.return_value = mock_client_instance
         
         # Import here to use the patched client
-        from app.argo_cd_api import get_argo_cd_token
+        from app.argo_cd_api import get_argocd_token
         import asyncio
         
         # Execute the function and verify the token
-        token = asyncio.run(get_argo_cd_token())
+        token = asyncio.run(get_argocd_token())
         assert token == "test-argo-cd-token"
         
         # Verify the request was made with correct parameters
@@ -44,13 +44,13 @@ def test_get_argo_cd_token_failure(test_client, mock_settings):
         mock_client.return_value = mock_client_instance
         
         # Import here to use the patched client
-        from app.argo_cd_api import get_argo_cd_token
+        from app.argo_cd_api import get_argocd_token
         from fastapi import HTTPException
         import asyncio
         
         # Execute the function and verify it raises HTTPException
         with pytest.raises(HTTPException) as excinfo:
-            asyncio.run(get_argo_cd_token())
+            asyncio.run(get_argocd_token())
         
         assert excinfo.value.status_code == 401
         assert "Authentication Failed" in excinfo.value.detail
@@ -69,7 +69,7 @@ def test_argo_cd_proxy(test_client, mock_argo_cd_token):
         mock_client.return_value = mock_client_instance
         
         # Test GET request to the proxy endpoint
-        response = test_client.get("/argo/cd/applications")
+        response = test_client.get("/argocd/applications")
         
         assert response.status_code == 200
         assert response.json() == {"applications": []}

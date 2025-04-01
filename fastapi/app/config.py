@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     kubernetes_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
     # Argo CD settings
-    argo_cd_url: str = os.getenv("ARGO_CD_URL", "https://argo-cd-server.argo_cd.svc")
+    argo_cd_url: str = os.getenv("ARGO_CD_URL", "https://argo-cd-server.argo-cd.svc")
     argo_cd_username: str = os.getenv("ARGO_CD_USERNAME", "admin")
     argo_cd_password: str = os.getenv("ARGO_CD_PASSWORD", "")  # No default for security
     

@@ -32,8 +32,8 @@ def mock_kubernetes_client():
 
 @pytest.fixture
 def mock_argo_cd_token():
-    """Fixture to mock argo_cd authentication token"""
-    with patch("app.argo_cd_api.get_argo_cd_token") as mock_token:
+    """Fixture to mock Argo CD authentication token"""
+    with patch("app.argo_cd_api.get_argocd_token") as mock_token:
         mock_token.return_value = "test-argo-cd-token"
         yield mock_token
 
