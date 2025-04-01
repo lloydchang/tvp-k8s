@@ -3,7 +3,7 @@ flowchart TD
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP Proxy]
+    API -->|/tvp/*| TVP[TVP]
     
     KP -->|Auth token| KA[Kubernetes API]
     AP -->|Login| Auth[Argo CD Auth]

@@ -18,7 +18,7 @@ import httpx
 # Import our modules
 from kubernetes_api import proxy as kubernetes_proxy
 from argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
-from tvp import proxy as tvp_proxy, start_reconciliation_thread
+from tvp import proxy as tvp, start_reconciliation_thread
 from config import get_settings, get_kubernetes_client
 
 app = FastAPI(
@@ -39,7 +39,7 @@ app.add_middleware(
 # Include proxys from different modules
 app.include_proxy(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 app.include_proxy(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
-app.include_proxy(tvp_proxy, prefix="/tvp", tags=["TVP"])
+app.include_proxy(tvp, prefix="/tvp", tags=["TVP"])
 
 @app.on_event("startup")
 async def startup_event():

@@ -119,7 +119,7 @@ flowchart TB
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Proxy]
         API --> AR[Argo CD Proxy]
-        API --> TR[TVP Proxy]
+        API --> TR[TVP]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
@@ -416,7 +416,7 @@ flowchart TD
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP Proxy]
+    API -->|/tvp/*| TVP[TVP]
     
     KP -->|Auth token| KA[Kubernetes API]
     AP -->|Login| Auth[Argo CD Auth]
