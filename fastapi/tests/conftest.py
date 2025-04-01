@@ -10,9 +10,9 @@ def mock_settings():
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
         settings.kubernetes_token_path = "/tmp/test-k8s-token"
-        settings.argocd_url = "https://test-argocd.local"
-        settings.argocd_username = "test-user"
-        settings.argocd_password = "test-password"
+        settings.argo_cd_url = "https://test-argo-cd.local"
+        settings.argo_cd_username = "test-user"
+        settings.argo_cd_password = "test-password"
         settings.tvp_repo_url = "git@github.com:test/test-repo.git"
         settings.tvp_repo_path = "/tmp/test-repo"
         settings.tvp_branch = "main"
@@ -31,10 +31,10 @@ def mock_kubernetes_client():
         yield k8s_client
 
 @pytest.fixture
-def mock_argocd_token():
-    """Fixture to mock ArgoCD authentication token"""
-    with patch("app.argocd_api.get_argocd_token") as mock_token:
-        mock_token.return_value = "test-argocd-token"
+def mock_argo_cd_token():
+    """Fixture to mock argo_cd authentication token"""
+    with patch("app.argo_cd_api.get_argo_cd_token") as mock_token:
+        mock_token.return_value = "test-argo-cd-token"
         yield mock_token
 
 @pytest.fixture
@@ -55,7 +55,7 @@ def mock_yaml_operations():
         yield mock_yaml_load
 
 @pytest.fixture
-def test_client(mock_settings, mock_kubernetes_client, mock_argocd_token):
+def test_client(mock_settings, mock_kubernetes_client, mock_argo_cd_token):
     """Fixture to create a FastAPI TestClient"""
     from fastapi.main import app
     with TestClient(app) as client:
