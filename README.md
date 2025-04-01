@@ -274,8 +274,8 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 - [1. TVP GitOps Architecture](#1-tvp-gitops-architecture)
 - [2. TVP GitOps Reconciliation Sequence](#2-tvp-gitops-reconciliation-sequence)
 - [3. Component Interaction Diagram](#3-component-interaction-diagram)
-- [4. API Structure Diagram](#4-api-structure-diagram)
-- [5. Data Flow Diagram](#5-data-flow-diagram)
+- [4. Data Flow Diagram](#4-data-flow-diagram)
+- [5. API Structure Diagram](#5-api-structure-diagram)
 - [6. Health Check Sequence](#6-health-check-sequence)
 - [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
 - [8. Argo CD Authentication Sequence](#8-argo-cd-authentication-sequence)
@@ -390,7 +390,41 @@ flowchart TB
 
 ```
 
-## 4. API Structure Diagram
+## 4. Data Flow Diagram
+
+```mermaid
+flowchart TD
+    User[User/Client] -->|API Request| API[FastAPI App]
+    
+    API -->|/kubernetes/*| KP[Kubernetes Proxy]
+    API -->|/argo/cd/*| AP[Argo CD Proxy]
+    API -->|/tvp/*| TVP[TVP]
+        
+    TVP -->|Status| TS[TVP Status]
+    TVP -->|Reconcile| R[Reconciliation]
+    
+    TS --> Git[Git Repository]
+    R --> Git
+    R --> KA
+    TVP -->|Auth token| KA[Kubernetes API Server]
+    KP -->|Auth token| KA[Kubernetes API Server]
+    AP -->|Auth token| AA[Argo CD API]
+    subgraph "Kubernetes Cluster"
+        KA --> Kubernetes[(Kubernetes Microservices)]
+        AA --> ArgoCD[(Argo CD Service)]
+    end
+
+    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
+    classDef app fill:#f9f,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
+    
+    class User user
+    class API,KP,AP,TVP,TS,R app
+    class Kubernetes,ArgoCD,Git,KA,AA,Auth external
+
+```
+
+## 5. API Structure Diagram
 
 ```mermaid
 classDiagram
@@ -462,40 +496,6 @@ classDiagram
     TVP --> TVPStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
-
-```
-
-## 5. Data Flow Diagram
-
-```mermaid
-flowchart TD
-    User[User/Client] -->|API Request| API[FastAPI App]
-    
-    API -->|/kubernetes/*| KP[Kubernetes Proxy]
-    API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP]
-        
-    TVP -->|Status| TS[TVP Status]
-    TVP -->|Reconcile| R[Reconciliation]
-    
-    TS --> Git[Git Repository]
-    R --> Git
-    R --> KA
-    TVP -->|Auth token| KA[Kubernetes API Server]
-    KP -->|Auth token| KA[Kubernetes API Server]
-    AP -->|Auth token| AA[Argo CD API]
-    subgraph "Kubernetes Cluster"
-        KA --> Kubernetes[(Kubernetes Microservices)]
-        AA --> ArgoCD[(Argo CD Service)]
-    end
-
-    classDef user fill:#bbf,stroke:#33f,stroke-width:2px
-    classDef app fill:#f9f,stroke:#333,stroke-width:2px
-    classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
-    
-    class User user
-    class API,KP,AP,TVP,TS,R app
-    class Kubernetes,ArgoCD,Git,KA,AA,Auth external
 
 ```
 
