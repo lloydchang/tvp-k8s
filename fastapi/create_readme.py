@@ -23,7 +23,7 @@ mermaid_files = [
     "mermaid/api-structure-diagram.mermaid",
     "mermaid/health-check-sequence.mermaid",
     "mermaid/kubernetes-proxy-sequence.mermaid",
-    "mermaid/argo-cd-authentication-sequence.mermaid",
+    "mermaid/argo-cd-proxy-sequence.mermaid",
     "mermaid/app-deployment-workflow.mermaid"
 ]
 
