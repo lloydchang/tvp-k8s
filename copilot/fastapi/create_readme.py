@@ -21,7 +21,7 @@ mermaid_files = [
     "mermaid/health-check-sequence.mermaid",
     "mermaid/tvp-architecture-diagram.mermaid",
     "mermaid/app-deployment-workflow.mermaid",
-    "mermaid/data-flow-diagram.mermaid"
+    "mermaid/data-flow-diagram.mermaid",
 ]
 
 titles = [
