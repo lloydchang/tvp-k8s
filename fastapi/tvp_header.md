@@ -97,9 +97,7 @@ A Thinnest Viable Platform is the smallest set of APIs, documentation, and tools
   - [A Thinnest Viable Platform (TVP) as described in Team Topologies, using just a Wiki page for a data platform](https://github.com/sbalnojan/TVP-example)
 - Documentation and tools focused on reducing cognitive load for development teams
   - [Trade Me’s Journey Towards a Thinnest Viable Platform (TVP)](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
-  - [CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
-    - [Spin up a complete internal developer platform with only Docker required as a dependency](https://github.com/cnoe-io/idpbuilder)
-  - [Backstage is an open framework for building developer portals](https://github.com/backstage/backstage)
+  - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.](https://cnoe.io/)
 - **A set of _curated_ APIs with simplified access to infrastructure**
   - https://github.com/lloydchang/tvp
 
