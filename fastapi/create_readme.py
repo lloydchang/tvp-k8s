@@ -26,7 +26,9 @@ mermaid_files = [
     "mermaid/health-check-sequence.mermaid",
     "mermaid/kubernetes-proxy-sequence.mermaid",
     "mermaid/argo-cd-proxy-sequence.mermaid",
-    "mermaid/app-deployment-workflow.mermaid"
+    "mermaid/app-deployment-workflow.mermaid",
+    "mermaid/test-coverage-diagram.mermaid",
+    "mermaid/gitops-workflow-diagram.mermaid"
 ]
 
 # Titles organized in a logical flow for the narrative
@@ -39,7 +41,9 @@ titles = [
     "Health Check Sequence",
     "Kubernetes Proxy Sequence",
     "Argo CD Proxy Sequence",
-    "Application Deployment Workflow"
+    "Application Deployment Workflow",
+    "Test Coverage Structure",
+    "GitOps Workflow Sequence"
 ]
 
 # Introductions for each section to create narrative flow - now with more emphasis on leverage
@@ -60,7 +64,11 @@ section_intros = [
     
     "Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform, reducing the cognitive load for developers. The sequence diagram below shows the authentication flow:",
     
-    "Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform, demonstrating how the TVP provides leverage throughout the deployment process:"
+    "Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform, demonstrating how the TVP provides leverage throughout the deployment process:",
+    
+    "Quality assurance is a critical aspect of platform reliability. Our test coverage structure ensures that all components are properly tested, which increases platform stability and reduces maintenance overhead:",
+    
+    "The GitOps workflow is a key part of our platform's leverage strategy. This sequence diagram illustrates how developers interact with the system to deploy applications through git-based workflows:"
 ]
 
 # Transitions between sections to improve narrative flow
@@ -81,7 +89,11 @@ section_transitions = [
     
     "All these components and interactions come together in the application deployment workflow.",
     
-    "This workflow represents the culmination of all the previously described processes working in harmony to deliver a streamlined developer experience."
+    "Behind the scenes, comprehensive testing ensures the reliability of each component.",
+    
+    "The test coverage is critical for supporting our GitOps workflow, which ties everything together for developers.",
+    
+    "This GitOps workflow represents the ultimate expression of our platform's leverage capabilities, enabling developers to focus on code rather than infrastructure."
 ]
 
 # New: Leverage points that highlight how each component provides leverage to the organization
@@ -102,7 +114,11 @@ leverage_points = [
     
     "**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.",
     
-    "**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently."
+    "**Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.",
+    
+    "**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.",
+    
+    "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations."
 ]
 
 def create_toc_link(title, index):
@@ -181,8 +197,8 @@ def main():
         for i, title in enumerate(titles):
             toc_link = create_toc_link(title, i)
             readme.write(f"{toc_link}\n")
-        readme.write("- [10. Measuring Platform Leverage](#10-measuring-platform-leverage)\n")
-        readme.write("- [11. Conclusion](#11-conclusion)\n\n")
+        readme.write(f"- [{len(titles)+1}. Measuring Platform Leverage](#{len(titles)+1}-measuring-platform-leverage)\n")
+        readme.write(f"- [{len(titles)+2}. Conclusion](#{len(titles)+2}-conclusion)\n\n")
         
         # Then write the diagrams with narrative text and leverage points
         for i, (filename, title, intro, transition, leverage) in enumerate(zip(mermaid_files, titles, section_intros, section_transitions, leverage_points)):
@@ -208,7 +224,7 @@ def main():
                 readme.write(f"{transition}\n\n")
         
         # Add a section on measuring platform leverage
-        readme.write("## 10. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)\n\n")
+        readme.write(f"## {len(titles)+1}. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)\n\n")
         readme.write("Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:\n\n")
         readme.write("1. **Developer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.\n\n")
         readme.write("2. **Deployment Frequency**: Teams using our platform deploy 4x more frequently than teams managing their own infrastructure.\n\n")
@@ -219,7 +235,7 @@ def main():
         readme.write("These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.\n\n")
         
         # Add a conclusion to tie everything together
-        readme.write("## 11. Conclusion\n\n")
+        readme.write(f"## {len(titles)+2}. Conclusion\n\n")
         readme.write("The diagrams and metrics presented above provide a comprehensive view of our Thinnest Viable Platform architecture ")
         readme.write("and the leverage it creates throughout the organization. ")
         readme.write("By implementing a GitOps approach with careful attention to component interaction and data flow, ")

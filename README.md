@@ -294,8 +294,10 @@ The following diagrams provide a comprehensive overview of the TVP architecture.
 - [7. Kubernetes Proxy Sequence](#7-kubernetes-proxy-sequence)
 - [8. Argo CD Proxy Sequence](#8-argo-cd-proxy-sequence)
 - [9. Application Deployment Workflow](#9-application-deployment-workflow)
-- [10. Measuring Platform Leverage](#10-measuring-platform-leverage)
-- [11. Conclusion](#11-conclusion)
+- [10. Test Coverage Structure](#10-test-coverage-structure)
+- [11. GitOps Workflow Sequence](#11-gitops-workflow-sequence)
+- [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
+- [13. Conclusion](#13-conclusion)
 
 ## 1. TVP GitOps Architecture
 
@@ -690,7 +692,100 @@ stateDiagram-v2
 
 **Leverage Point:** This workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
-## 10. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
+Behind the scenes, comprehensive testing ensures the reliability of each component.
+
+## 10. Test Coverage Structure
+
+Quality assurance is a critical aspect of platform reliability. Our test coverage structure ensures that all components are properly tested, which increases platform stability and reduces maintenance overhead:
+
+```mermaid
+flowchart TD
+    subgraph Tests
+        conftest[conftest.py]
+        test_main[test_main.py]
+        test_tvp[test_tvp.py]
+        test_kubernetes[test_kubernetes_api.py]
+        test_argo[test_argo_cd_api.py]
+    end
+
+    subgraph "Application Code"
+        main[main.py]
+        tvp[tvp.py]
+        kubernetes[kubernetes_api.py]
+        argo[argo_cd_api.py]
+        config[config.py]
+    end
+
+    conftest --> |fixtures| test_main
+    conftest --> |fixtures| test_tvp
+    conftest --> |fixtures| test_kubernetes
+    conftest --> |fixtures| test_argo
+
+    test_main --> |tests| main
+    test_tvp --> |tests| tvp
+    test_kubernetes --> |tests| kubernetes
+    test_argo --> |tests| argo
+
+    main --> |imports| tvp
+    main --> |imports| kubernetes
+    main --> |imports| argo
+    main --> |imports| config
+
+    tvp --> |imports| config
+    kubernetes --> |imports| config
+    argo --> |imports| config
+
+    classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
+    classDef appFile fill:#bef,stroke:#333,stroke-width:1px
+    
+    class conftest,test_main,test_tvp,test_kubernetes,test_argo testFile
+    class main,tvp,kubernetes,argo,config appFile
+
+```
+
+**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
+
+The test coverage is critical for supporting our GitOps workflow, which ties everything together for developers.
+
+## 11. GitOps Workflow Sequence
+
+The GitOps workflow is a key part of our platform's leverage strategy. This sequence diagram illustrates how developers interact with the system to deploy applications through git-based workflows:
+
+```mermaid
+sequenceDiagram
+    actor Dev as Developer
+    participant Git as Git Repository
+    participant TVP as TVP API
+    participant Thread as Reconciliation Thread
+    participant Kubernetes as Kubernetes API Server
+    
+    Dev->>Git: Push application changes
+    
+    alt Manual Trigger
+        Dev->>TVP: POST /tvp/reconcile
+        TVP->>Thread: background_tasks.add_task(reconcile_from_git)
+        TVP-->>Dev: {"status": "started"}
+    else Automatic Reconciliation
+        Note over Thread: Periodic check<br>(every 5 min)
+    end
+    
+    Thread->>Git: Pull latest changes
+    Thread->>Thread: Parse configuration
+    
+    loop For each application
+        Thread->>Kubernetes: Apply configuration
+    end
+    
+    Thread->>Thread: Update last_reconciliation timestamp
+    
+    Dev->>TVP: GET /tvp/status
+    TVP-->>Dev: Application status information
+
+```
+
+**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
+
+## 12. Measuring Platform Leverage (in a hypothetical scenario with sample numbers)
 
 Leverage from a platform can be quantified in several ways. Here are some metrics that demonstrate the effectiveness of our TVP approach:
 
@@ -708,7 +803,7 @@ Leverage from a platform can be quantified in several ways. Here are some metric
 
 These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
 
-## 11. Conclusion
+## 13. Conclusion
 
 The diagrams and metrics presented above provide a comprehensive view of our Thinnest Viable Platform architecture and the leverage it creates throughout the organization. By implementing a GitOps approach with careful attention to component interaction and data flow, we've created a platform that provides significant leverage through self-service APIs while maintaining simplicity and ease of use. 
 
