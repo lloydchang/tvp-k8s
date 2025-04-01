@@ -1,5 +1,7 @@
 ![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
-Picture is from https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/
+- To stabilize this roof, would you remove one block or add several blocks?
+- Image: University of Virginia
+- https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/
 
 ---
 
