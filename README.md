@@ -233,11 +233,11 @@ A TVP is a careful balance between keeping the platform small and ensuring that 
 
 | <div style="width:120px">Aspect </div> | Question                                                                                   | Provisional            | Operational           | Scalable               | Optimizing                   |
 |:---------------------------------------|:-------------------------------------------------------------------------------------------|:-----------------------|:----------------------|:-----------------------|:-----------------------------|
-| [Investment](#Investment)     | _How are staff and funds allocated to platform capabilities?_                              | Voluntary or temporary | Dedicated team        | As product             | Enabled ecosystem            |
-| [Adoption](#Adoption)         | _Why and how do users discover and use internal platforms and platform capabilities?_      | Erratic                | Extrinsic push        | Intrinsic pull         | Participatory                |
-| [Interfaces](#Interfaces)     | _How do users interact with and consume platform capabilities?_                            | Custom processes       | Standard tooling      | Self-service solutions | Integrated services          |
-| [Operations](#Operations)     | _How are platforms and their capabilities planned, prioritized, developed and maintained?_ | By request             | Centrally tracked     | Centrally enabled      | Managed services             |
-| [Measurement](#Measurement)   | _What is the process for gathering and incorporating feedback and learning?_               | Ad hoc                 | Consistent collection | Insights               | Quantitative and qualitative |
+| [Investment](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/#Investment)     | _How are staff and funds allocated to platform capabilities?_                              | Voluntary or temporary | Dedicated team        | As product             | Enabled ecosystem            |
+| [Adoption](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/#Adoption)         | _Why and how do users discover and use internal platforms and platform capabilities?_      | Erratic                | Extrinsic push        | Intrinsic pull         | Participatory                |
+| [Interfaces](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/#Interfaces)     | _How do users interact with and consume platform capabilities?_                            | Custom processes       | Standard tooling      | Self-service solutions | Integrated services          |
+| [Operations](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/#Operations)     | _How are platforms and their capabilities planned, prioritized, developed and maintained?_ | By request             | Centrally tracked     | Centrally enabled      | Managed services             |
+| [Measurement](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/#Measurement)   | _What is the process for gathering and incorporating feedback and learning?_               | Ad hoc                 | Consistent collection | Insights               | Quantitative and qualitative |
 
 ---
 
