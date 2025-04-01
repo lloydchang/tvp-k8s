@@ -45,7 +45,8 @@ def main():
     
     If a file is missing, it will include a placeholder message.
     """
-    with open("../README.md", "w") as readme:
+    readme_path = os.path.join(os.path.dirname(__file__), "../README.md")
+    with open(readme_path, "w") as readme:
         # Read and write the TVP header from the separate file
         try:
             with open("tvp_header.md", "r") as header_file:
