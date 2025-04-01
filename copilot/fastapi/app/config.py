@@ -71,10 +71,9 @@ def get_kubernetes_client():
         try:
             config.load_kube_config()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to load Kubernetes config: {e}")
-    
-    return client.CoreV1Api()
+            raise HTTPException(status_code=500, detail=f"Failed to load Kubernetes config: {e}") from e
 
+    return client.CoreV1Api()
 def get_kubernetes_token():
     """
     Retrieve the Kubernetes service account token.
