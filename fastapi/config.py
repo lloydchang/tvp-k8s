@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     kubernetes_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
     # Argo CD settings
-    argo_cd_url: str = os.getenv("ARGOCD_URL", "https://argo_cd-server.argo_cd.svc")
-    argo_cd_username: str = os.getenv("ARGOCD_USERNAME", "admin")
-    argo_cd_password: str = os.getenv("ARGOCD_PASSWORD", "")  # No default for security
+    argo_cd_url: str = os.getenv("ARGO_CD_URL", "https://argo-cd-server.argo_cd.svc")
+    argo_cd_username: str = os.getenv("ARGO_CD_USERNAME", "admin")
+    argo_cd_password: str = os.getenv("ARGO_CD_PASSWORD", "")  # No default for security
     
     # TVP settings
     tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/kubernetes-apps.git")
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     def _check_security_settings(self):
         """Check and warn about insecure settings."""
         if not self.argo_cd_password:
-            warnings.warn("Argo CD password not set. Please set ARGOCD_PASSWORD environment variable.")
+            warnings.warn("Argo CD password not set. Please set ARGO_CD_PASSWORD environment variable.")
         if not self.verify_ssl:
             warnings.warn("SSL verification is disabled. This is insecure and should not be used in production.")
 
