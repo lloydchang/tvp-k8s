@@ -14,10 +14,10 @@ flowchart TD
 
     KP -->|Auth token| KA[Kubernetes API Server]
     AP -->|Login| Auth[Argo CD Auth]
-        Auth -->|Token| AP
+    Auth -->|Token| AP
+    AP -->|Auth token| AA[Argo CD API]
 
     subgraph "Kubernetes Cluster"
-        AP -->|Auth token| AA[Argo CD API]
         KubernetesAPI[Kubernetes API Server]
         ArgoCD[Argo CD]
         KA --> Kubernetes[(Kubernetes Microservices)]
