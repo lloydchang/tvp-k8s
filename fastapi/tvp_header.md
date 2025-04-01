@@ -262,7 +262,7 @@ A **_Thinnest_** Viable Platform is the **_smallest set of APIs_**, documentatio
   - [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures](https://cnoe.io/)
 - **A _set of curated Application Programming Interfaces (APIs)_ with simplified access to infrastructure**
-  - https://github.com/lloydchang/tvp
+  - [Thinnest Viable Platform (TVP) about Leverage](https://github.com/lloydchang/tvp)
 
 ## System Architecture Documentation:
 
