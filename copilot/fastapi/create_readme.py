@@ -33,7 +33,7 @@ titles = [
     "Health Check Sequence",
     "TVP GitOps Architecture",
     "Application Deployment Workflow",
-    "Data Flow Diagram"
+    "Data Flow Diagram",
 ]
 
 def main() -> None:
