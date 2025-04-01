@@ -16,9 +16,7 @@ flowchart TD
     subgraph "Kubernetes Cluster"
         KA --> Kubernetes[(Kubernetes Microservices)]
         AA --> ArgoCD[(Argo CD Service)]
-        AA -->|Login| Auth[Argo CD Auth]
     end
-    Auth -->|Response| AP
 
     classDef user fill:#bbf,stroke:#33f,stroke-width:2px
     classDef app fill:#f9f,stroke:#333,stroke-width:2px
