@@ -4,12 +4,7 @@ flowchart TD
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
     API -->|/tvp/*| TVP[TVP]
-    
-    KP -->|Auth token| KA[Kubernetes API Server]
-    AP -->|Login| Auth[Argo CD Auth]
-    Auth -->|Token| AP
-    AP -->|Auth token| AA[Argo CD API]
-    
+        
     TVP -->|Status| TS[TVP Status]
     TVP -->|Reconcile| R[Reconciliation]
     
@@ -18,6 +13,10 @@ flowchart TD
     R --> KA
 
     subgraph "Kubernetes Cluster"
+        KP -->|Auth token| KA[Kubernetes API Server]
+        AP -->|Login| Auth[Argo CD Auth]
+        Auth -->|Token| AP
+        AP -->|Auth token| AA[Argo CD API]
         KubernetesAPI[Kubernetes API Server]
         ArgoCD[Argo CD]
         KA --> Kubernetes[(Kubernetes Microservices)]
