@@ -16,27 +16,27 @@ import re
 
 # List of Mermaid diagram files and their corresponding section titles
 mermaid_files = [
+    "mermaid/tvp-architecture-diagram.mermaid",
+    "mermaid/tvp-reconciliation-sequence.mermaid",
     "mermaid/component-diagram.mermaid",
     "mermaid/api-structure-diagram.mermaid",
-    "mermaid/argo-cd-authentication-sequence.mermaid",
-    "mermaid/kubernetes-proxy-sequence.mermaid",
-    "mermaid/tvp-reconciliation-sequence.mermaid",
-    "mermaid/health-check-sequence.mermaid",
-    "mermaid/tvp-architecture-diagram.mermaid",
-    "mermaid/app-deployment-workflow.mermaid",
     "mermaid/data-flow-diagram.mermaid",
+    "mermaid/health-check-sequence.mermaid",
+    "mermaid/kubernetes-proxy-sequence.mermaid",
+    "mermaid/argo-cd-authentication-sequence.mermaid",
+    "mermaid/app-deployment-workflow.mermaid",
 ]
 
 titles = [
+    "TVP GitOps Architecture",
+    "TVP GitOps Reconciliation Sequence",
     "Component Interaction Diagram",
     "API Structure Diagram",
-    "Argo CD Authentication Sequence",
-    "Kubernetes Proxy Sequence",
-    "TVP GitOps Reconciliation Sequence",
-    "Health Check Sequence",
-    "TVP GitOps Architecture",
-    "Application Deployment Workflow",
     "Data Flow Diagram",
+    "Health Check Sequence",
+    "Kubernetes Proxy Sequence",
+    "Argo CD Authentication Sequence",
+    "Application Deployment Workflow",
 ]
 
 def create_toc_link(title, index):
