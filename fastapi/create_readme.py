@@ -16,7 +16,7 @@ import os
 import re
 from datetime import datetime
 
-# List of Mermaid diagram files and their corresponding section titles
+# List of Mermaid diagram files in a logical narrative sequence
 mermaid_files = [
     "mermaid/tvp-architecture-diagram.mermaid",
     "mermaid/tvp-gitops-workflow-diagram.mermaid",
@@ -31,72 +31,72 @@ mermaid_files = [
     "mermaid/test-coverage-diagram.mermaid",
 ]
 
-# Titles organized in a logical flow for the narrative
+# Titles precisely matching the content of each diagram
 titles = [
-    "TVP GitOps Architecture",
-    "TVP GitOps Workflow Sequence",
-    "TVP GitOps Reconciliation Sequence",
+    "TVP Architecture Overview",
+    "GitOps Workflow Sequence",
+    "GitOps Reconciliation Process",
     "Component Interaction Diagram",
     "Data Flow Diagram", 
     "API Structure Diagram",
     "Health Check Sequence",
     "Kubernetes Proxy Sequence",
-    "Argo CD Proxy Sequence",
+    "Argo CD Proxy Flow",
     "Application Deployment Workflow",
     "Test Coverage Structure",
 ]
 
-# Introductions for each section to create narrative flow - now with more emphasis on leverage
+# Introductions for each section to create narrative flow
 section_intros = [
-    "Let's start by understanding the overall architecture of our Thinnest Viable Platform and how it implements GitOps principles to provide leverage. This diagram provides a high-level view of the system components and their interactions:",
+    "Let's start by understanding the overall architecture of our Thinnest Viable Platform. This diagram provides a high-level view of the system components and their interactions, showing how the platform provides leverage through centralized management:",
     
-    "Now that we've seen the architecture, let's examine how the GitOps reconciliation process works in practice. This sequence diagram shows the steps involved when synchronizing the platform with the Git repository - a key automation that creates leverage:",
+    "With the architecture overview in mind, let's examine how developers interact with our GitOps workflow. This sequence diagram shows the practical steps involved when a developer pushes changes and how the platform responds:",
     
-    "To better understand how the TVP creates leverage, the following component interaction diagram breaks down the FastAPI application into its functional parts and shows how they communicate to reduce duplicated work across teams:",
+    "To complement the GitOps workflow, the reconciliation process ensures that all environments stay synchronized with Git. This diagram shows the detailed steps of how the platform reconciles environments with the desired state in Git:",
     
-    "The data flows through the system in a specific pattern, creating efficiency through standardization. This diagram illustrates how information moves between different components of the platform:",
+    "Now let's look deeper at how the components within our FastAPI application are structured. The following component interaction diagram breaks down the application into its functional parts and shows how they communicate:",
     
-    "Our API is structured to provide clear separation of concerns while maintaining simplicity - a core TVP principle. The following class diagram shows the architecture of our API endpoints and their supporting classes:",
+    "These components work together to facilitate various data flows within the platform. This diagram illustrates how information moves between different components, creating efficiency through standardization:",
+    
+    "Our API is structured to provide clear separation of concerns while maintaining simplicity - a core TVP principle. The following diagram shows the architecture of our API endpoints and their supporting classes:",
     
     "Reliability is essential for any platform that aims to provide leverage. The health check mechanism ensures that all services are operating correctly, reducing the monitoring burden on application teams:",
     
-    "The Kubernetes Proxy allows application developers to interact with the Kubernetes API through our platform, providing leverage by abstracting away complexity. This sequence diagram shows how requests are securely proxied:",
+    "The Kubernetes Proxy allows application developers to interact with the Kubernetes API through our platform. This sequence diagram shows how requests are securely proxied, abstracting away complexity:",
     
-    "Similar to the Kubernetes proxy, the Argo CD proxy enables interaction with Argo CD through our platform, reducing the cognitive load for developers. The sequence diagram below shows the authentication flow:",
+    "Similar to the Kubernetes proxy, the Argo CD authentication flow enables secure interaction with Argo CD through our platform. The sequence diagram below shows the authentication process:",
     
-    "Finally, let's look at the application deployment workflow. This state diagram shows the complete lifecycle of an application deployment through our platform, demonstrating how the TVP provides leverage throughout the deployment process:",
+    "All these components and workflows come together in the application deployment process. This state diagram shows the complete lifecycle of an application deployment through our platform:",
     
-    "Quality assurance is a critical aspect of platform reliability. Our test coverage structure ensures that all components are properly tested, which increases platform stability and reduces maintenance overhead:",
-    
-    "The GitOps workflow is a key part of our platform's leverage strategy. This sequence diagram illustrates how developers interact with the system to deploy applications through git-based workflows:"
+    "Behind the scenes, comprehensive testing ensures the reliability of each component. This diagram shows our test coverage structure and how tests relate to application code:"
 ]
 
 # Transitions between sections to improve narrative flow
 section_transitions = [
-    "With the architecture overview in mind, we can now explore how the platform handles GitOps reconciliation.",
+    "Now that we understand the overall architecture, let's examine how developers actually use the platform through the GitOps workflow.",
     
-    "Understanding the reconciliation process helps us see how changes propagate through the system. Let's now look at the component structure in more detail.",
+    "While the GitOps workflow shows the developer experience, the background reconciliation process ensures everything stays in sync automatically.",
     
-    "These components work together to facilitate various data flows within the platform.",
+    "Having seen how the reconciliation process works, let's look deeper at the components that make up our platform.",
     
-    "Now that we understand the data flow, let's examine the API structure that enables these interactions.",
+    "These components work together in specific patterns to create efficient data flows throughout the system.",
     
-    "One of the key aspects of our API is the ability to monitor system health.",
+    "With an understanding of how data flows through our system, let's examine the API structure that enables these interactions.",
     
-    "In addition to health monitoring, our platform provides secure access to the underlying Kubernetes API.",
+    "One of the key functions of our API is health monitoring, which ensures platform reliability.",
     
-    "Similarly, our platform facilitates interaction with Argo CD for GitOps operations.",
+    "Beyond health checks, our platform also provides secure access to underlying infrastructure through the Kubernetes proxy.",
     
-    "All these components and interactions come together in the application deployment workflow.",
+    "In addition to Kubernetes access, our platform provides secure authentication to Argo CD.",
     
-    "Behind the scenes, comprehensive testing ensures the reliability of each component.",
+    "The authentication and proxy capabilities come together to support the full application deployment workflow.",
     
-    "The test coverage is critical for supporting our GitOps workflow, which ties everything together for developers.",
+    "To ensure all these workflows remain reliable, we maintain comprehensive test coverage across all components.",
     
-    "This GitOps workflow represents the ultimate expression of our platform's leverage capabilities, enabling developers to focus on code rather than infrastructure."
+    "With all these components working together, our platform delivers significant leverage to the organization."
 ]
 
-# New: Leverage points that highlight how each component provides leverage to the organization
+# Leverage points that highlight how each component provides leverage
 leverage_points = [
     "**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts dozens of application developers.",
     
@@ -211,6 +211,8 @@ def main():
             try:
                 with open(filename, "r") as mermaid_file:
                     mermaid_content = mermaid_file.read()
+                    # Remove the filepath comment to avoid showing it in the README
+                    mermaid_content = re.sub(r'^// filepath:.*$', '', mermaid_content, flags=re.MULTILINE).strip()
                     readme.write(mermaid_content)
             except FileNotFoundError:
                 readme.write(f"# File {filename} not found\n")
