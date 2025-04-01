@@ -69,7 +69,7 @@ def test_argo_cd_proxy(test_client, mock_argo_cd_token):
         mock_client.return_value = mock_client_instance
         
         # Test GET request to the proxy endpoint
-        response = test_client.get("/argocd/applications")
+        response = test_client.get("/argo/cd/applications")
         
         assert response.status_code == 200
         assert response.json() == {"applications": []}

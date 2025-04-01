@@ -55,7 +55,7 @@ async def get_argo_cd_auth_token():
             raise HTTPException(status_code=503, detail=f"Argo CD service unavailable: {str(e)}")
 
 # Argo CD True Pass-Through Proxy
-@router.api_route("/argocd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+@router.api_route("/argo/cd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def argo_cd_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Argo CD API.

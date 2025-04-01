@@ -2,7 +2,7 @@ flowchart TD
     User[User/Client] -->|API Request| API[FastAPI App]
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
-    API -->|/argocd/*| AP[Argo CD Proxy]
+    API -->|/argo/cd/*| AP[Argo CD Proxy]
     API -->|/tvp/*| TVP[TVP Router]
     
     KP -->|Auth token| KA[Kubernetes API]

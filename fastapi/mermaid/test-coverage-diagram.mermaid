@@ -4,14 +4,14 @@ flowchart TD
         test_main[test_main.py]
         test_tvp[test_tvp.py]
         test_k8s[test_kubernetes_api.py]
-        test_argo[test_argocd_api.py]
+        test_argo[test_argo_cd_api.py]
     end
 
     subgraph "Application Code"
         main[main.py]
         tvp[tvp.py]
         k8s[kubernetes_api.py]
-        argo[argocd_api.py]
+        argo[argo_cd_api.py]
         config[config.py]
     end
 

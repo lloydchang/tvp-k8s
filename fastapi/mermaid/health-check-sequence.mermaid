@@ -16,7 +16,7 @@ sequenceDiagram
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     
-    FastAPI->>ArgoCD: get_argocd_token()
+    FastAPI->>ArgoCD: get_argo_cd_token()
     alt ArgoCD Healthy
         ArgoCD-->>FastAPI: Valid token
         FastAPI->>FastAPI: ArgoCD status = "healthy"

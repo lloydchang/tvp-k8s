@@ -163,8 +163,8 @@ classDiagram
     }
     
     class ArgoCDRouter {
-        +argocd_proxy()
-        +get_argocd_token()
+        +argo_cd_proxy()
+        +get_arg_ocd_token()
     }
     
     class TVPRouter {
@@ -326,7 +326,7 @@ sequenceDiagram
         FastAPI->>FastAPI: Overall status = "degraded"
     end
     
-    FastAPI->>ArgoCD: get_argocd_token()
+    FastAPI->>ArgoCD: get_argo_cd_token()
     alt ArgoCD Healthy
         ArgoCD-->>FastAPI: Valid token
         FastAPI->>FastAPI: ArgoCD status = "healthy"
@@ -415,7 +415,7 @@ flowchart TD
     User[User/Client] -->|API Request| API[FastAPI App]
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
-    API -->|/argocd/*| AP[Argo CD Proxy]
+    API -->|/argo/cd/*| AP[Argo CD Proxy]
     API -->|/tvp/*| TVP[TVP Router]
     
     KP -->|Auth token| KA[Kubernetes API]

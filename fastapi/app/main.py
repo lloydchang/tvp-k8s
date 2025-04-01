@@ -17,7 +17,7 @@ import httpx
 
 # Import our modules
 from kubernetes_api import router as kubernetes_router
-from argo_cd_api import router as argocd_router, get_argocd_token
+from argo_cd_api import router as argo_cd_router, get_argo_cd_token
 from tvp import router as tvp_router, start_reconciliation_thread
 from config import get_settings, get_kubernetes_client
 
@@ -38,7 +38,7 @@ app.add_middleware(
 
 # Include routers from different modules
 app.include_router(kubernetes_router, prefix="/kubernetes", tags=["Kubernetes"])
-app.include_router(argocd_router, prefix="/argocd", tags=["Argo CD"])
+app.include_router(argo_cd_router, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(tvp_router, prefix="/tvp", tags=["TVP"])
 
 @app.on_event("startup")
@@ -69,7 +69,7 @@ async def root():
         "status": "healthy",
         "endpoints": [
             {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
-            {"prefix": "/argocd", "description": "Argo CD API operations"},
+            {"prefix": "/argo/cd", "description": "Argo CD API operations"},
             {"prefix": "/tvp", "description": "Thinnest Viable Platform operations"}
         ]
     }
