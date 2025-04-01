@@ -122,7 +122,7 @@ async def health_check():
     settings = get_settings()
     try:
         # Use the helper function we created for Argo CD auth
-        token = await get_argocd_token()
+        token = await get_argo_cd_token()
         if token:
             health_status["services"]["argo_cd"] = {
                 "status": "healthy"
