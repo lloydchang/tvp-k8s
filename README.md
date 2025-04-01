@@ -218,30 +218,10 @@ classDiagram
 
 ```
 
-## 3. ArgoCD Authentication Sequence
+## 3. Argo CD Authentication Sequence
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant FastAPI
-    participant ArgoCDRouter
-    participant Config
-    participant ArgoCD
-    
-    Client->>FastAPI: Request to /argocd/...
-    FastAPI->>ArgoCDRouter: Forward request
-    ArgoCDRouter->>ArgoCDRouter: get_argocd_token()
-    ArgoCDRouter->>Config: get_settings()
-    Config-->>ArgoCDRouter: Returns settings
-    
-    ArgoCDRouter->>ArgoCD: POST /api/v1/session
-    Note over ArgoCDRouter,ArgoCD: {username, password}
-    ArgoCD-->>ArgoCDRouter: Authentication token
-    
-    ArgoCDRouter->>ArgoCD: Original request with token
-    ArgoCD-->>ArgoCDRouter: Response data
-    ArgoCDRouter-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
+# File mermaid/argo-cd-authentication-sequence.mermaid not found
 
 ```
 
