@@ -180,7 +180,7 @@ def set_last_reconciliation_time() -> None:
     settings = get_settings()
     timestamp_file = Path(settings.tvp_repo_path) / ".last_reconciliation"
     
-    timestamp = datetime.now().isoformat()
+    timestamp = datetime.now(tz=datetime.utcnow().tzinfo).isoformat()
     
     try:
         timestamp_file.write_text(timestamp)
