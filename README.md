@@ -9,7 +9,8 @@
 
 ---
 
-![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
+![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/b85d2d40-1b80-4ff4-8090-b748ddcb86a8)
+
 > **To stabilize this roof, would you remove one block or add several blocks?**
 > - [**Nature Scientific Journal: _People systematically overlook subtractive changes_** by University of Virginia, Gabrielle Adams, Benjamin Converse, Andrew Hales and Leidy Klotz](https://www.nature.com/articles/s41586-021-03380-y)
 > - [**World Economic Forum: _This Lego experiment shows our brains prefer adding. Here's why it matters_** by Harry Kretchmer](https://www.weforum.org/stories/2021/04/brains-prefer-adding-sustainability/)
