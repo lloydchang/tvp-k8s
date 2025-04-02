@@ -19,8 +19,8 @@ flowchart TB
     end
     
     Client[Client Application] --> API
-    API <-->|Proxy Requests/Responses| KubernetesAPI
-    API <-->|Proxy Requests/Responses| ArgoCD
+    API <-->|Proxy requests/responses| KubernetesAPI
+    API <-->|Proxy requests/responses| ArgoCD
     
     classDef platform fill:#f9f,stroke:#333,stroke-width:2px
     classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
