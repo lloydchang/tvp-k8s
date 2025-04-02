@@ -195,11 +195,11 @@ computing:
 
 > At Google, one of the primary objectives of SRE teams is **_sublinear_** scaling: the size and number of SRE teams should grow more slowly than the number of supported services.
 
-**Leverage Point:** _Declarative_ Automation
+**Leverage Point:** **_Declarative_ Automation**
 
-This comes from the section in the video and transcript where Nikolaus Rath explains their approach to automation that helped achieve **_sublinear_** scaling. The team moved beyond imperative automation (scripts that execute predefined steps) to _declarative_ automation, where you specify the desired state rather than the path to get there.
+This comes from the section in the video and transcript where Nikolaus Rath explains their approach to automation that helped achieve **_sublinear_** scaling. The team moved beyond imperative automation (scripts that execute predefined steps) to **_declarative_** automation, where you specify the desired state rather than the path to get there.
 
-This _declarative_ approach is described as a key leverage point that allowed their SRE team to maintain twice as many services (growing from 200 to 400) without increasing team size.
+This **_declarative_** approach is described as a key leverage point that allowed their SRE team to maintain twice as many services (growing from 200 to 400) without increasing team size.
 
 ---
 
