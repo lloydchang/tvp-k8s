@@ -4,7 +4,7 @@
 
 # Executive Summary:
 - The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
-- We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate software development by providing reusable building blocks
+- We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
 - It is achieved by curating well-defined Application Programming Interfaces (APIs) that simplify infrastructure access and applying product thinking to maximize value
 
 ---
@@ -205,7 +205,7 @@ This **_declarative_** approach is described as a key leverage point that allowe
 
 ## How to build a Thinnest Viable Platform (TVP)?
 
-We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate software development by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
