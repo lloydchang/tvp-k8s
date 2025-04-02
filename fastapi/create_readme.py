@@ -190,7 +190,7 @@ def main():
     
     # Read the TVP header content
     try:
-        with open("tvp_header.md", "r") as header_file:
+        with open("markdown/tvp_header.md", "r") as header_file:
             header_content = header_file.read()
     except FileNotFoundError:
         header_content = "# Thinnest Viable Platform (TVP) about Leverage\n\n"
@@ -273,7 +273,7 @@ def main():
         
         # Finally, append the TVP footer if it exists
         try:
-            with open("tvp_footer.md", "r") as footer_file:
+            with open("markdown/tvp_footer.md", "r") as footer_file:
                 tvp_footer = footer_file.read()
                 readme.write(tvp_footer + "\n")
         except FileNotFoundError:
