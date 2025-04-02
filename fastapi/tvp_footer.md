@@ -8,13 +8,13 @@
 
 ---
 
-## SRE: The Four Golden Signals
+## SRE: The Four Golden Signals of Site Reliablity Engineering
 
 https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals
 
 ---
 
-## DORA: Core Model
+## DORA: Core Model of DevOps Research and Assessment
 
 https://dora.dev/research/?view=detail
 
@@ -22,7 +22,7 @@ https://dora.dev/research/core/assets/dora-core-v2.0.0-detail.png
 
 ---
 
-## SPACE: Developer Productivity
+## The SPACE of Developer Productivity: There's more to it than you think
 
 https://queue.acm.org/detail.cfm?id=3454124
 
@@ -32,7 +32,7 @@ https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.
 
 ---
 
-## DevEx: What Actually Drives Productivity
+## DevEx: What Actually Drives Productivity: The developer-centric approach to measuring and improving productivity
 
 https://queue.acm.org/detail.cfm?id=3595878
 
