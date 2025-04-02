@@ -5,7 +5,7 @@
 # Executive Summary:
 - The core value of platform engineering is leverage—where the work of a lean platform team significantly reduces effort across the broader organization
 - A TVP balances engineering a thinnest viable platform-as-a-product while ensuring that a coherent platform accelerates software delivery through leverage
-- This is achieved through curated Application Programming Interfaces (APIs) that provide simplified platform access to infrastructure using product thinking.
+- This is achieved through curated Application Programming Interfaces (APIs) that provide simplified platform access to infrastructure using product thinking
 
 ---
 
