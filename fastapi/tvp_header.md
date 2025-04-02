@@ -4,7 +4,7 @@
 
 # Executive Summary:
 - The core value of platform engineering is leverage: enabling a lean platform team to significantly reduce effort and improve effectiveness across the broader organization
-- We are building a thinnest viable platform (TVP), treated as a product, to accelerate software development by providing reusable building blocks
+- We are building a thinnest viable platform (TVP), treated as a lean, minimal, focused product, to accelerate software development by providing reusable building blocks
 - This is achieved by curating well-defined Application Programming Interfaces (APIs) that simplify infrastructure access and by applying product thinking to maximize value
 
 ---
