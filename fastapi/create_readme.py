@@ -18,7 +18,7 @@ from datetime import datetime
 
 # List of Mermaid diagram files in a logical narrative sequence
 mermaid_files = [
-    "mermaid/tvp-architecture-diagram.mermaid",
+    "mermaid/tvp-gitops-architecture-diagram.mermaid",
     "mermaid/tvp-gitops-workflow-diagram.mermaid",
     "mermaid/tvp-reconciliation-sequence.mermaid",
     "mermaid/component-diagram.mermaid",
@@ -33,7 +33,7 @@ mermaid_files = [
 
 # Titles precisely matching the content of each diagram
 titles = [
-    "TVP Architecture Overview",
+    "TVP GitOps Architecture Overview",
     "GitOps Workflow Sequence",
     "GitOps Reconciliation Process",
     "Component Interaction Diagram",
