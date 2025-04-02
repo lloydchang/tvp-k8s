@@ -353,7 +353,7 @@ Now that we've established the architectural foundation, let's see how engineers
 
 ## 2. GitOps Workflow Sequence
 
-With our architectural foundation established, let's see how engineers actually interact with this system. The GitOps workflow represents the primary interface between engineers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a engineer pushes a change:
+With our architectural foundation established, let's see how engineers actually interact with this system. The GitOps workflow represents the primary interface between engineers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when an engineer pushes a change:
 
 ```mermaid
 sequenceDiagram
