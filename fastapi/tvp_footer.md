@@ -102,15 +102,16 @@ categories, made possible by large-scale behavioral data.
 
 ## [CASTLE: A UX Framework for Workplace Software](https://www.nngroup.com/articles/castle-framework/)
 
+> The HEART framework is great for B2C products but is lacking for workplace applications where users cannot choose the product. CASTLE offers a complementary assessment framework for UX that focuses on the needs of internal product teams.
+
 > CASTLE is an acronym for:
->
 > C = Cognitive load
 > A = Advanced feature usage
 > S = Satisfaction
 > T = Task efficiency
 > L = Learnability
 > E = Errors
->
+
 > Much like in the HEART framework, the six dimensions are constructs intended to represent the most important elements of user experience for productivity applications that are used as part of someone’s job. The selection of these constructs has taken into account general user-experience principles and priorities, as well as typical business cases and needs for workplace software.
 
 ---
