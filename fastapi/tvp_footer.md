@@ -78,6 +78,8 @@ https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.p
 
 https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
 
+http://dmrussell.net/CHI2010/docs/p2395.pdf
+
 https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36299.pdf
 
 > **PULSE METRICS**
