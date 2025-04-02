@@ -203,7 +203,7 @@ This declarative approach is described as a key leverage point that allowed thei
 
 ---
 
-## What is a **_Thinnest Viable_** Platform (TVP)?
+## What is a Thinnest Viable Platform (TVP)?
 
 A TVP balances between engineering a thinnest viable platform-as-a-product and ensuring that the coherent platform accelerates software delivery through leverage. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
@@ -266,7 +266,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 > The interesting thing about platform is - it's maybe not the platforms of the past, because platforms of the past often in many organizations were great big great massive things; very difficult to use... The platforms we're talking about have placed a strong focus on developer experience; they see other development teams as their customers effectively.
 
-### What is a Thinnest Viable Platform (TVP)?:
+### What is in a Thinnest Viable Platform (TVP)?:
 
 A TVP consists of curated APIs, documentation, and tools needed to accelerate teams' development of modern software services and systems through leverage.
 
