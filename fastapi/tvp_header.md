@@ -268,7 +268,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A **_Thinnest Viable_** Platform is the **_thinnest viable set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A Thinnest Viable Platform consists of curated APIs, documentation, and tools needed to accelerate teams' development of modern software services and systems through leverage.
 
 ### Examples of TVP:
 
