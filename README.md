@@ -801,7 +801,9 @@ flowchart TD
 
 6. **Support Ratio**: Our platform team of 5 effectively supports 25 application teams (100+ engineers).
 
-These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
+These sample metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
+
+For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).
 
 ## 13. Conclusion: The Multiplication of Force
 
