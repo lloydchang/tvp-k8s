@@ -205,7 +205,7 @@ This **_declarative_** approach is described as a key leverage point that allowe
 
 ## How to build a Thinnest Viable Platform (TVP)?
 
-We are building a thinnest viable platform (TVP), treated as a product, to accelerate software development by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+We are building a thinnest viable platform (TVP), treated as a lean, minimal, focused product, to accelerate software development by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
