@@ -295,7 +295,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 
 ## Table of Contents
 
-- [1. TVP Architecture Overview](#1-tvp-architecture-overview)
+- [1. TVP GitOps Architecture Overview](#1-tvp-gitops-architecture-overview)
 - [2. GitOps Workflow Sequence](#2-gitops-workflow-sequence)
 - [3. GitOps Reconciliation Process](#3-gitops-reconciliation-process)
 - [4. Component Interaction Diagram](#4-component-interaction-diagram)
@@ -309,7 +309,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
 - [13. Conclusion](#13-conclusion)
 
-## 1. TVP Architecture Overview
+## 1. TVP GitOps Architecture Overview
 
 Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
 
