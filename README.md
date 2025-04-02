@@ -39,7 +39,7 @@
 
 > As we’ve described, a platform for cloud-native computing offers and composes capabilities and services from many supporting providers. These providers may be other teams within the same enterprise or third parties like cloud service providers. In a nutshell, platforms bridge from underlying capability providers to platform users like application developers; and in the process implement and enforce desired practices for security, performance, cost governance and consistent experience. The following graphic illustrates the relationships between products, platforms, and capability providers.
 
-![Relationships between Products, Platforms, and Capability Providers](https://github.com/user-attachments/assets/be20e9ec-c203-451b-a954-c736e489a7d1)
+![Relationships between Products, Platforms, and Capability Providers](https://github.com/user-attachments/assets/95a73722-5272-4c73-8a64-9125eb818227)
 
 > We've focused in this paper on how to construct a good platform and platform
 team; now in this last section we'll describe the capabilities a platform may
