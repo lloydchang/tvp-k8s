@@ -241,8 +241,9 @@ def main():
         readme.write("4. **Standardization Benefits**: Security audits take 70% less time due to consistent patterns and controls.\n\n")
         readme.write("5. **Cognitive Load Reduction**: Engineers report spending 30% more time on business logic and 30% less time on infrastructure concerns.\n\n")
         readme.write("6. **Support Ratio**: Our platform team of 5 effectively supports 25 application teams (100+ engineers).\n\n")
-        readme.write("These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.\n\n")
-        
+        readme.write("These sample metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.\n\n")
+        readme.write("For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).\n\n")
+
         # More powerful conclusion with a clear call to action
         readme.write(f"## {len(titles)+2}. Conclusion: The Multiplication of Force\n\n")
         readme.write("Throughout this architectural journey, we've seen how the Thinnest Viable Platform ")
