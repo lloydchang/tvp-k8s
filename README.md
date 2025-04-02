@@ -325,7 +325,7 @@ flowchart TB
         RT --> API
     end
     
-    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
+    Eng[Engineers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
     RT -->|Apply configs| KubernetesAPI
     
@@ -344,7 +344,7 @@ flowchart TB
     
     class API,RT platform
     class KubernetesAPI,ArgoCD,GitRepo external
-    class Dev,Client user
+    class Eng,Client user
 ```
 
 **Leverage Point:** The GitOps architecture creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
