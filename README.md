@@ -326,7 +326,7 @@ flowchart TB
     end
     
     Eng[Engineers] -->|Git push| GitRepo[(Git Repository)]
-    GitRepo -->|Pull| RT
+    GitRepo -->|Git pull| RT
     RT -->|Apply configs| KubernetesAPI
     
     subgraph "Kubernetes Cluster"
