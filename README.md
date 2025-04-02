@@ -311,7 +311,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 
 ## 1. TVP Architecture Overview
 
-Let's start by understanding the challenge: how can a small platform team support hundreds of developers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
+Let's start by understanding the challenge: how can a small platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
 
 ```mermaid
 flowchart TB
@@ -347,7 +347,7 @@ flowchart TB
     class Dev,Client user
 ```
 
-**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of application developers.
+**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
 
 Now that we've established the architectural foundation, let's see how developers actually interact with this powerful system.
 
