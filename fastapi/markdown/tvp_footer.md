@@ -80,16 +80,36 @@ large-scale behavioral data.
 on business or technical aspects of a product, and they (or
 similar variations) are widely used by many organizations
 to track overall product health. We call these PULSE
-metrics: **P**age views, **U**ptime, **L**atency, **S**even-day active
-users (i.e. the number of unique users who used the product
-at least once in the last week), and **E**arnings.
+metrics:
+
+> **P**age views,
+
+> **U**ptime,
+
+> **L**atency,
+
+> **S**even-day active users (i.e. the number of unique users who used the product
+at least once in the last week), and
+
+> **E**arnings.
 
 > **HEART METRICS**
 > Based on the shortcomings we saw in PULSE, both for
 measuring user experience quality, and providing
 actionable data, we created a complementary metrics
-framework, HEART: **H**appiness, **E**ngagement, **A**doption,
-**R**etention, and **T**ask success. These are categories, from
+framework, HEART:
+
+> **H**appiness,
+
+> **E**ngagement,
+
+> **A**doption,
+
+> **R**etention, and
+
+> **T**ask success.
+
+> These are categories, from
 which teams can then define the specific metrics that they
 will use to track progress towards goals. The Happiness and
 Task Success categories are generalized from existing user
