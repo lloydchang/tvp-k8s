@@ -869,7 +869,11 @@ https://queue.acm.org/detail.cfm?id=3454124
 
 https://getdx.com/blog/space-framework-primer/
 
+https://medium.com/better-programming/developer-productivity-7552b5a124de
+
 https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.png
+
+![1_PgPlUhNagdK9mrj97gOG3g](https://github.com/user-attachments/assets/adcb7465-8111-46ff-80cc-ca5236c1fe27)
 
 ---
 
@@ -879,19 +883,55 @@ https://queue.acm.org/detail.cfm?id=3595878
 
 https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.png
 
+![noda-table1](https://github.com/user-attachments/assets/a1ef8f49-02d1-4c5b-8e81-3542a4a215a9)
+
 ---
 
-## HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications
+## PULSE and HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications
 
 https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
 
 https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36299.pdf
+
+> **PULSE METRICS**
+> The most commonly used large-scale metrics are focused
+on business or technical aspects of a product, and they (or
+similar variations) are widely used by many organizations
+to track overall product health. We call these PULSE
+metrics: **P**age views, **U**ptime, **L**atency, **S**even-day active
+users (i.e. the number of unique users who used the product
+at least once in the last week), and **E**arnings.
+
+> **HEART METRICS**
+> Based on the shortcomings we saw in PULSE, both for
+measuring user experience quality, and providing
+actionable data, we created a complementary metrics
+framework, HEART: **H**appiness, **E**ngagement, **A**doption,
+**R**etention, and **T**ask success. These are categories, from
+which teams can then define the specific metrics that they
+will use to track progress towards goals. The Happiness and
+Task Success categories are generalized from existing user
+experience metrics: Happiness incorporates satisfaction,
+and Task Success incorporates both effectiveness and
+efficiency. Engagement, Adoption, and Retention are new
+categories, made possible by large-scale behavioral data. 
 
 ---
 
 ## CASTLE: A UX Framework for Workplace Software
 
 https://www.nngroup.com/articles/castle-framework/
+
+> CASTLE is an acronym for:
+>
+> C = Cognitive load
+> A = Advanced feature usage
+> S = Satisfaction
+> T = Task efficiency
+> L = Learnability
+> E = Errors
+>
+> Much like in the HEART framework, the six dimensions are constructs intended to represent the most important elements of user experience for productivity applications that are used as part of someone’s job. The selection of these constructs has taken into account general user-experience principles and priorities, as well as typical business cases and needs for workplace software.
 
 ---
 
