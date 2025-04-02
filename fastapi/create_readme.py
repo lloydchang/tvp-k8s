@@ -49,7 +49,7 @@ titles = [
 # Introductions for each section to create narrative flow - revised for stronger narrative arc
 section_intros = [
     # Exposition - Setting the stage and introducing the problem
-    "Let's start by understanding the challenge: how can a small platform team support hundreds of developers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:",
+    "Let's start by understanding the challenge: how can a small platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:",
     
     # Rising action - Building complexity and engagement
     "With our architectural foundation established, let's see how developers actually interact with this system. The GitOps workflow represents the primary interface between developers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a developer pushes a change:",
@@ -104,7 +104,7 @@ section_transitions = [
 
 # Leverage points that highlight how each component provides leverage
 leverage_points = [
-    "**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of application developers.",
+    "**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.",
     
     "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.",
 
