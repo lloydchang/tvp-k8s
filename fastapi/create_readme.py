@@ -154,6 +154,27 @@ def contains_architecture_section(content):
     """
     return re.search(r'#+ +System +Architecture', content, re.IGNORECASE) is not None
 
+def read_markdown_file(filename, default_content=""):
+    """
+    Read content from a markdown file.
+    
+    Args:
+        filename: Path to the markdown file
+        default_content: Content to return if the file is not found
+        
+    Returns:
+        The content of the file or the default content if the file is not found
+    """
+    try:
+        with open(filename, "r") as file:
+            content = file.read()
+            # Remove the filepath comment if present
+            content = re.sub(r'^<!-- filepath:.*? -->', '', content, flags=re.MULTILINE).strip()
+            return content
+    except FileNotFoundError:
+        print(f"Warning: {filename} not found, using default content.")
+        return default_content
+
 def main():
     """
     Main function that generates the README.md file.
@@ -174,6 +195,17 @@ def main():
     except FileNotFoundError:
         header_content = "# Thinnest Viable Platform (TVP) about Leverage\n\n"
         header_content += "This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n"
+    
+    # Read the measuring leverage and conclusion content
+    measuring_leverage_content = read_markdown_file(
+        "markdown/measuring_leverage.md",
+        "**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample metrics that our TVP approach may deliver..."
+    )
+    
+    conclusion_content = read_markdown_file(
+        "markdown/conclusion.md",
+        "Throughout this architectural journey, we've seen how the Thinnest Viable Platform embodies Archimedes' famous principle: \"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.\"..."
+    )
     
     with open(readme_path, "w") as readme:
         # Write the header content
@@ -231,34 +263,13 @@ def main():
             if i < len(mermaid_files) - 1:
                 readme.write(f"{transition}\n\n")
         
-        # Enhanced metrics section with more dramatic impact
+        # Metrics section from markdown file
         readme.write(f"## {len(titles)+1}. Measuring Platform Leverage\n\n")
-        readme.write("**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. ")
-        readme.write("Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:\n\n")
-        readme.write("1. **Engineer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.\n\n")
-        readme.write("2. **Deployment Frequency**: Teams using our platform deploy 4x more frequently than teams managing their own infrastructure.\n\n")
-        readme.write("3. **Onboarding Acceleration**: New engineers become productive in 3 days versus 3 weeks without the platform.\n\n")
-        readme.write("4. **Standardization Benefits**: Security audits take 70% less time due to consistent patterns and controls.\n\n")
-        readme.write("5. **Cognitive Load Reduction**: Engineers report spending 30% more time on business logic and 30% less time on infrastructure concerns.\n\n")
-        readme.write("6. **Support Ratio**: Our platform team of 5 effectively supports 25 application teams (100+ engineers).\n\n")
-        readme.write("These sample metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.\n\n")
-        readme.write("For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).\n\n")
+        readme.write(measuring_leverage_content + "\n\n")
 
-        # More powerful conclusion with a clear call to action
-        readme.write(f"## {len(titles)+2}. Conclusion: The Multiplication of Force\n\n")
-        readme.write("Throughout this architectural journey, we've seen how the Thinnest Viable Platform ")
-        readme.write("embodies Archimedes' famous principle: \"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.\" ")
-        readme.write("By strategically positioning our platform components as leverage points, we've created a system where ")
-        readme.write("the effort of a lean platform team multiplies across the broader organization. ")
-        readme.write("\n\n")
-        readme.write("This is the essence of successful platform engineering - not building every feature requested, ")
-        readme.write("but carefully selecting the minimum set of abstractions that deliver maximum impact. ")
-        readme.write("Just as a physical lever transforms a small force into a much larger one, ")
-        readme.write("our TVP transmutes the effort of platform engineers into outsized productivity gains ")
-        readme.write("for all engineering teams.\n\n")
-        readme.write("**The question now is:** Where in your organization can you apply these same principles? ")
-        readme.write("Which cognitive loads can you remove from your engineers? ")
-        readme.write("What minimum viable abstractions would create the greatest leverage in your context?\n\n")
+        # Conclusion section from markdown file
+        readme.write(f"## {len(titles)+2}. Conclusion\n\n")
+        readme.write(conclusion_content + "\n\n")
         
         # Finally, append the TVP footer if it exists
         try:
