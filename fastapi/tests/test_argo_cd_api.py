@@ -25,7 +25,7 @@ def test_get_argo_cd_token_success(test_client, mock_settings):
         # Verify the request was made with correct parameters
         mock_client_instance.__aenter__.return_value.post.assert_called_with(
             f"{mock_settings.argo_cd_url}/api/v1/session",
-            json={"username": mock_settings.argo_cd_username, "password": mock_settings.argo_cd_password},
+            json={"identity": mock_settings.argo_cd_identity},
             timeout=10.0
         )
 
