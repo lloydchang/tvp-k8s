@@ -104,7 +104,7 @@ section_transitions = [
 
 # Leverage points that highlight how each component provides leverage
 leverage_points = [
-    "**Leverage Point:** The GitOps architecture — [*_declarative_*, versioned, immutable, *_pulled automatically_* and *_continuously reconciled_*](https://opengitops.dev/) — creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.",
+    "**Leverage Point:** The GitOps architecture — [**_declarative_**, versioned, immutable, **_pulled automatically_** and **_continuously reconciled_**](https://opengitops.dev/) — creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.",
     
     "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.",
 
