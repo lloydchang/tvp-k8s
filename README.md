@@ -357,18 +357,18 @@ With our architectural foundation established, let's see how engineers actually 
 
 ```mermaid
 sequenceDiagram
-    actor Dev as Developer
+    actor Eng as Engineer
     participant Git as Git Repository
     participant TVP as TVP API
     participant Thread as Reconciliation Thread
     participant Kubernetes as Kubernetes API Server
     
-    Dev->>Git: Push application changes
+    Eng->>Git: Push application changes
     
     alt Manual Trigger
-        Dev->>TVP: POST /tvp/reconcile
+        Eng->>TVP: POST /tvp/reconcile
         TVP->>Thread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>Dev: {"status": "started"}
+        TVP-->>Eng: {"status": "started"}
     else Automatic Reconciliation
         Note over Thread: Periodic check<br>(every 5 min)
     end
@@ -382,8 +382,8 @@ sequenceDiagram
     
     Thread->>Thread: Update last_reconciliation timestamp
     
-    Dev->>TVP: GET /tvp/status
-    TVP-->>Dev: Application status information
+    Eng->>TVP: GET /tvp/status
+    TVP-->>Eng: Application status information
 ```
 
 **Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
