@@ -156,8 +156,8 @@ categories, made possible by large-scale behavioral data.
 
 > [Depending](https://teachersinstitute.yale.edu/curriculum/units/2014/4/14.04.04/2) on the positions of fulcrum, input force and applied force, one can define three types of levers: first class, second class and third class.
 
-![FirstClass](https://github.com/user-attachments/assets/b3340481-77d0-4987-8330-2601f0467a91)
+![First Class Levers](https://github.com/user-attachments/assets/32435cde-aac8-4cf9-a902-2146977d2d8b)
 
-![SecondClass](https://github.com/user-attachments/assets/b3ec6f68-d472-4b23-93e4-0318ea169aef)
+![Second Class Levers](https://github.com/user-attachments/assets/e425a6a8-49f9-4fd9-b7fb-34944ab9cfa5)
 
-![ThirdClass](https://github.com/user-attachments/assets/6b6e2ed2-ccc1-41f5-ba30-dde585bf7160)
+![Third Class Levers](https://github.com/user-attachments/assets/cb60a23f-d5dc-44a7-a099-6b16e482f4e0)
