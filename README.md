@@ -347,7 +347,7 @@ flowchart TB
     class Dev,Client user
 ```
 
-**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts dozens of application developers.
+**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of application developers.
 
 Now that we've established the architectural foundation, let's see how developers actually interact with this powerful system.
 
