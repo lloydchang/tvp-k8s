@@ -5,7 +5,7 @@
 # Executive Summary:
 - The core value of platform engineering is leverage—where the work of a lean platform team significantly reduces effort across the broader organization
 - A TVP balances between engineering a thinnest viable platform-as-a-product and ensuring that the coherent platform accelerates software delivery through leverage
-- A set of curated Application Programming Interfaces (APIs) with simplified platform access to infrastructure via product thinking
+- Curated Application Programming Interfaces (APIs) with simplified platform access to infrastructure via product thinking
 
 ---
 
@@ -268,7 +268,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A **_Thinnest Viable_** Platform is the **_thinnest viable set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A Thinnest Viable Platform consists of curated APIs, documentation, and tools needed to accelerate teams' development of modern software services and systems through leverage.
 
 ### Examples of TVP:
 
@@ -279,7 +279,7 @@ A **_Thinnest Viable_** Platform is the **_thinnest viable set of APIs_**, docum
 - **Documentation and tools focused on reducing cognitive load for development teams**
   - [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures](https://cnoe.io/)
-- **A _set of curated Application Programming Interfaces (APIs)_ with simplified platform access to infrastructure via product thinking**
+- **_Curated Application Programming Interfaces (APIs)_ with simplified platform access to infrastructure via product thinking**
   - [Thinnest Viable Platform (TVP) about Leverage](https://github.com/lloydchang/tvp)
 
 ## System Architecture Documentation:
