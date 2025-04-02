@@ -327,7 +327,7 @@ flowchart TB
     
     Eng[Engineers] -->|Push| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
-    RT -->|Apply configs| KubernetesAPI
+    RT -->|Apply| KubernetesAPI
     
     subgraph "Kubernetes Cluster"
         KubernetesAPI[Kubernetes API Server]
