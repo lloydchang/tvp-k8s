@@ -311,7 +311,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 
 ## 1. TVP Architecture Overview
 
-Let's start by understanding the challenge: how can a small platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
+Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
 
 ```mermaid
 flowchart TB
@@ -347,7 +347,7 @@ flowchart TB
     class Dev,Client user
 ```
 
-**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
+**Leverage Point:** The GitOps architecture creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
 
 Now that we've established the architectural foundation, let's see how developers actually interact with this powerful system.
 
@@ -804,7 +804,7 @@ These metrics demonstrate the true leverage that comes from building a carefully
 
 ## 13. Conclusion: The Multiplication of Force
 
-Throughout this architectural journey, we've seen how the Thinnest Viable Platform embodies Archimedes' famous principle: "Give me a lever long enough and a fulcrum on which to place it, and I shall move the world." By strategically positioning our platform components as leverage points, we've created a system where the effort of a small platform team multiplies across the entire organization. 
+Throughout this architectural journey, we've seen how the Thinnest Viable Platform embodies Archimedes' famous principle: "Give me a lever long enough and a fulcrum on which to place it, and I shall move the world." By strategically positioning our platform components as leverage points, we've created a system where the effort of a lean platform team multiplies across the broader organization. 
 
 This is the essence of successful platform engineering - not building every feature requested, but carefully selecting the minimum set of abstractions that deliver maximum impact. Just as a physical lever transforms a small force into a much larger one, our TVP transmutes the effort of platform engineers into outsized productivity gains for all development teams.
 
