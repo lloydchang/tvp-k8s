@@ -2,6 +2,11 @@
 
 # Thinnest Viable Platform (TVP) about Leverage
 
+# Executive Summary:
+- Core to the value of platform engineering is the concept of leverage—meaning, the work of a few engineers on a platform team reduces the work of the greater organization
+- A TVP is a careful balance between keeping the platform small and ensuring that the platform is helping to accelerate and simplify software delivery for teams building on the platform
+- A set of curated APIs with simplified access to infrastructure
+
 ---
 
 ![This Lego experiment shows our brains prefer adding  Here's why it matters](https://github.com/user-attachments/assets/ea8b4c7f-bacc-4041-871b-8c1f85916e0c)
