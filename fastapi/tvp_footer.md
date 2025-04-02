@@ -105,6 +105,7 @@ categories, made possible by large-scale behavioral data.
 > The HEART framework is great for B2C products but is lacking for workplace applications where users cannot choose the product. CASTLE offers a complementary assessment framework for UX that focuses on the needs of internal product teams.
 
 > CASTLE is an acronym for:
+
 > C = Cognitive load
 > A = Advanced feature usage
 > S = Satisfaction
