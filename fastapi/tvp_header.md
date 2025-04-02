@@ -4,7 +4,7 @@
 
 # Executive Summary:
 - Core to the value of platform engineering is the concept of leverage—meaning, the work of a few engineers on a platform team reduces the work of the greater organization
-- A TVP balances between keeping the platform-as-a-product small and ensuring that the coherent platform is accelerating software deliveries
+- A TVP balances between engineering a thinnest viable platform-as-a-product and ensuring that the coherent platform accelerates software delivery
 - A set of curated Application Programming Interfaces (APIs) with simplified platform access to infrastructure via product thinking
 
 ---
@@ -205,7 +205,7 @@ This declarative approach is described as a key leverage point that allowed thei
 
 ## What is a **_Thinnest Viable_** Platform (TVP)?
 
-A TVP balances between keeping the platform-as-a-product small and ensuring that the coherent platform is accelerating software deliveries. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+A TVP balances between engineering a thinnest viable platform-as-a-product and ensuring that the coherent platform accelerates software delivery. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
@@ -268,7 +268,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 ### TVP Definition:
 
-A **_Thinnest Viable_** Platform is the **_smallest set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
+A **_Thinnest Viable_** Platform is the **_thinnest viable set of APIs_**, documentation, and tools needed to accelerate the teams developing modern software services and systems.
 
 ### Examples of TVP:
 
