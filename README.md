@@ -676,12 +676,13 @@ sequenceDiagram
     Client->>FastAPI: Request to /argo/cd/...
     FastAPI->>Argo CD Proxy: Forward request
     Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
+    Note over Argo CD Proxy: Authentication using service account token
     Argo CD Proxy->>Config: get_settings()
     Config-->>Argo CD Proxy: Returns settings
     
     Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {username, password}
-    Argo CD-->>Argo CD Proxy: Authentication token
+    Note over Argo CD Proxy,Argo CD: {identity}
+    Argo CD-->>Argo CD Proxy: Session token
     
     Argo CD Proxy->>Argo CD: Original request with token
     Argo CD-->>Argo CD Proxy: Response data
