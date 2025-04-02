@@ -9,7 +9,7 @@ flowchart TB
         RT --> API
     end
     
-    Dev[Developers] -->|Git commit| GitRepo[(Git Repository)]
+    Eng[Engineers] -->|Git commit| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
     RT -->|Apply configs| KubernetesAPI
     
@@ -28,4 +28,4 @@ flowchart TB
     
     class API,RT platform
     class KubernetesAPI,ArgoCD,GitRepo external
-    class Dev,Client user
+    class Eng,Client user
