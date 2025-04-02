@@ -46,7 +46,7 @@ https://dora.dev/research/?view=detail
 
 https://dora.dev/research/core/assets/dora-core-v2.0.0-detail.png
 
-![dora-core-v2 0 0-detail](https://github.com/user-attachments/assets/61e455c1-643d-49c2-bbe3-273acd47052e)
+![dora-core-v2 0 0-detail](https://github.com/user-attachments/assets/dddac594-7f4a-40de-9701-7e725fa51605)
 
 ---
 
@@ -60,7 +60,7 @@ https://medium.com/better-programming/developer-productivity-7552b5a124de
 
 https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.png
 
-![1_PgPlUhNagdK9mrj97gOG3g](https://github.com/user-attachments/assets/adcb7465-8111-46ff-80cc-ca5236c1fe27)
+![1_PgPlUhNagdK9mrj97gOG3g](https://github.com/user-attachments/assets/bd48b91d-2c86-49fd-b19b-8caf55ea9907)
 
 ---
 
@@ -70,7 +70,7 @@ https://queue.acm.org/detail.cfm?id=3595878
 
 https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.png
 
-![noda-table1](https://github.com/user-attachments/assets/a1ef8f49-02d1-4c5b-8e81-3542a4a215a9)
+![noda-table1](https://github.com/user-attachments/assets/9a3c1929-59b7-4d4d-b0ba-f74931207808)
 
 ---
 
