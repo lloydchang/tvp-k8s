@@ -44,8 +44,6 @@ https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_gold
 
 https://dora.dev/research/?view=detail
 
-https://dora.dev/research/core/assets/dora-core-v2.0.0-detail.png
-
 ![dora-core-v2 0 0-detail](https://github.com/user-attachments/assets/dddac594-7f4a-40de-9701-7e725fa51605)
 
 ---
@@ -53,12 +51,6 @@ https://dora.dev/research/core/assets/dora-core-v2.0.0-detail.png
 ## The SPACE of Developer Productivity: There's more to it than you think
 
 https://queue.acm.org/detail.cfm?id=3454124
-
-https://getdx.com/blog/space-framework-primer/
-
-https://medium.com/better-programming/developer-productivity-7552b5a124de
-
-https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.png
 
 ![1_PgPlUhNagdK9mrj97gOG3g](https://github.com/user-attachments/assets/bd48b91d-2c86-49fd-b19b-8caf55ea9907)
 
@@ -68,8 +60,6 @@ https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.
 
 https://queue.acm.org/detail.cfm?id=3595878
 
-https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.png
-
 ![noda-table1](https://github.com/user-attachments/assets/9a3c1929-59b7-4d4d-b0ba-f74931207808)
 
 ---
@@ -77,10 +67,6 @@ https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.p
 ## PULSE and HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications
 
 https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
-
-http://dmrussell.net/CHI2010/docs/p2395.pdf
-
-https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36299.pdf
 
 > **PULSE METRICS**
 > The most commonly used large-scale metrics are focused
