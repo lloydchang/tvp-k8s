@@ -8,9 +8,7 @@
 
 ---
 
-## SRE: The Four Golden Signals of Site Reliablity Engineering
-
-https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals
+## [SRE: The Four Golden Signals of Site Reliablity Engineering](https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals)
 
 > **The Four Golden Signals**
 > 
@@ -40,33 +38,25 @@ https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_gold
 
 ---
 
-## DORA: Core Model of DevOps Research and Assessment
-
-https://dora.dev/research/?view=detail
+## [DORA: Core Model of DevOps Research and Assessment](https://dora.dev/research/?view=detail)
 
 ![dora-core-v2 0 0-detail](https://github.com/user-attachments/assets/dddac594-7f4a-40de-9701-7e725fa51605)
 
 ---
 
-## The SPACE of Developer Productivity: There's more to it than you think
-
-https://queue.acm.org/detail.cfm?id=3454124
+## [The SPACE of Developer Productivity: There's more to it than you think](https://queue.acm.org/detail.cfm?id=3454124)
 
 ![1_PgPlUhNagdK9mrj97gOG3g](https://github.com/user-attachments/assets/bd48b91d-2c86-49fd-b19b-8caf55ea9907)
 
 ---
 
-## DevEx: What Actually Drives Productivity: The developer-centric approach to measuring and improving productivity
-
-https://queue.acm.org/detail.cfm?id=3595878
+## [DevEx: What Actually Drives Productivity: The developer-centric approach to measuring and improving productivity](https://queue.acm.org/detail.cfm?id=3595878)
 
 ![noda-table1](https://github.com/user-attachments/assets/9a3c1929-59b7-4d4d-b0ba-f74931207808)
 
 ---
 
-## PULSE and HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications
-
-https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
+## [PULSE and HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications](https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/)
 
 > **PULSE METRICS**
 > The most commonly used large-scale metrics are focused
@@ -93,9 +83,7 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
-## CASTLE: A UX Framework for Workplace Software
-
-https://www.nngroup.com/articles/castle-framework/
+## [CASTLE: A UX Framework for Workplace Software](https://www.nngroup.com/articles/castle-framework/)
 
 > CASTLE is an acronym for:
 >
@@ -129,5 +117,3 @@ https://www.nngroup.com/articles/castle-framework/
 ![SecondClass](https://github.com/user-attachments/assets/b3ec6f68-d472-4b23-93e4-0318ea169aef)
 
 ![ThirdClass](https://github.com/user-attachments/assets/6b6e2ed2-ccc1-41f5-ba30-dde585bf7160)
-
-- [**GeoCities: _Mechanical Systems_** by R. Warren](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html)
