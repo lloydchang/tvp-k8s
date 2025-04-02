@@ -39,7 +39,7 @@ async def get_argo_cd_auth_token():
         try:
             auth_response = await client.post(
                 f"{settings.argo_cd_url}/api/v1/session",
-                json={"username": settings.argo_cd_username, "password": settings.argo_cd_password},
+                json={"identity": settings.argo_cd_identity},
                 timeout=10.0  # Add reasonable timeout
             )
             if auth_response.status_code != 200:
