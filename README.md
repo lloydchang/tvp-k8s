@@ -347,7 +347,7 @@ flowchart TB
     class Eng,Client user
 ```
 
-**Leverage Point:** The GitOps architecture (declarative, versioned, immutable, **__pulled__**, reconciled) creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
+**Leverage Point:** The GitOps architecture (**__declarative__**, versioned, immutable, **__pulled__**, reconciled) creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
 
 Now that we've established the architectural foundation, let's see how engineers actually interact with this powerful system.
 
