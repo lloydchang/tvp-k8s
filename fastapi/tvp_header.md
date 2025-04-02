@@ -3,9 +3,9 @@
 # Thinnest Viable Platform (TVP) through Leverage
 
 # Executive Summary:
-- The core value of platform engineering is leverage—enabling a lean platform team to reduce effort and improve operations across the broader organization
-- The team is building a thinnest viable software platform (treated like a product), designed to speed up the software development process by providing reusable building blocks
-- This is achieved by curating Application Programming Interfaces (APIs) that simplify access to infrastructure, using product thinking to maximize value
+- The core value of platform engineering is leverage: enabling a lean platform team to significantly reduce effort and improve operational impact across the organization
+- We are building a thinnest viable platform (TVP), treated as a product, to accelerate software development by providing reusable building blocks
+- This is achieved by curating well-defined Application Programming Interfaces (APIs) that simplify infrastructure access and by applying product thinking to maximize value
 
 ---
 
@@ -203,9 +203,9 @@ This **_declarative_** approach is described as a key leverage point that allowe
 
 ---
 
-## What is a Thinnest Viable Platform (TVP)?
+## How to build a Thinnest Viable Platform (TVP)?
 
-The team is building a thinnest viable software platform (treated like a product), designed to speed up the software development process by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+We are building a thinnest viable platform (TVP), treated as a product, to accelerate software development by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
