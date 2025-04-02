@@ -813,7 +813,65 @@ This is the essence of successful platform engineering - not building every feat
 
 ---
 
-# *Leverage* Analogies: What Makes Things Move?
+# Appendix
+
+---
+
+# Frameworks:
+
+---
+
+## SRE: The Four Golden Signals
+
+https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals
+
+---
+
+## DORA: Core Model
+
+https://dora.dev/research/?view=detail
+
+https://dora.dev/research/core/assets/dora-core-v2.0.0-detail.png
+
+---
+
+## SPACE: Developer Productivity
+
+https://queue.acm.org/detail.cfm?id=3454124
+
+https://getdx.com/blog/space-framework-primer/
+
+https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PgPlUhNagdK9mrj97gOG3g.png
+
+---
+
+## DevEx: What Actually Drives Productivity
+
+https://queue.acm.org/detail.cfm?id=3595878
+
+https://dl.acm.org/cms/attachment/html/10.1145/3595878/assets/html/noda-table1.png
+
+---
+
+## HEART: Measuring the User Experience on a Large Scale: User-Centered Metrics for Web Applications
+
+https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
+
+https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36299.pdf
+
+---
+
+## CASTLE: A UX Framework for Workplace Software
+
+https://www.nngroup.com/articles/castle-framework/
+
+---
+
+# Analogies:
+
+---
+
+## Levers: What Makes Things Move?
 
 ---
 
