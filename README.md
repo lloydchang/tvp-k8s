@@ -325,7 +325,7 @@ flowchart TB
         RT --> API
     end
     
-    Eng[Engineers] -->|Git commit| GitRepo[(Git Repository)]
+    Eng[Engineers] -->|Git push| GitRepo[(Git Repository)]
     GitRepo -->|Pull| RT
     RT -->|Apply configs| KubernetesAPI
     
