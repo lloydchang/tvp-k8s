@@ -49,7 +49,7 @@ titles = [
 # Introductions for each section to create narrative flow - revised for stronger narrative arc
 section_intros = [
     # Exposition - Setting the stage and introducing the problem
-    "Let's start by understanding the challenge: how can a small platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:",
+    "Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:",
     
     # Rising action - Building complexity and engagement
     "With our architectural foundation established, let's see how developers actually interact with this system. The GitOps workflow represents the primary interface between developers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a developer pushes a change:",
@@ -104,7 +104,7 @@ section_transitions = [
 
 # Leverage points that highlight how each component provides leverage
 leverage_points = [
-    "**Leverage Point:** The GitOps architecture creates leverage by allowing a small platform team to support many development teams. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.",
+    "**Leverage Point:** The GitOps architecture creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.",
     
     "**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.",
 
@@ -248,7 +248,7 @@ def main():
         readme.write("Throughout this architectural journey, we've seen how the Thinnest Viable Platform ")
         readme.write("embodies Archimedes' famous principle: \"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.\" ")
         readme.write("By strategically positioning our platform components as leverage points, we've created a system where ")
-        readme.write("the effort of a small platform team multiplies across the entire organization. ")
+        readme.write("the effort of a lean platform team multiplies across the broader organization. ")
         readme.write("\n\n")
         readme.write("This is the essence of successful platform engineering - not building every feature requested, ")
         readme.write("but carefully selecting the minimum set of abstractions that deliver maximum impact. ")
