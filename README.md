@@ -291,7 +291,7 @@ This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides
 
 **The challenge:** How can organizations scale their development capabilities without proportionally scaling their operational overhead? The answer lies in leverage - the ability for small teams to enable disproportionately large outcomes. In the following sections, we'll journey through the architecture of a Thinnest Viable Platform that embodies this principle, showing how carefully designed abstractions create extraordinary force multiplication across an engineering organization.
 
-The diagrams below tell a story - one of complexity tamed through deliberate design choices. We'll start with the big picture and progressively dive deeper, revealing how each component contributes to the platform's leverage. Pay attention to how a few well-designed interfaces and automation points eliminate entire categories of toil across the organization, allowing development teams to focus on business value rather than infrastructure complexities.
+The diagrams below tell a story - one of complexity tamed through deliberate design choices. We'll start with the big picture and progressively dive deeper, revealing how each component contributes to the platform's leverage. Pay attention to how a few well-designed interfaces and automation points eliminate entire categories of toil across the organization, allowing engineering teams to focus on business value rather than infrastructure complexities.
 
 ## Table of Contents
 
@@ -349,11 +349,11 @@ flowchart TB
 
 **Leverage Point:** The GitOps architecture creates leverage by allowing a lean platform team to support hundreds of engineers. By centralizing the infrastructure interaction through a single API layer, the organization gains a force multiplier where each platform engineer's work impacts hundreds of engineers.
 
-Now that we've established the architectural foundation, let's see how developers actually interact with this powerful system.
+Now that we've established the architectural foundation, let's see how engineers actually interact with this powerful system.
 
 ## 2. GitOps Workflow Sequence
 
-With our architectural foundation established, let's see how developers actually interact with this system. The GitOps workflow represents the primary interface between developers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a developer pushes a change:
+With our architectural foundation established, let's see how engineers actually interact with this system. The GitOps workflow represents the primary interface between engineers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a engineer pushes a change:
 
 ```mermaid
 sequenceDiagram
@@ -386,9 +386,9 @@ sequenceDiagram
     TVP-->>Dev: Application status information
 ```
 
-**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one developer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
+**Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
 
-While this workflow appears simple from the developer's perspective, there's sophisticated automation working behind the scenes. Let's examine the reconciliation process that makes this seamless experience possible.
+While this workflow appears simple from the engineer's perspective, there's sophisticated automation working behind the scenes. Let's examine the reconciliation process that makes this seamless experience possible.
 
 ## 3. GitOps Reconciliation Process
 
@@ -428,7 +428,7 @@ sequenceDiagram
     ReconcileThread->>ReconcileThread: is_reconciling = false
 ```
 
-**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One developer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
+**Leverage Point:** The reconciliation process provides leverage by automating what would otherwise be manual, error-prone operations. One engineer committing a change to Git can trigger consistent updates across multiple environments and services - a significant force multiplier.
 
 To understand how reconciliation works at a deeper level, we need to look at the individual components that make up our platform.
 
@@ -470,7 +470,7 @@ flowchart TB
 
 **Leverage Point:** This component structure demonstrates the leverage principle of TVP by separating concerns and enabling multiple teams to work independently. Each component acts as a force multiplier by providing standardized functionality that would otherwise be duplicated across teams.
 
-With these components identified, we can follow how data flows through the system, creating patterns that developers can rely on.
+With these components identified, we can follow how data flows through the system, creating patterns that engineers can rely on.
 
 ## 5. Data Flow Diagram
 
@@ -587,7 +587,7 @@ classDiagram
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 ```
 
-**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Development teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
+**Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Engineering teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
 
 A sophisticated platform needs to be reliable. Let's see how health monitoring ensures the system remains operational even as complexity increases.
 
@@ -633,7 +633,7 @@ Now we reach the crucial capability that delivers immense leverage: abstracting 
 
 ## 8. Kubernetes Proxy Sequence
 
-We've now reached the core capability of our platform: secure access to underlying infrastructure. The Kubernetes Proxy represents the primary leverage point, where platform engineering effort creates enormous value. This diagram shows how the proxy securely connects developers to Kubernetes without requiring specialized expertise:
+We've now reached the core capability of our platform: secure access to underlying infrastructure. The Kubernetes Proxy represents the primary leverage point, where platform engineering effort creates enormous value. This diagram shows how the proxy securely connects engineers to Kubernetes without requiring specialized expertise:
 
 ```mermaid
 sequenceDiagram
@@ -657,13 +657,13 @@ sequenceDiagram
     FastAPI-->>Client: API response
 ```
 
-**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each developer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
+**Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each engineer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
 
 With Kubernetes access solved, we complete our core capabilities by providing similar abstraction for GitOps workflows through the Argo CD proxy.
 
 ## 9. Argo CD Proxy Sequence
 
-Similarly critical is our Argo CD integration, which extends the platform's reach to GitOps deployment workflows. The proxy flow shown here creates a seamless experience for developers while maintaining security boundaries:
+Similarly critical is our Argo CD integration, which extends the platform's reach to GitOps deployment workflows. The proxy flow shown here creates a seamless experience for engineers while maintaining security boundaries:
 
 ```mermaid
 sequenceDiagram
@@ -689,7 +689,7 @@ sequenceDiagram
     FastAPI-->>Client: API response
 ```
 
-**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows development teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
+**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows engineering teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
 
 With all these elements in place, we can now see how they combine to create a complete application deployment workflow - the ultimate value proposition of our platform.
 
@@ -730,7 +730,7 @@ stateDiagram-v2
     }
 ```
 
-**Leverage Point:** This Application Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Development teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
+**Leverage Point:** This Application Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Engineering teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
 Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.
 
@@ -782,23 +782,23 @@ flowchart TD
     class main,tvp,kubernetes,argo,config appFile
 ```
 
-**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application developers, enabling faster iteration and more frequent releases.
+**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application engineers, enabling faster iteration and more frequent releases.
 
 ## 12. Measuring Platform Leverage
 
 **The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:
 
-1. **Developer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.
+1. **Engineer Time Multiplication**: For every hour spent by the platform team, we save approximately 20 hours of development time across application teams.
 
 2. **Deployment Frequency**: Teams using our platform deploy 4x more frequently than teams managing their own infrastructure.
 
-3. **Onboarding Acceleration**: New developers become productive in 3 days versus 3 weeks without the platform.
+3. **Onboarding Acceleration**: New engineers become productive in 3 days versus 3 weeks without the platform.
 
 4. **Standardization Benefits**: Security audits take 70% less time due to consistent patterns and controls.
 
-5. **Cognitive Load Reduction**: Developers report spending 30% more time on business logic and 30% less time on infrastructure concerns.
+5. **Cognitive Load Reduction**: Engineers report spending 30% more time on business logic and 30% less time on infrastructure concerns.
 
-6. **Support Ratio**: Our platform team of 5 effectively supports 25 application teams (100+ developers).
+6. **Support Ratio**: Our platform team of 5 effectively supports 25 application teams (100+ engineers).
 
 These metrics demonstrate the true leverage that comes from building a carefully designed Thinnest Viable Platform.
 
@@ -806,9 +806,9 @@ These metrics demonstrate the true leverage that comes from building a carefully
 
 Throughout this architectural journey, we've seen how the Thinnest Viable Platform embodies Archimedes' famous principle: "Give me a lever long enough and a fulcrum on which to place it, and I shall move the world." By strategically positioning our platform components as leverage points, we've created a system where the effort of a lean platform team multiplies across the broader organization. 
 
-This is the essence of successful platform engineering - not building every feature requested, but carefully selecting the minimum set of abstractions that deliver maximum impact. Just as a physical lever transforms a small force into a much larger one, our TVP transmutes the effort of platform engineers into outsized productivity gains for all development teams.
+This is the essence of successful platform engineering - not building every feature requested, but carefully selecting the minimum set of abstractions that deliver maximum impact. Just as a physical lever transforms a small force into a much larger one, our TVP transmutes the effort of platform engineers into outsized productivity gains for all engineering teams.
 
-**The question now is:** Where in your organization can you apply these same principles? Which cognitive loads can you remove from your developers? What minimum viable abstractions would create the greatest leverage in your context?
+**The question now is:** Where in your organization can you apply these same principles? Which cognitive loads can you remove from your engineers? What minimum viable abstractions would create the greatest leverage in your context?
 
 ---
 
