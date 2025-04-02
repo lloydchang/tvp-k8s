@@ -4,7 +4,7 @@
 
 # Executive Summary:
 - Core to the value of platform engineering is the concept of leverage—meaning, the work of a few engineers on a platform team reduces the work of the greater organization
-- A TVP is a careful balance between keeping the platform small and ensuring that the coherent platform is helping to accelerate and simplify software delivery for teams building on the platform-as-a-product
+- A TVP balances between keeping the platform small and ensuring that the coherent platform is accelerating software delivery for teams building on the platform-as-a-product
 - A set of curated Application Programming Interfaces (APIs) with simplified platform access to infrastructure via product thinking
 
 ---
@@ -205,7 +205,7 @@ This declarative approach is described as a key leverage point that allowed thei
 
 ## What is a **_Thinnest Viable_** Platform (TVP)?
 
-A TVP is a careful balance between keeping the platform small and ensuring that the coherent platform is helping to accelerate and simplify software delivery for teams building on the platform-as-a-product. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+A TVP balances between keeping the platform small and ensuring that the coherent platform is accelerating software delivery for teams building on the platform-as-a-product. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
