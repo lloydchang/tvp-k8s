@@ -52,7 +52,7 @@ section_intros = [
     "Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:",
     
     # Rising action - Building complexity and engagement
-    "With our architectural foundation established, let's see how engineers actually interact with this system. The GitOps workflow represents the primary interface between engineers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when a engineer pushes a change:",
+    "With our architectural foundation established, let's see how engineers actually interact with this system. The GitOps workflow represents the primary interface between engineers and infrastructure, making complex operations remarkably simple. This sequence diagram illustrates the streamlined experience when an engineer pushes a change:",
     
     "Behind this simplified developer experience lies a sophisticated reconciliation process. As complexity builds, we see how the platform automatically keeps environments synchronized with the desired state in Git, eliminating manual toil:",
     
