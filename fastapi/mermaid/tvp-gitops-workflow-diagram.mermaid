@@ -12,7 +12,7 @@ sequenceDiagram
         TVP->>Thread: background_tasks.add_task(reconcile_from_git)
         TVP-->>Eng: {"status": "started"}
     else Automatic Reconciliation
-        Note over Thread: Periodic check<br>(every 5 min)
+        Note over Thread: Periodic check<br>(every minute)
     end
     
     Thread->>Git: Pull latest changes
