@@ -6,9 +6,57 @@
 
 # Platform Engineering Communities:
 
+---
+
 ## [Cloud Native Computing Foundation (CNCF) Platforms Working Group](https://tag-app-delivery.cncf.io/wgs/platforms/)
 
+### Working mode / expected outcome
+
+> The group discusses concepts, plans and develops a demo infrastructure (as code) to handle these use cases (e.g. App-Ready-Platform as code). This might be implemented using different tools (link to landscape) and could be a blueprint for end users. Furthermore, the validated best practices might then be documented in a white paper.
+
+### Goals
+
+> _Focusing on the key stakeholder, who in this scenario is an engineer potentially with a CKA/CKAD looking to enable the delivery of an application workload on cloud infrastructure._
+
+> - Vendor and End-user interviews.
+> - Focused questions that help identify successes and frustrations of products.
+> - Capturing the current practices and the landscape.
+> - Landscape radar
+> - Provide interoperability examples between IaC and CD tools in the Podtato-head project.
+> - Give end-users ideas and examples of how they could integrate application and infrastructure deployment.
+> - Provide patterns in a white paper based on practical work and how end-users are implementing them. Present practices and trends seen occurring within the industry that would be valuable to highlight to end-users.
+
+### Non-Goals
+
+> - Creating a new type of standard
+> - An opinion on how to build microservice applications or cloud-native architecture
+> - Defining how deployments should be done
+> - Creation of a new CNCF open source project
+
+---
+
 ## [Cloud Native Operational Excellence (CNOE) Community](https://cnoe.io/)
+
+## What is CNOE?
+
+> CNOE is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures.
+
+> - Enterprises that adopt OSS as the foundation of their cloud platforms face the challenge of choosing technologies that will support their business outcomes for 3-5 years.
+> - The cost of retooling and re-platforming for large organizations is high, which makes bets on specific technologies fundamental to their technology strategies.
+> - In order to de-risk these bets, enterprises take into consideration the investments of their peer organizations.
+> - The goal for the CNOE framework is to bring together a cohort of enterprises operating at the same scale so that they can navigate their operational technology decisions together, de-risk their tooling bets, coordinate contribution, and offer guidance to large enterprises on which CNCF technologies to use together to achieve the best cloud efficiencies.
+
+## What CNOE is not
+
+> 1. not only a unified control plane but building blocks for them to expand and extend the unified control plane
+
+> 2. not only a CI/CD tool but other components and capabilities that extend and enhance the integration and delivery of applications
+
+> 3. not new technologies or set of managed services, but a way to interact and integrate. There is still an expectation that companies will need to fund and operate the various open source tools used within the IDP
+
+> 4. not installers or proprietary packaging mechanisms. it will be fully open source and customizable and available to use by any one
+
+> 5. not responsible for operationalizing of the toolchain. There is still an expectation that companies will need to fund and operate the various open source tools used within the IDP
 
 ---
 
