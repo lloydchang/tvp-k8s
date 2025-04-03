@@ -308,7 +308,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [10. Application Deployment Workflow](#10-application-deployment-workflow)
 - [11. Test Coverage Structure](#11-test-coverage-structure)
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
-- [13. Conclusion](#13-conclusion)
+- [13. Conclusion: The Multiplication of Force](#13-conclusion)
 
 ## 1. TVP GitOps Architecture Overview
 
@@ -786,8 +786,6 @@ flowchart TD
 
 **Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application engineers, enabling faster iteration and more frequent releases.
 
-## 12. Measuring Platform Leverage
-
 # Measuring Platform Leverage
 
 **The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:
@@ -807,8 +805,6 @@ flowchart TD
 These sample metrics demonstrate the leverage that comes from building a carefully designed Thinnest Viable Platform.
 
 For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).
-
-## 13. Conclusion
 
 # Conclusion: The Multiplication of Force
 
