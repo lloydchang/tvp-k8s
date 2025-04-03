@@ -264,9 +264,11 @@ def main():
                 readme.write(f"{transition}\n\n")
         
         # Metrics section from markdown file
+        readme.write(f"## {len(titles)+1}. Measuring Platform Leverage\n\n")
         readme.write(measuring_leverage_content + "\n\n")
 
         # Conclusion section from markdown file
+        readme.write(f"## {len(titles)+2}. Conclusion: The Multiplication of Force\n\n")
         readme.write(conclusion_content + "\n\n")
         
         # Finally, append the TVP footer if it exists
