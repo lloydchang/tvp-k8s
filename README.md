@@ -308,7 +308,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [10. Application Deployment Workflow](#10-application-deployment-workflow)
 - [11. Test Coverage Structure](#11-test-coverage-structure)
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
-- [13. Conclusion: The Multiplication of Force](#13-conclusion)
+- [13. Conclusion: The Multiplication of Force](#13-conclusion-the-multiplication-of-force)
 
 ## 1. TVP GitOps Architecture Overview
 
