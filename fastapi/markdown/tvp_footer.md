@@ -150,7 +150,7 @@ categories, made possible by large-scale behavioral data.
 
 ![Trade Me's Journey Towards a TVP](https://github.com/user-attachments/assets/219f1493-a404-45b0-8918-3a10c45e6455)
 
-> The diagram above is a simplified version of how teams interact with the TVP.  We have three stream-aligned teams that work on the platform. Stream-aligned teams from Consumer & Marketplace and Classifieds use a TVP to build their new services. The team that owns TVP will provide support for TVP’s users, and will continually improve the TVP user experience based on feedback with pushed updates. The process and experience resembles that of any third-party software, except all done internally. 
+> The diagram above is a simplified version of how teams interact with a TVP.  We have three stream-aligned teams that work on the platform. Stream-aligned teams from Consumer & Marketplace and Classifieds use a TVP to build their new services. The team that owns TVP will provide support for TVP’s users, and will continually improve a TVP user experience based on feedback with pushed updates. The process and experience resembles that of any third-party software, except all done internally. 
 
 ---
 
@@ -186,5 +186,5 @@ categories, made possible by large-scale behavioral data.
 
 # Recap:
 - It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
-- We are building the TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
+- We are building a TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
 - The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
