@@ -820,7 +820,7 @@ This is the essence of successful platform engineering - not building every feat
 
 ---
 
-# Platform Engineering:
+# Platform Engineering Communities:
 
 ## [Cloud Native Computing Foundation (CNCF) Platforms Working Group](https://tag-app-delivery.cncf.io/wgs/platforms/)
 
@@ -1006,7 +1006,7 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
-# TVP through Leverage
+# TVP through Leverage:
 
 # Recap:
 - It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
