@@ -14,4 +14,4 @@
 
 These sample metrics demonstrate the leverage that comes from building a carefully designed Thinnest Viable Platform.
 
-For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).
+For comprehensive metrics, please see [Measurement Frameworks](#measurement-frameworks).
