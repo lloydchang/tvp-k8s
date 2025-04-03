@@ -968,7 +968,7 @@ categories, made possible by large-scale behavioral data.
 
 ## [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform)
 
-### Just big enough
+### Just big enough:
  
 > TVP intends to ensure the absolute minimum requirements we expect from our production systems are implemented and abstracted away from our developers. This way, we keep the platform as simple as possible to cater to one of its primary purposes: reducing developers’ cognitive load. As the “Thinnest” in the abbreviation implies, it is just big enough. We look at parts of systems that are common across all domains. For example, every system needs monitoring. We provide this out of the box with TVP, so developers don’t need to remember to add monitoring when creating a new service; it’s automatically provided with our chosen monitoring tool. 
 
