@@ -236,7 +236,7 @@ def main():
             toc_link = create_toc_link(title, i)
             readme.write(f"{toc_link}\n")
         readme.write(f"- [{len(titles)+1}. Measuring Platform Leverage](#{len(titles)+1}-measuring-platform-leverage)\n")
-        readme.write(f"- [{len(titles)+2}. Conclusion: The Multiplication of Force](#{len(titles)+2}-conclusion)\n\n")
+        readme.write(f"- [{len(titles)+2}. Conclusion: The Multiplication of Force](#{len(titles)+2}-conclusion-the-multiplication-of-force)\n\n")
         
         # Then write the diagrams with narrative text and leverage points
         for i, (filename, title, intro, transition, leverage) in enumerate(zip(mermaid_files, titles, section_intros, section_transitions, leverage_points)):
