@@ -786,7 +786,7 @@ flowchart TD
 
 **Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application engineers, enabling faster iteration and more frequent releases.
 
-# Measuring Platform Leverage
+## 12. Measuring Platform Leverage
 
 **The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample numbers and hypothetical outcomes that our TVP approach may deliver:
 
@@ -805,6 +805,8 @@ flowchart TD
 These sample metrics demonstrate the leverage that comes from building a carefully designed Thinnest Viable Platform.
 
 For comprehensive metrics, please see [Appendix: Framework](https://github.com/lloydchang/tvp?tab=readme-ov-file#frameworks).
+
+## 13. Conclusion: The Multiplication of Force
 
 # Conclusion: The Multiplication of Force
 
