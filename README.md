@@ -970,6 +970,12 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
+# [Team Topologies Quick Reference Card (QRC) by Henny Portman](https://hennyportman.wordpress.com/2020/05/25/review-team-topologies/)
+
+![Team Topologies Quick Reference Card (QRC) by Henny Portman](https://github.com/user-attachments/assets/a5240409-6d2c-4b78-9b8b-3fcf04a1a33d)
+
+---
+
 # Analogies:
 
 ---
