@@ -142,6 +142,17 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
+# Trade Me’s Journey Towards a Thinnest Viable Platform (TVP)
+
+> **Just big enough**
+> TVP intends to ensure the absolute minimum requirements we expect from our production systems are implemented and abstracted away from our developers. This way, we keep the platform as simple as possible to cater to one of its primary purposes: reducing developers’ cognitive load. As the “Thinnest” in the abbreviation implies, it is just big enough. We look at parts of systems that are common across all domains. For example, every system needs monitoring. We provide this out of the box with TVP, so developers don’t need to remember to add monitoring when creating a new service; it’s automatically provided with our chosen monitoring tool. 
+
+![Trade Me’s Journey Towards a Thinnest Viable Platform (TVP)](https://github.com/user-attachments/assets/49882472-e616-48e4-a0b3-0b78c82e1dc7)
+
+> The diagram above is a simplified version of how teams interact with the TVP.  We have three stream-aligned teams that work on the platform. Stream-aligned teams from Consumer & Marketplace and Classifieds use a TVP to build their new services. The team that owns TVP will provide support for TVP’s users, and will continually improve the TVP user experience based on feedback with pushed updates. The process and experience resembles that of any third-party software, except all done internally. 
+
+---
+
 # Analogies:
 
 ---
