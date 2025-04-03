@@ -142,7 +142,7 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
-# Trade Me's Journey Towards a TVP
+# [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform)
 
 ## Just big enough
  
