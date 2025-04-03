@@ -4,7 +4,7 @@
 
 # Summary:
 - The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
-- We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
+- We are building a TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
 - It is achieved by curating well-defined Application Programming Interfaces (APIs) that simplify infrastructure access and applying product thinking to maximize value
 
 ---
@@ -204,9 +204,9 @@ This **_declarative_** approach is described as a key leverage point that allowe
 
 ---
 
-## How to build a Thinnest Viable Platform (TVP)?
+## How to build a TVP?
 
-We are building the thinnest viable platform (TVP), a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
+We are building a TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks. The concept was [introduced](https://teamtopologies.com/key-concepts-content/what-is-a-thinnest-viable-platform-tvp) by [Matthew Skelton](https://www.linkedin.com/in/matthewskelton/) and [Manuel Pais](https://www.linkedin.com/in/manuelpais/), co-authors of the book [_Team Topologies_](https://teamtopologies.com/book).
 
 ---
 
@@ -267,7 +267,7 @@ As _Team Topologies_ [described](https://www.youtube.com/watch?v=8AQPSR09bxk):
 
 > The interesting thing about platform is - it's maybe not the platforms of the past, because platforms of the past often in many organizations were great big great massive things; very difficult to use... The platforms we're talking about have placed a strong focus on developer experience; they see other development teams as their customers effectively.
 
-### What is in a Thinnest Viable Platform (TVP)?:
+### What is in a TVP?:
 
 A TVP consists of curated APIs, documentation, and tools needed to accelerate teams' development of modern software services and systems through leverage.
 
@@ -281,7 +281,7 @@ A TVP consists of curated APIs, documentation, and tools needed to accelerate te
   - [Trade Me's Journey Towards a TVP](https://teamtopologies.com/industry-examples/trade-me-journey-towards-a-thinnest-viable-platform) by [Catherine Matheson](https://www.linkedin.com/in/catherine-matheson-31970b111/), [Amir Mohtasebi](https://www.linkedin.com/in/amirmohtasebi/) and [Eduardo da Silva](https://www.linkedin.com/in/emgsilva/)
   - [Cloud Native Operational Excellence (CNOE) is an open community collaboration with the goal of helping facilitate platform engineering through the sharing of guidance, tooling, and internal developer platform (IDP) reference architectures](https://cnoe.io/)
 - **Curating well-defined Application Programming Interfaces (APIs) that simplify infrastructure access and applying product thinking to maximize value**
-  - [Thinnest Viable Platform (TVP) about Leverage](https://github.com/lloydchang/tvp)
+  - [TVP through Leverage](https://github.com/lloydchang/tvp)
 
 ## System Architecture Documentation:
 
@@ -820,6 +820,14 @@ This is the essence of successful platform engineering - not building every feat
 
 ---
 
+# Platform Engineering:
+
+## [Cloud Native Computing Foundation (CNCF) Platforms Working Group](https://tag-app-delivery.cncf.io/wgs/platforms/)
+
+## [Cloud Native Operational Excellence (CNOE) Community](https://cnoe.io/)
+
+---
+
 # Measurement Frameworks:
 
 ---
@@ -966,7 +974,7 @@ categories, made possible by large-scale behavioral data.
 
 ![Trade Me's Journey Towards a TVP](https://github.com/user-attachments/assets/219f1493-a404-45b0-8918-3a10c45e6455)
 
-> The diagram above is a simplified version of how teams interact with the TVP.  We have three stream-aligned teams that work on the platform. Stream-aligned teams from Consumer & Marketplace and Classifieds use a TVP to build their new services. The team that owns TVP will provide support for TVP’s users, and will continually improve the TVP user experience based on feedback with pushed updates. The process and experience resembles that of any third-party software, except all done internally. 
+> The diagram above is a simplified version of how teams interact with a TVP.  We have three stream-aligned teams that work on the platform. Stream-aligned teams from Consumer & Marketplace and Classifieds use a TVP to build their new services. The team that owns TVP will provide support for TVP’s users, and will continually improve a TVP user experience based on feedback with pushed updates. The process and experience resembles that of any third-party software, except all done internally. 
 
 ---
 
@@ -995,4 +1003,13 @@ categories, made possible by large-scale behavioral data.
 ![Second Class Lever](https://github.com/user-attachments/assets/e425a6a8-49f9-4fd9-b7fb-34944ab9cfa5)
 
 ![Third Class Lever](https://github.com/user-attachments/assets/cb60a23f-d5dc-44a7-a099-6b16e482f4e0)
+
+---
+
+# TVP through Leverage
+
+# Recap:
+- It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
+- We are building a TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
+- The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
 
