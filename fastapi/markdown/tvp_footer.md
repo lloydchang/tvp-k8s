@@ -4,6 +4,14 @@
 
 ---
 
+# Platform Engineering:
+
+## [Cloud Native Computing Foundation (CNCF) Platforms Working Group](https://tag-app-delivery.cncf.io/wgs/platforms/)
+
+## [Cloud Native Operational Excellence (CNOE) Community](https://cnoe.io/)
+
+---
+
 # Measurement Frameworks:
 
 ---
