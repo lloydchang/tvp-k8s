@@ -198,12 +198,12 @@ def main():
     
     # Read the measuring leverage and conclusion content
     measuring_leverage_content = read_markdown_file(
-        "markdown/measuring_leverage.md",
+        "markdown/measuring_platform_leverage.md",
         "**The proof is in the numbers.** When leverage is properly applied, the results are dramatic and measurable. Here are sample metrics that our TVP approach may deliver..."
     )
     
     conclusion_content = read_markdown_file(
-        "markdown/conclusion.md",
+        "markdown/conclusion_the_multiplication_of_force.md",
         "Throughout this architectural journey, we've seen how the Thinnest Viable Platform embodies Archimedes' famous principle: \"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.\"..."
     )
     
