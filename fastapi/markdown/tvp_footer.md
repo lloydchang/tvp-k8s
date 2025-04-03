@@ -179,3 +179,12 @@ categories, made possible by large-scale behavioral data.
 ![Second Class Lever](https://github.com/user-attachments/assets/e425a6a8-49f9-4fd9-b7fb-34944ab9cfa5)
 
 ![Third Class Lever](https://github.com/user-attachments/assets/cb60a23f-d5dc-44a7-a099-6b16e482f4e0)
+
+---
+
+# TVP through Leverage
+
+# Recap:
+- It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
+- We are building the TVP, a lean, minimal, focused product, to accelerate application software engineering by providing reusable building blocks
+- The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
