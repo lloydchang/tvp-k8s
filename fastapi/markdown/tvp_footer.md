@@ -62,7 +62,7 @@
 
 > The goal for CNOE is to capture and provide references for tools commonly used by platform engineers to design their IDPs, the way these tools are configured, and implementations for common patterns and practices that can be extended and used across organizations.
 
-![ref-impl-995cf0dc541f002c5270f2e7245b763c](https://github.com/user-attachments/assets/d75e18fa-679c-4e90-9017-f4bd6f98228b)
+![ref-impl-995cf0dc541f002c5270f2e7245b763c](https://github.com/user-attachments/assets/c0b42506-269e-4543-a92e-11fde616e416)
 
 ---
 
