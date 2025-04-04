@@ -11,7 +11,7 @@ Features:
 - Helper functions for accessing the Kubernetes API clients
 """
 
-from fastapi import APIProxy, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, HTTPException
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 from pydantic import BaseModel
@@ -21,7 +21,8 @@ import aiofiles
 
 from app.config import get_settings, get_kubernetes_client
 
-proxy = APIProxy()
+# Using APIRouter instead of APIProxy which doesn't exist in FastAPI
+proxy = APIRouter()
 
 # Models
 class DeploymentRequest(BaseModel):
@@ -54,7 +55,7 @@ def get_apps_v1_client():
     return client.AppsV1Api()
 
 # Kubernetes True Pass-Through Proxy
-@proxy.api_route("/kubernetes/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+@proxy.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def kubernetes_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Kubernetes API.
@@ -90,7 +91,7 @@ async def kubernetes_proxy(path: str, request: Request):
         if header_key.lower() not in ["host", "connection", "content-length"]:
             headers[header_key] = header_value
     
-    # Create the target URL
+    # Create the target URL - use the kubernetes_api_url from settings
     target_url = f"{settings.kubernetes_api_url}/api/v1/{path}"
     
     # Pass through the request without modification
@@ -108,4 +109,4 @@ async def kubernetes_proxy(path: str, request: Request):
             # Return the raw response
             return response.json()
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}") from e
+            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}")

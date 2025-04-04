@@ -33,7 +33,9 @@ def mock_kubernetes_client():
 def mock_argo_cd_token():
     """Fixture to mock Argo CD authentication token"""
     with patch("app.argo_cd_api.get_argo_cd_token") as mock_token:
-        mock_token.return_value = "test-argo-cd-token"
+        # Make this an async mock to work with the async function
+        from unittest.mock import AsyncMock
+        mock_token.side_effect = AsyncMock(return_value="test-argo-cd-token")
         yield mock_token
 
 @pytest.fixture
@@ -52,9 +54,26 @@ def mock_yaml_operations():
             "tag": "latest",
         }
         yield mock_yaml_load
+
 @pytest.fixture
 def test_client(mock_settings, mock_kubernetes_client, mock_argo_cd_token):
     """Fixture to create a FastAPI TestClient"""
     from app.main import app
     with TestClient(app) as client:
         yield client
+
+@pytest.fixture
+def test_health_check_kubernetes_unhealthy():
+    """Special fixture to mock Kubernetes client for health check tests"""
+    with patch("app.main.get_kubernetes_client") as mock_client:
+        kubernetes_client = MagicMock()
+        kubernetes_client.list_namespace.side_effect = Exception("Connection refused")
+        mock_client.return_value = kubernetes_client
+        yield mock_client
+
+@pytest.fixture
+def test_health_check_argo_cd_unhealthy():
+    """Special fixture to mock Argo CD token for health check tests"""
+    with patch("app.main.get_argo_cd_token") as mock_token:
+        mock_token.side_effect = Exception("Argo CD unavailable")
+        yield mock_token

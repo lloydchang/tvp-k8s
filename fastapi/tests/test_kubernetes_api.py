@@ -3,31 +3,40 @@ import httpx
 
 def test_kubernetes_proxy(test_client, mock_settings):
     """Test the Kubernetes proxy endpoint"""
-    # Mock the httpx client
-    with patch("httpx.AsyncClient") as mock_client:
-        # Configure the mock client's response
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"kind": "Pod", "items": []}
+    # Ensure the mock_settings is being used in kubernetes_proxy function
+    with patch("app.kubernetes_api.get_settings") as mock_get_settings:
+        mock_get_settings.return_value = mock_settings
         
-        # Configure the mock client's request method
-        mock_client_instance = MagicMock()
-        mock_client_instance.__aenter__.return_value.request.return_value = mock_response
-        mock_client.return_value = mock_client_instance
-        
-        # Use mock_open to mock file reading operations
-        token_content = "test-token"
-        with patch("builtins.open", mock_open(read_data=token_content)):
-            # Test GET request to the proxy endpoint
-            response = test_client.get("/kubernetes/pods")
-            assert response.status_code == 200
-            data = response.json()
-            assert data["kind"] == "Pod"
+        # Mock the httpx client
+        with patch("httpx.AsyncClient") as mock_client:
+            # Configure the mock client's response
+            mock_response = MagicMock()
+            mock_response.json.return_value = {"kind": "Pod", "items": []}
             
-            # Verify the request was made with the correct URL and headers
-            call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
-            assert call_kwargs["url"] == f"{mock_settings.kubernetes_api_url}/api/v1/pods"
-            assert "Authorization" in call_kwargs["headers"]
-            assert call_kwargs["headers"]["Authorization"] == "Bearer test-token"
+            # Configure the mock client's request method
+            mock_client_instance = MagicMock()
+            mock_client_instance.__aenter__.return_value.request.return_value = mock_response
+            mock_client.return_value = mock_client_instance
+            
+            # Create a proper async context manager mock for aiofiles.open
+            async_mock = MagicMock()
+            async_cm = MagicMock()
+            async_cm.__aenter__.return_value.read.return_value = "test-token"
+            async_mock.return_value = async_cm
+            
+            # Mock the token file reading using aiofiles with async context manager
+            with patch("aiofiles.open", async_mock):
+                # Test GET request to the proxy endpoint
+                response = test_client.get("/kubernetes/pods")
+                assert response.status_code == 200
+                data = response.json()
+                assert data["kind"] == "Pod"
+                
+                # Verify the request was made with the correct URL and headers
+                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
+                assert call_kwargs["url"] == f"{mock_settings.kubernetes_api_url}/api/v1/pods"
+                assert "Authorization" in call_kwargs["headers"]
+                assert call_kwargs["headers"]["Authorization"] == "Bearer test-token"
 
 def test_kubernetes_proxy_failure(test_client):
     """Test the Kubernetes proxy endpoint when the API is unavailable"""
@@ -37,10 +46,15 @@ def test_kubernetes_proxy_failure(test_client):
         mock_client_instance.__aenter__.return_value.request.side_effect = httpx.HTTPError("Connection error")
         mock_client.return_value = mock_client_instance
         
-        # Mock the token file
-        with patch("builtins.open", MagicMock()):
-            with patch("fastapi.kubernetes_api.open", MagicMock()):
-                # Test request to the proxy endpoint
-                response = test_client.get("/kubernetes/pods")
-                assert response.status_code == 503
-                assert "unavailable" in response.json()["detail"].lower()
+        # Create a proper async context manager mock for aiofiles.open
+        async_mock = MagicMock()
+        async_cm = MagicMock()
+        async_cm.__aenter__.return_value.read.return_value = "test-token"
+        async_mock.return_value = async_cm
+        
+        # Mock the token file reading using aiofiles with async context manager
+        with patch("aiofiles.open", async_mock):
+            # Test request to the proxy endpoint
+            response = test_client.get("/kubernetes/pods")
+            assert response.status_code == 503
+            assert "unavailable" in response.json()["detail"].lower()

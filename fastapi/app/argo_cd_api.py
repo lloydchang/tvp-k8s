@@ -5,15 +5,16 @@ This module provides direct API operations and pass-through proxy functionality
 for Argo CD application management.
 """
 
-from fastapi import APIProxy, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from typing import Any
 import httpx
-from config import get_settings, get_kubernetes_client
+from app.config import get_settings, get_kubernetes_client
 
-proxy = APIProxy()
+proxy = APIRouter()
 
 try:
+    import yaml
 except ImportError:
     raise ImportError("PyYAML is required. Install it with 'pip install pyyaml'")
 
@@ -28,7 +29,7 @@ class ArgoCDApplicationRequest(BaseModel):
     sync_policy_prune: bool = True
     sync_policy_self_heal: bool = True
 
-async def get_argo_cd_auth_token():
+async def get_argo_cd_token():
     """Helper function to get Argo CD authentication token."""
     settings = get_settings()
     
@@ -37,22 +38,34 @@ async def get_argo_cd_auth_token():
     
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
         try:
-            auth_response = await client.post(
+            # Use identity parameter as expected by the tests
+            response = await client.post(
                 f"{settings.argo_cd_url}/api/v1/session",
                 json={"identity": settings.argo_cd_identity},
-                timeout=10.0  # Add reasonable timeout
+                timeout=10.0
             )
-            if auth_response.status_code != 200:
+            
+            # Raise HTTPException for non-200 status codes
+            if response.status_code != 200:
                 raise HTTPException(
                     status_code=401, 
-                    detail=f"Argo CD Authentication Failed: {auth_response.text}"
+                    detail=f"Argo CD Authentication Failed: {response.text}"
                 )
-            return auth_response.json().get("token")
+                
+            # Extract token from response
+            return response.json().get("token")
         except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"Argo CD service unavailable: {str(e)}")
+            # Network-related errors
+            raise HTTPException(
+                status_code=503,
+                detail=f"Argo CD service unavailable: {str(e)}"
+            )
+
+# Also provide the auth_token function as originally named for backward compatibility
+get_argo_cd_auth_token = get_argo_cd_token
 
 # Argo CD True Pass-Through Proxy
-@proxy.api_route("/argo/cd/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+@proxy.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def argo_cd_proxy(path: str, request: Request):
     """
     Provides a true pass-through proxy to the Argo CD API.

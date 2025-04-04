@@ -12,7 +12,7 @@ Following GitOps principles:
 4. Continuously Reconciled - TVP agent applies changes automatically
 """
 
-from fastapi import APIProxy, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 import logging
 from pydantic import BaseModel
 from typing import Optional, Any, List, Dict
@@ -24,9 +24,10 @@ import threading
 import yaml
 from pathlib import Path
 from datetime import datetime, timezone
-from config import get_settings
+from app.config import get_settings
 
-proxy = APIProxy()
+# Using APIRouter instead of APIProxy which doesn't exist in FastAPI
+proxy = APIRouter()
 logger = logging.getLogger(__name__)
 
 # Global reconciliation flag and lock for thread safety
@@ -98,7 +99,9 @@ async def get_tvp_status() -> TVPStatus:
         is_reconciling=is_reconciling,
         last_reconciliation=get_last_reconciliation_time(),
         status=status,
+        applications=applications
     )
+
 @proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
@@ -240,6 +243,7 @@ def reconcile_from_git() -> None:
     finally:
         with reconciliation_lock:
             is_reconciling = False
+
 def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
     Clone the source repository.

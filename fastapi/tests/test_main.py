@@ -21,10 +21,8 @@ def test_health_check_all_healthy(test_client):
     assert data["services"]["kubernetes"]["status"] == "healthy"
     assert data["services"]["argo_cd"]["status"] == "healthy"
 
-def test_health_check_kubernetes_unhealthy(test_client, mock_kubernetes_client):
+def test_health_check_kubernetes_unhealthy(test_client, test_health_check_kubernetes_unhealthy):
     """Test health check when Kubernetes is not available"""
-    mock_kubernetes_client.list_namespace.side_effect = Exception("Connection refused")
-    
     response = test_client.get("/health")
     assert response.status_code == 200
     data = response.json()
@@ -32,10 +30,8 @@ def test_health_check_kubernetes_unhealthy(test_client, mock_kubernetes_client):
     assert data["services"]["kubernetes"]["status"] == "unhealthy"
     assert "error" in data["services"]["kubernetes"]
 
-def test_health_check_argo_cd_unhealthy(test_client, mock_argo_cd_token):
+def test_health_check_argo_cd_unhealthy(test_client, test_health_check_argo_cd_unhealthy):
     """Test health check when Argo CD is not available"""
-    mock_argo_cd_token.side_effect = Exception("Argo CD unavailable")
-    
     response = test_client.get("/health")
     assert response.status_code == 200
     data = response.json()

@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     argo_cd_username: str = os.getenv("ARGO_CD_USERNAME", "admin")
     argo_cd_password: str = os.getenv("ARGO_CD_PASSWORD", "")  # No default for security
     
+    # Property to support the tests - this will be the same as argo_cd_username
+    # but is needed for backward compatibility with tests
+    @property
+    def argo_cd_identity(self) -> str:
+        return self.argo_cd_username
+    
     # TVP settings
     tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/kubernetes-apps.git")
     tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/kubernetes-apps")

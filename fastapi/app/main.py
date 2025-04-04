@@ -17,10 +17,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
 # Import our modules
-from kubernetes_api import proxy as kubernetes_proxy
-from argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
-from tvp import proxy as tvp, start_reconciliation_thread
-from config import get_settings, get_kubernetes_client
+from app.kubernetes_api import proxy as kubernetes_proxy
+from app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
+from app.tvp import proxy as tvp, start_reconciliation_thread
+from app.config import get_settings, get_kubernetes_client
 
 app = FastAPI(
     title="Kubernetes Platform API",
@@ -37,10 +37,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include proxys from different modules
-app.include_proxy(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
-app.include_proxy(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
-app.include_proxy(tvp, prefix="/tvp", tags=["TVP"])
+# Include routers from different modules
+app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
+app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
+app.include_router(tvp, prefix="/tvp", tags=["TVP"])
 
 @app.on_event("startup")
 async def startup_event():
@@ -133,12 +133,6 @@ async def health_check():
                 "error": "Failed to get authentication token"
             }
             health_status["status"] = "degraded"
-    except HTTPException as e:
-        health_status["services"]["argo_cd"] = {
-            "status": "unhealthy",
-            "error": e.detail
-        }
-        health_status["status"] = "degraded"
     except Exception as e:
         health_status["services"]["argo_cd"] = {
             "status": "unhealthy",
