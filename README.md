@@ -1081,7 +1081,7 @@ categories, made possible by large-scale behavioral data.
 
 • **GitOps Principles:** Declarative, versioned, immutable, pulled automatically and continuously reconciled
 
-• **Measurement Frameworks:** SRE: The Four Golden Signals, DORA, SPACE, DevEx, PULSE, HEART, and CASTLE
+• **Measurement Frameworks:** SRE's Four Golden Signals, DORA, SPACE, DevEx, PULSE, HEART, and CASTLE
 
 ---
 
