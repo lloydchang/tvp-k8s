@@ -6,7 +6,7 @@ for the Kubernetes Platform API.
 """
 
 from functools import lru_cache
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from kubernetes import client, config
 from fastapi import HTTPException
 import os
