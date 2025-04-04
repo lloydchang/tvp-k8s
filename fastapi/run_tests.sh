@@ -68,6 +68,11 @@ for arg in "$@"; do
     esac
 done
 
+# Check if ARGO_CD_PASSWORD is empty or unset, and set it if so
+if [ -z "$ARGO_CD_PASSWORD" ]; then
+  export ARGO_CD_PASSWORD='M0ckPa%%w0rd'
+fi
+
 # Run the tests
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"
