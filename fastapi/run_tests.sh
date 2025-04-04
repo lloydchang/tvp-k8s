@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd $(dirname "$0")
-
 # Colors for terminal output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -60,6 +58,14 @@ for arg in "$@"; do
         -v|--verbose)
         VERBOSE="-v"
         shift
+        ;;
+        -h|--help)
+        echo "Usage: ./run_tests.sh [options] [test_path]"
+        echo "Options:"
+        echo "  --cov, --coverage  Enable coverage reporting."
+        echo "  -v, --verbose      Run tests in verbose mode."
+        echo "  -h, --help         Show this help message."
+        exit 0
         ;;
         *)
         SPECIFIC_TEST="$arg"
