@@ -17,6 +17,7 @@ from kubernetes.client.rest import ApiException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import httpx
+import aiofiles
 
 from config import get_settings, get_kubernetes_client
 
@@ -75,19 +76,12 @@ async def kubernetes_proxy(path: str, request: Request):
     
     # Determine headers
     try:
-import aiofiles
-
-try:
-    async with aiofiles.open(settings.kubernetes_token_path, "r") as f:
-        kubernetes_token = (await f.read()).strip()
-            kubernetes_token = f.read().strip()
+        async with aiofiles.open(settings.kubernetes_token_path, "r") as f:
+            kubernetes_token = (await f.read()).strip()
         headers = {
             "Authorization": f"Bearer {kubernetes_token}",
         }
-    except FileNotFoundError:
-        # For local development using kubeconfig
-        headers = {}
-    except PermissionError:
+    except (FileNotFoundError, PermissionError):
         # For local development using kubeconfig
         headers = {}
     
@@ -108,16 +102,10 @@ try:
                 url=target_url,
                 headers=headers,
                 content=body,
-response = await client.request(
-    method=request.method,
-    url=target_url,
-    headers=headers,
-    content=body,
-    follow_redirects=True,
-)
+                follow_redirects=True,
+            )
             
             # Return the raw response
             return response.json()
         except httpx.HTTPError as e:
--            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}")
-+            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}") from e
+            raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}") from e

@@ -15,7 +15,7 @@ Following GitOps principles:
 from fastapi import APIProxy, HTTPException, BackgroundTasks
 import logging
 from pydantic import BaseModel
-from typing import Optional, Any
+from typing import Optional, Any, List, Dict
 import os
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
@@ -23,7 +23,7 @@ import time
 import threading
 import yaml
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from config import get_settings
 
 proxy = APIProxy()
@@ -391,3 +391,35 @@ async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]
             raise HTTPException(status_code=500, detail=f"Error reading application configuration")
     
     return app_info
+
+def sanitize_branch_name(branch_name: str) -> str:
+    """
+    Sanitize git branch name to prevent command injection.
+    
+    Args:
+        branch_name (str): The branch name to sanitize
+        
+    Returns:
+        str: Sanitized branch name
+    """
+    # Only allow alphanumeric characters, dashes, underscores, dots, and slashes
+    import re
+    sanitized = re.sub(r'[^a-zA-Z0-9\-_\./]', '', branch_name)
+    # Prevent path traversal
+    sanitized = sanitized.replace('..', '')
+    return sanitized
+
+def sanitize_git_url(url: str) -> str:
+    """
+    Sanitize git URL to prevent command injection.
+    
+    Args:
+        url (str): The URL to sanitize
+        
+    Returns:
+        str: Sanitized URL
+    """
+    # Only allow valid git URL characters
+    import re
+    sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
+    return sanitized
