@@ -58,6 +58,12 @@
 
 > 5. not responsible for operationalizing of the toolchain. There is still an expectation that companies will need to fund and operate the various open source tools used within the IDP
 
+## Technology Choices
+
+> The goal for CNOE is to capture and provide references for tools commonly used by platform engineers to design their IDPs, the way these tools are configured, and implementations for common patterns and practices that can be extended and used across organizations.
+
+![ref-impl-995cf0dc541f002c5270f2e7245b763c](https://github.com/user-attachments/assets/d75e18fa-679c-4e90-9017-f4bd6f98228b)
+
 ---
 
 # Measurement Frameworks:
