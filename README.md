@@ -1071,7 +1071,7 @@ categories, made possible by large-scale behavioral data.
 
 • **TVP:** A platform with minimum necessary components that creates maximum value — just big enough — to reduce developers' cognitive load while providing composable building blocks
 
-• **Leverage:** The idea that work from a few platform engineers can reduce work across the broader organization through well-designed APIs
+• **Leverage:** The idea that effort from a few platform engineers can reduce effort across the broader organization by curating well-designed APIs
 
 • **Value Proposition:** Creating leverage through platform engineering, allowing a small team to dramatically increase effectiveness across an organization
 
