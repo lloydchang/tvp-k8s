@@ -6,15 +6,15 @@ for the Kubernetes Platform API.
 """
 
 from functools import lru_cache
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from kubernetes import client, config
 from fastapi import HTTPException
 import os
 import warnings
 
 class Settings(BaseSettings):
-    """Configuration settings for the application."""
-    
+    model_config = SettingsConfigDict(env_file=".env")
+
     # Kubernetes settings
     kubernetes_api_url: str = "https://kubernetes.default.svc"
     kubernetes_token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -40,9 +40,6 @@ class Settings(BaseSettings):
     
     # Security
     verify_ssl: bool = os.getenv("VERIFY_SSL", "true").lower() != "false"
-    
-    class Config:
-        env_file = ".env"
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

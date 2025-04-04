@@ -22,10 +22,17 @@ from app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
 from app.tvp import proxy as tvp, start_reconciliation_thread
 from app.config import get_settings, get_kubernetes_client
 
+def lifespan(app: FastAPI):
+    # This runs at startup
+    start_reconciliation_thread()
+    yield
+    # Cleanup if needed at shutdown
+
 app = FastAPI(
     title="Kubernetes Platform API",
     description="A unified API for Kubernetes and Argo CD operations",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -41,18 +48,6 @@ app.add_middleware(
 app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(tvp, prefix="/tvp", tags=["TVP"])
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Runs when the application starts.
-    
-    Initializes background tasks like the GitOps reconciliation thread.
-    This ensures the TVP reconciliation process begins automatically
-    when the API service starts.
-    """
-    # Start the TVP GitOps reconciliation thread
-    start_reconciliation_thread()
 
 @app.get("/", tags=["Health"])
 async def root():
