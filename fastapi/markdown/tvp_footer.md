@@ -248,10 +248,28 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
+# Key Concepts:
+
+• **Definition:** A platform with minimum necessary components that creates maximum value — just big enough — to reduce developers' cognitive load while providing composable building blocks
+
+• **Leverage:** The idea that work from a few platform engineers can reduce work across the broader organization through well-designed APIs
+
+• **Value Proposition:** Creating leverage through platform engineering, allowing a small team to dramatically increase effectiveness across an organization
+
+• **Product Thinking:** Treating the platform as a product with internal teams as customers, focusing on their needs rather than wants
+
+• **Declarative Automation:** Shifting the focus from how to achieve a result (procedural steps) to what result to achieve (declarative intent) as a key leverage point
+
+• **GitOps Principles:** Declarative, versioned, immutable, pulled automatically and continuously reconciled
+
+• **Measurement Frameworks:** Measuring effectiveness with metrics, such as DORA, SPACE, HEART, PULSE, and CASTLE
+
+---
+
 # TVP through Leverage:
 
-# • It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
+• It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
 
-# • We are building a TVP, a declarative automation product, to accelerate application software engineering by providing composable building blocks
+• We are building a TVP, a declarative automation product, to accelerate application software engineering by providing composable building blocks
 
-# • The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
+• The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
