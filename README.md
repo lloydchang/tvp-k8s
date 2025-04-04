@@ -1069,7 +1069,7 @@ categories, made possible by large-scale behavioral data.
 
 # Key Concepts:
 
-• **Definition:** A platform with minimum necessary components that creates maximum value — just big enough — to reduce developers' cognitive load while providing composable building blocks
+• **TVP:** A platform with minimum necessary components that creates maximum value — just big enough — to reduce developers' cognitive load while providing composable building blocks
 
 • **Leverage:** The idea that work from a few platform engineers can reduce work across the broader organization through well-designed APIs
 
