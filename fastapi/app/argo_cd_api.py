@@ -38,24 +38,25 @@ async def get_argo_cd_token():
     
     async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
         try:
-            # Use identity parameter as expected by the tests
             response = await client.post(
                 f"{settings.argo_cd_url}/api/v1/session",
-                json={"identity": settings.argo_cd_identity},
+                json={
+                    "username": settings.argo_cd_username,
+                    "password": settings.argo_cd_password
+                },
                 timeout=10.0
             )
             
-            # Raise HTTPException for non-200 status codes
             if response.status_code != 200:
                 raise HTTPException(
                     status_code=401, 
                     detail=f"Argo CD Authentication Failed: {response.text}"
                 )
-                
-            # Extract token from response
-            return response.json().get("token")
+
+            # Await the json() coroutine
+            json_response = await response.json()
+            return json_response.get("token")
         except httpx.RequestError as e:
-            # Network-related errors
             raise HTTPException(
                 status_code=503,
                 detail=f"Argo CD service unavailable: {str(e)}"
@@ -97,8 +98,8 @@ async def argo_cd_proxy(path: str, request: Request):
                 content=body,
                 follow_redirects=True
             )
-            
-            # Return the raw response
-            return response.json()
+
+            # Return the awaited json response
+            return await response.json()
         except httpx.HTTPError as e:
             raise HTTPException(status_code=503, detail=f"Argo CD API unavailable: {str(e)}")
