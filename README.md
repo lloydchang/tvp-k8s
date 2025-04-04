@@ -1077,7 +1077,7 @@ categories, made possible by large-scale behavioral data.
 
 • **Product Thinking:** Treating the platform as a product with internal teams as customers, focusing on their needs rather than wants
 
-• **Declarative Automation:** Shifting the focus from how to achieve a result (procedural steps) to what result to achieve (declarative intent) as a key leverage point
+• **Declarative Automation:** Shifting the focus from how to achieve a result (imperative programming) to what result to achieve (declarative programming) as a key leverage point
 
 • **GitOps Principles:** Declarative, versioned, immutable, pulled automatically and continuously reconciled
 
