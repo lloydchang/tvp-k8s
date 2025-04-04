@@ -19,7 +19,7 @@ from typing import Optional, Dict, Any, List
 import httpx
 import aiofiles
 
-from config import get_settings, get_kubernetes_client
+from app.config import get_settings, get_kubernetes_client
 
 proxy = APIProxy()
 
