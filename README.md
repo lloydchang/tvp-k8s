@@ -1087,9 +1087,9 @@ categories, made possible by large-scale behavioral data.
 
 # TVP through Leverage:
 
-• It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
+# It is achieved by curating well-defined APIs that simplify infrastructure access and applying product thinking to maximize value
 
-• We are building a TVP, a declarative automation product, to accelerate application software engineering by providing composable building blocks
+# We are building a TVP, a declarative automation product, to accelerate application software engineering by providing composable building blocks
 
-• The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
+# The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
 
