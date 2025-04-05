@@ -60,7 +60,8 @@ app.add_middleware(
 )
 
 # Include routers from different modules
-app.include_router(gitops, prefix="/gitops", tags=[])
+app.include_router(gitops, prefix="/deploy", tags=["Deployments"])
+app.include_router(gitops, prefix="/reconcile", tags=["Reconciliations"])
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 
@@ -79,7 +80,8 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
-            {"prefix": "/gitops", "description": "Reconciliation operations"},
+            {"prefix": "/deploy", "description": "Deployment operations"},
+            {"prefix": "/reconcile", "description": "Reconciliation operations"},
             {"prefix": "/argo/cd", "description": "Argo CD operations"},
             {"prefix": "/kubernetes", "description": "Kubernetes operations"},
         ]

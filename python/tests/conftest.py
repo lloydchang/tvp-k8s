@@ -32,7 +32,7 @@ finally:
 @pytest.fixture
 def mock_settings():
     """Fixture to mock application settings"""
-    with patch("app.config.get_settings") as mock_get_settings:
+    with patch("python.app.config.get_settings") as mock_get_settings:
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
         settings.kubernetes_token_path = "/tmp/test-kubernetes-token"
@@ -50,7 +50,7 @@ def mock_settings():
 @pytest.fixture
 def mock_kubernetes_client():
     """Fixture to mock Kubernetes client where it's used in index.py"""
-    with patch("app.config.get_kubernetes_client") as mock_get_client_function:
+    with patch("python.app.config.get_kubernetes_client") as mock_get_client_function:
         # First, patch the function that gets the client
         kubernetes_client = MagicMock()
         # Create a specific mock for list_namespace that won't make actual API calls

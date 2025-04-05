@@ -10,7 +10,7 @@ def test_root_endpoint(test_client):
     assert data["name"] == "TVP API"
     assert "version" in data
     assert "endpoints" in data
-    assert len(data["endpoints"]) == 3
+    assert len(data["endpoints"]) == 4
 
 def test_health_check_all_healthy(test_client, mock_kubernetes_client, mock_argo_cd_token):
     """Test the health check endpoint when all services are healthy"""

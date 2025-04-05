@@ -19,10 +19,14 @@ classDiagram
         +get_argo_cd_token()
     }
     
-    class GitOps {
-        +get_gitops_status()
-        +trigger_reconciliation()
+    class DeployAPI {
         +get_deployment_status()
+        +deploy_application()
+    }
+    
+    class ReconcileAPI {
+        +get_reconciliation_status()
+        +trigger_reconciliation()
     }
     
     class Config {
@@ -59,17 +63,20 @@ classDiagram
     
     FastAPI --> KubernetesProxy : includes
     FastAPI --> ArgoCDProxy : includes
-    FastAPI --> GitOps : includes
+    FastAPI --> DeployAPI : includes
+    FastAPI --> ReconcileAPI : includes
     KubernetesProxy --> Config : depends on
     ArgoCDProxy --> Config : depends on
-    GitOps --> Config : depends on
+    DeployAPI --> Config : depends on
+    ReconcileAPI --> Config : depends on
     FastAPI --> Config : depends on
-    GitOps --> GitOpsStatus : returns
-    KubernetesProxy --> DeploymentRequest : accepts
+    ReconcileAPI --> GitOpsStatus : returns
+    DeployAPI --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
     note for FastAPI "api.index"
     note for KubernetesProxy "api.kubernetes_api"
     note for ArgoCDProxy "api.argo_cd_api" 
-    note for GitOps "api.gitops"
+    note for DeployAPI "api.gitops (deploy)"
+    note for ReconcileAPI "api.gitops (reconcile)"
     note for Config "api.config"
