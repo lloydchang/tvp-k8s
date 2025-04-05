@@ -42,17 +42,17 @@ else
 fi
 
 # Install runtime requirements
-if [ -f "requirements.txt" ]; then
+if [ -f "../requirements.txt" ]; then
     echo 'Installing runtime requirements...'
     pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install -r ../requirements.txt
 else
-    echo 'requirements.txt not found. Please ensure it exists.'
+    echo '../requirements.txt not found. Please ensure it exists.'
     exit 1
 fi
 
 # Set PYTHONPATH
-export PYTHONPATH="${PYTHONPATH:-$(pwd)}"
+export PYTHONPATH="${PYTHONPATH:-$(pwd)/..}"
 export PYTHONPATH="$BASE_DIR:$PYTHONPATH"
 
 # Start Uvicorn server on the available port

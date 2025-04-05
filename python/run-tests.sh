@@ -35,7 +35,7 @@ fi
 echo -e "${YELLOW}Installing/upgrading required packages...${NC}"
 
 pip install -r ../requirements.txt
-pip install -r ../requirements-dev.txt
+pip install -r requirements-dev.txt
 
 # Debug: Print the file content of conftest.py to understand the import issue
 if [ -f "tests/conftest.py" ]; then
