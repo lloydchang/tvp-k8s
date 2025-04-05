@@ -4,10 +4,10 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app # Import the FastAPI app instance
 
-warnings.filterwarnings("ignore", category=DeprecationWarning, message="ast.Str.*")
-warnings.filterwarnings("ignore", category=DeprecationWarning, message="Attribute s is deprecated.*")
-warnings.filterwarnings("ignore", category=DeprecationWarning, message="on_event is deprecated.*")
-warnings.filterwarnings("ignore", category=DeprecationWarning, message="Support for class-based `config` is deprecated.*")
+# warnings.filterwarnings("ignore", category=DeprecationWarning, message="ast.Str.*")
+# warnings.filterwarnings("ignore", category=DeprecationWarning, message="Attribute s is deprecated.*")
+# warnings.filterwarnings("ignore", category=DeprecationWarning, message="on_event is deprecated.*")
+# warnings.filterwarnings("ignore", category=DeprecationWarning, message="Support for class-based `config` is deprecated.*")
 
 @pytest.fixture
 def mock_settings():
