@@ -40,7 +40,13 @@ app = FastAPI(
     title="TVP API",
     description="Thinnest Viable Platform API",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    openapi_tags=[
+        {"name": "Health", "description": "Health check and system status endpoints"},
+        {"name": "GitOps", "description": "GitOps operations and reconciliation"},
+        {"name": "Argo CD", "description": "Argo CD API operations and integrations"},
+        {"name": "Kubernetes", "description": "Kubernetes API operations and resources"}
+    ]
 )
 
 # Add CORS middleware
