@@ -288,4 +288,4 @@ A TVP consists of curated APIs, documentation, and tools needed to accelerate te
 
 ## System Architecture Documentation:
 
-This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.
+This README.md provides a visual overview of the system architecture using various diagrams.
