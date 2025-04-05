@@ -263,9 +263,13 @@ def test_app_initialization():
     assert len(app.openapi_tags) > 0
     
     # Test middleware configuration - fixed to access middleware stack properly
-    middlewares = [type(m) for m in app.middleware]
     from fastapi.middleware.cors import CORSMiddleware
-    assert CORSMiddleware in middlewares
+    cors_middleware_found = False
+    for middleware in app.user_middleware:
+        if middleware.cls == CORSMiddleware:
+            cors_middleware_found = True
+            break
+    assert cors_middleware_found, "CORSMiddleware not found in app middleware"
 
 def test_router_prefix_conflicts():
     """Test that router prefixes don't conflict"""

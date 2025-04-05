@@ -25,6 +25,7 @@ import yaml
 from pathlib import Path
 from datetime import datetime, timezone
 from .config import get_settings
+import re  # Add missing import at the top of the file
 
 # Using APIRouter instead of APIProxy which doesn't exist in FastAPI
 proxy = APIRouter()
@@ -557,20 +558,31 @@ def sanitize_branch_name(branch_name: str) -> str:
     Returns:
         str: Sanitized branch name
     """
-    if branch_name is None:
+    if branch_name is None or not branch_name:
         return "main"
     
     try:
-        # First replace slashes with hyphens
-        branch_name = branch_name.replace('/', '-')
-        # Then clean up any other invalid characters
-        sanitized = re.sub(r'[^a-zA-Z0-9\-_\.]', '', branch_name)
-        return sanitized
+        # First, replace path traversal sequences completely
+        sanitized = re.sub(r'\.\.', '', branch_name)
+        
+        # Replace forward slashes with hyphens
+        sanitized = re.sub(r'/', '-', sanitized)
+        
+        # Remove other potentially dangerous characters
+        sanitized = re.sub(r'[^\w\-\.]', '-', sanitized)
+        
+        # If after sanitization the string is empty, return "main"
+        return sanitized if sanitized else "main"
     except Exception as e:
         logging.warning(f"Error using regex for branch sanitization: {e}")
         # Fallback to basic string replacement if regex fails
         if branch_name:
-            return branch_name.replace('/', '-').replace(' ', '-')
+            # First remove path traversal sequences
+            branch_name = branch_name.replace("..", "")
+            # Replace forward slashes with hyphens
+            branch_name = branch_name.replace("/", "-")
+            # Keep only allowed characters
+            return ''.join(c if c.isalnum() or c in '-._' else '-' for c in branch_name)
         return "main"
 
 def sanitize_git_url(url: str) -> str:
@@ -583,12 +595,11 @@ def sanitize_git_url(url: str) -> str:
     Returns:
         str: Sanitized URL
     """
-    # Only allow valid git URL characters
     try:
-        import re
+        # Only allow valid git URL characters
         sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
         return sanitized
-    except (ImportError, AttributeError) as e:
+    except Exception as e:
         # If re module is not available or has an issue, use basic sanitization
         logger.warning(f"Error using regex for URL sanitization: {str(e)}")
         # Fallback: basic character filtering
