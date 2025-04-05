@@ -39,16 +39,12 @@ class Settings(BaseSettings):
     environment: str = os.getenv("ENVIRONMENT", "development")
     
     # Security
-    verify_ssl: bool = os.getenv("VERIFY_SSL", "true").lower() != "false"
+    verify_ssl: bool = True
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._check_security_settings()
-    
-    def _check_security_settings(self):
-        """Check and warn about insecure settings."""
         if not self.verify_ssl:
-            warnings.warn("SSL verification is disabled. This is insecure and should not be used in production.")
+            raise ValueError("SSL verification must remain enabled for security.")
 
 @lru_cache()
 def get_settings():
