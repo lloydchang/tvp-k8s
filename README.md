@@ -260,7 +260,7 @@ We are building a TVP, a declarative automation product, to accelerate applicati
 
 ---
 
-### Build only what is _necessary_ - _Thinnest Viable_
+### Build only what is _necessary - Thinnest Viable_
 - **Differentiate between customer wants and customer needs**
   - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
 
@@ -1252,6 +1252,16 @@ categories, made possible by large-scale behavioral data.
 • **GitOps Principles:** Declarative, versioned, immutable, pulled automatically and continuously reconciled
 
 • **Measurement Frameworks:** The Four Golden Signals (SRE), DORA, SPACE, DevEx, PULSE, HEART and CASTLE
+
+• **Key Principles of TVP:**
+
+  - Use modern software development techniques within the platform team
+
+  - Focus on _Product Thinking_, viewing internal teams as customers
+
+  - Accelerate and simplify software delivery for teams using the platform
+
+  - Build only what is _necessary - Thinnest Viable_
 
 ---
 
