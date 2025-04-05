@@ -47,8 +47,6 @@ class Settings(BaseSettings):
     
     def _check_security_settings(self):
         """Check and warn about insecure settings."""
-        if not self.argo_cd_password:
-            warnings.warn("Argo CD password not set. Please set ARGO_CD_PASSWORD environment variable.")
         if not self.verify_ssl:
             warnings.warn("SSL verification is disabled. This is insecure and should not be used in production.")
 
