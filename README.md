@@ -705,11 +705,7 @@ sequenceDiagram
     
     FastAPI->>FastAPI: Compute overall status and metrics
     FastAPI->>Logger: log_info("Health check completed: " + overall_status)
-    FastAPI-->>Client: Health status response {
-        "status": overall_status,
-        "components": component_statuses,
-        "timestamp": timestamp
-    }
+    FastAPI-->>Client: Health status response {"status": overall_status, "components": component_statuses, "timestamp": timestamp}
 ```
 
 **Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
@@ -925,11 +921,11 @@ flowchart TD
     end
 
     subgraph "Application Code"
-        main[app.main.py]
-        tvp[app.tvp.py]
-        kubernetes[app.kubernetes_api.py]
-        argo[app.argo_cd_api.py]
-        config[app.config.py]
+        main[main.py]
+        tvp[tvp.py]
+        kubernetes[kubernetes_api.py]
+        argo[argo_cd_api.py]
+        config[config.py]
     end
 
     conftest --> |fixtures| test_main

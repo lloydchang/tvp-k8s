@@ -67,8 +67,4 @@ sequenceDiagram
     
     FastAPI->>FastAPI: Compute overall status and metrics
     FastAPI->>Logger: log_info("Health check completed: " + overall_status)
-    FastAPI-->>Client: Health status response {
-        "status": overall_status,
-        "components": component_statuses,
-        "timestamp": timestamp
-    }
+    FastAPI-->>Client: Health status response {"status": overall_status, "components": component_statuses, "timestamp": timestamp}
