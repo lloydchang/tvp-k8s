@@ -332,17 +332,21 @@ def start_reconciliation_thread() -> None:
     if reconciliation_thread and reconciliation_thread.is_alive():
         return
     
-    def periodic_reconcile() -> None:
-        while True:
-            try:
-                reconcile_from_git()
-            except Exception as e:
-                logger.error(f"Error in periodic reconciliation: {e}")
-            time.sleep(60)  # Reconcile every minute
-    
-    reconciliation_thread = threading.Thread(target=periodic_reconcile, daemon=True)
-    reconciliation_thread.start()
-    logger.info("Started GitOps reconciliation thread")
+    try:
+        def periodic_reconcile() -> None:
+            while True:
+                try:
+                    reconcile_from_git()
+                except Exception as e:
+                    logger.error(f"Error in periodic reconciliation: {e}")
+                time.sleep(60)  # Reconcile every minute
+        
+        reconciliation_thread = threading.Thread(target=periodic_reconcile, daemon=True)
+        reconciliation_thread.start()
+        logger.info("Started GitOps reconciliation thread")
+    except Exception as e:
+        logger.error(f"Failed to start reconciliation thread: {str(e)}")
+        raise RuntimeError("Failed to start")
 
 def get_last_reconciliation_time() -> Optional[str]:
     """
