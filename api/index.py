@@ -44,8 +44,8 @@ app = FastAPI(
     openapi_tags=[
         {"name": "Health", "description": "Health check and system status endpoints"},
         {"name": "GitOps", "description": "GitOps operations and reconciliation"},
-        {"name": "Argo CD", "description": "Argo CD API operations and integrations"},
-        {"name": "Kubernetes", "description": "Kubernetes API operations and resources"}
+        {"name": "Argo CD", "description": "Argo CD operations and integrations"},
+        {"name": "Kubernetes", "description": "Kubernetes operations and resources"}
     ]
 )
 
@@ -79,8 +79,8 @@ async def root():
         "status": "healthy",
         "endpoints": [
             {"prefix": "/gitops", "description": "GitOps operations"},
-            {"prefix": "/argo/cd", "description": "Argo CD API operations"},
-            {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
+            {"prefix": "/argo/cd", "description": "Argo CD operations"},
+            {"prefix": "/kubernetes", "description": "Kubernetes operations"},
         ]
     }
 
