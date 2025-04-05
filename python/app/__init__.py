@@ -9,4 +9,4 @@ with GitOps reconciliation capabilities.
 from . import config
 from . import argo_cd_api
 from . import kubernetes_api
-from . import tvp
+from . import gitops

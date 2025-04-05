@@ -19,8 +19,8 @@ classDiagram
         +get_argo_cd_token()
     }
     
-    class TVP {
-        +get_tvp_status()
+    class GitOps {
+        +get_gitops_status()
         +trigger_reconciliation()
         +get_deployment_status()
     }
@@ -32,7 +32,7 @@ classDiagram
         +get_kubernetes_token()
     }
 
-    class TVPStatus {
+    class GitOpsStatus {
         +is_reconciling: bool
         +last_reconciliation: Optional[str]
         +status: str
@@ -59,17 +59,17 @@ classDiagram
     
     FastAPI --> KubernetesProxy : includes
     FastAPI --> ArgoCDProxy : includes
-    FastAPI --> TVP : includes
+    FastAPI --> GitOps : includes
     KubernetesProxy --> Config : depends on
     ArgoCDProxy --> Config : depends on
-    TVP --> Config : depends on
+    GitOps --> Config : depends on
     FastAPI --> Config : depends on
-    TVP --> TVPStatus : returns
+    GitOps --> GitOpsStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
     note for FastAPI "api.index"
     note for KubernetesProxy "api.kubernetes_api"
     note for ArgoCDProxy "api.argo_cd_api" 
-    note for TVP "api.tvp"
+    note for GitOps "api.gitops"
     note for Config "api.config"

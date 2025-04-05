@@ -5,10 +5,10 @@ This FastAPI application serves as a unified API for interacting with Kubernetes
 and Argo CD, supporting both direct operations and pass-through proxy capabilities.
 
 The application provides:
+- Health checking for dependent services 
+- GitOps reconciliation functionalityons 
+- Argo CD API pass-through and operationsons 
 - Kubernetes API pass-through and operations 
-- Argo CD API pass-through and operations
-- TVP GitOps reconciliation functionality
-- Health checking for dependent services
 """
 
 import sys
@@ -24,9 +24,9 @@ import httpx
 import contextlib
 
 # Fix imports to use python.app modules instead of app modules
-from python.app.kubernetes_api import proxy as kubernetes_proxy
+from python.app.gitops import proxy as gitops, start_reconciliation_thread
 from python.app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
-from python.app.tvp import proxy as tvp, start_reconciliation_thread
+from python.app.kubernetes_api import proxy as kubernetes_proxy
 from python.app.config import get_settings, get_kubernetes_client
 
 @contextlib.asynccontextmanager
@@ -53,9 +53,9 @@ app.add_middleware(
 )
 
 # Include routers from different modules
-app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
+app.include_router(gitops, prefix="/gitops", tags=["GitOps"])
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
-app.include_router(tvp, prefix="/tvp", tags=["TVP"])
+app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 
 @app.get("/", tags=["Health"])
 async def root():
@@ -72,9 +72,9 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
-            {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
+            {"prefix": "/gitops", "description": "GitOps operations"},
             {"prefix": "/argo/cd", "description": "Argo CD API operations"},
-            {"prefix": "/tvp", "description": "Thinnest Viable Platform operations"}
+            {"prefix": "/kubernetes", "description": "Kubernetes API operations"},
         ]
     }
 

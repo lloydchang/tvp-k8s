@@ -3,15 +3,15 @@ flowchart TD
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP]
+    API -->|/gitops/*| GitOps[GitOps]
         
-    TVP -->|Status| TS[TVP Status]
-    TVP -->|Reconcile| R[Reconciliation]
+    GitOps -->|Status| TS[GitOps Status]
+    GitOps -->|Reconcile| R[Reconciliation]
     
     TS --> Git[Git Repository]
     R --> Git
     R --> KA
-    TVP -->|Auth token| KA[Kubernetes API Server]
+    GitOps -->|Auth token| KA[Kubernetes API Server]
     KP -->|Auth token| KA[Kubernetes API Server]
     AP -->|Auth token| AA[Argo CD API]
     subgraph "Kubernetes Cluster"
@@ -24,5 +24,5 @@ flowchart TD
     classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
     
     class User user
-    class API,KP,AP,TVP,TS,R app
+    class API,KP,AP,GitOps,TS,R app
     class Kubernetes,ArgoCD,Git,KA,AA,Auth external

@@ -1,23 +1,23 @@
 sequenceDiagram
     participant Client
     participant FastAPI as "FastAPI (api.index)"
-    participant TVP as "TVP (api.tvp)"
-    participant ReconcileThread as "Reconcile Thread (api.tvp)"
+    participant GitOps as "GitOps (api.gitops)"
+    participant ReconcileThread as "Reconcile Thread (api.gitops)"
     participant GitRepo
     participant KubernetesApiServer
     participant Logger as "Logging System"
     
-    Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVP: trigger_reconciliation()
+    Client->>FastAPI: POST /gitops/reconcile
+    FastAPI->>GitOps: trigger_reconciliation()
     
     alt Already reconciling
-        TVP-->>FastAPI: Return "already_running" status
-        Note over TVP,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+        GitOps-->>FastAPI: Return "already_running" status
+        Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
         FastAPI-->>Client: Response 200 OK
     else Not yet reconciling
-        TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>FastAPI: Return "started" status
-        Note over TVP,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
+        GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+        GitOps-->>FastAPI: Return "started" status
+        Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
         FastAPI-->>Client: Response 200 OK
         
         ReconcileThread->>ReconcileThread: is_reconciling = true

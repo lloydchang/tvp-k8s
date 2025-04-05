@@ -2,7 +2,7 @@ stateDiagram-v2
     title: Application Deployment Workflow
     [*] --> GitRepoUpdate: Developer commits changes
     
-    GitRepoUpdate --> Reconciliation: TVP periodic reconciliation
+    GitRepoUpdate --> Reconciliation: GitOps periodic reconciliation
     GitRepoUpdate --> ManualReconcile: Manual trigger
     
     ManualReconcile --> Reconciliation

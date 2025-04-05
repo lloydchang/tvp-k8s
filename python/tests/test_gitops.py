@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
-def test_tvp_status_endpoint(test_client) -> None:
-    """Test the TVP status endpoint"""
+def test_gitops_status_endpoint(test_client) -> None:
+    """Test the GitOps status endpoint"""
     # Mock Path.exists and Path.iterdir
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("pathlib.Path.iterdir") as mock_iterdir, \
@@ -43,8 +43,8 @@ def test_tvp_status_endpoint(test_client) -> None:
             "tag": "v1.0.0"
         }
         
-        # Test the TVP status endpoint
-        response = test_client.get("/tvp/status")
+        # Test the GitOps status endpoint
+        response = test_client.get("/gitops/status")
         
         assert response.status_code == 200
         data = response.json()
@@ -59,10 +59,10 @@ def test_tvp_status_endpoint(test_client) -> None:
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
-    with patch("python.app.tvp.reconcile_from_git") as mock_reconcile:
+    with patch("python.app.gitops.reconcile_from_git") as mock_reconcile:
         mock_reconcile.return_value = None
         
-        response = test_client.post("/tvp/reconcile")
+        response = test_client.post("/gitops/reconcile")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "started"
@@ -71,23 +71,23 @@ def test_trigger_reconciliation(test_client):
 def test_trigger_reconciliation_already_running(test_client) -> None:
     """Test the reconciliation trigger when already in progress"""
     # Set global flag to simulate already reconciling
-    import python.app.tvp as tvp
-    tvp.is_reconciling = True
+    import python.app.gitops as gitops
+    gitops.is_reconciling = True
 
     try:
         # Test the reconciliation endpoint
-        response = test_client.post("/tvp/reconcile")
+        response = test_client.post("/gitops/reconcile")
         
         assert response.status_code == 200
         assert response.json()["status"] == "already_running"
     finally:
         # Reset the flag for other tests
-        tvp.is_reconciling = False
+        gitops.is_reconciling = False
 
 def test_trigger_reconciliation_background_task(test_client) -> None:
     """Test that the reconciliation task is properly added to background tasks"""
-    import python.app.tvp as tvp
-    tvp.is_reconciling = False
+    import python.app.gitops as gitops
+    gitops.is_reconciling = False
     
     # Create a mock for background_tasks
     mock_tasks = MagicMock()
@@ -96,14 +96,14 @@ def test_trigger_reconciliation_background_task(test_client) -> None:
     # This is where it's actually imported in the trigger_reconciliation function
     with patch("fastapi.BackgroundTasks", return_value=mock_tasks):
         # Simulate a direct call to the endpoint function with our mock
-        from python.app.tvp import trigger_reconciliation
+        from python.app.gitops import trigger_reconciliation
         import asyncio
         
         # Call the function directly with our mock
         result = asyncio.run(trigger_reconciliation(mock_tasks))
         
         # Verify that add_task was called with reconcile_from_git
-        mock_tasks.add_task.assert_called_once_with(tvp.reconcile_from_git)
+        mock_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
         
         # Check the result matches what we expect
         assert result["status"] == "started"
@@ -114,7 +114,7 @@ def test_get_deployment_status(test_client, mock_settings):
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("builtins.open", MagicMock()), \
          patch("yaml.safe_load") as mock_yaml_load, \
-         patch("python.app.tvp.get_last_reconciliation_time") as mock_get_time:
+         patch("python.app.gitops.get_last_reconciliation_time") as mock_get_time:
         
         # Setup mocks
         mock_exists.return_value = True
@@ -125,7 +125,7 @@ def test_get_deployment_status(test_client, mock_settings):
         mock_get_time.return_value = "2023-07-01T12:00:00"
         
         # Test the deployment status endpoint
-        response = test_client.get("/tvp/status/test-namespace/test-app")
+        response = test_client.get("/gitops/status/test-namespace/test-app")
         
         assert response.status_code == 200
         data = response.json()

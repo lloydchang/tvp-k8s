@@ -50,16 +50,28 @@ class TVPStatus(BaseModel):
     status: str
     applications: List[Dict[str, Any]] = []
 
-@proxy.get("/status", summary="Get TVP GitOps reconciliation status", response_model=TVPStatus)
-async def get_tvp_status() -> TVPStatus:
+class GitOpsStatus(BaseModel):
     """
-    Gets the status of the TVP GitOps reconciliation.
+    Status of GitOps reconciliation.
+    
+    Attributes:
+        is_reconciling (bool): Whether reconciliation is currently in progress.
+        last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
+        status (str): Current status of the GitOps service ("active" or "inactive").
+        applications (List[Dict[str, Any]]): List of applications managed by GitOps.
+    """
+    is_reconciling: bool
+    last_reconciliation: Optional[str] = None
+    status: str
+    applications: List[Dict[str, Any]] = []
+
+@proxy.get("/status", summary="Get GitOps reconciliation status", response_model=GitOpsStatus)
+async def get_gitops_status() -> GitOpsStatus:
+    """
+    Gets the status of the GitOps reconciliation.
     
     Returns:
-        TVPStatus: Object containing reconciliation status, applications list, and timestamps.
-    
-    Raises:
-        Exception: If there's an error reading application data from the repository.
+        GitOpsStatus: Object containing reconciliation status, applications list, and timestamps.
     """
     settings = get_settings()
     
@@ -95,14 +107,14 @@ async def get_tvp_status() -> TVPStatus:
     with reconciliation_lock:
         status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
     
-    return TVPStatus(
+    return GitOpsStatus(
         is_reconciling=is_reconciling,
         last_reconciliation=get_last_reconciliation_time(),
         status=status,
         applications=applications
     )
 
-@proxy.post("/reconcile", summary="Trigger a TVP GitOps reconciliation")
+@proxy.post("/reconcile", summary="Trigger a GitOps reconciliation")
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
@@ -343,10 +355,10 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
                 except Exception as e:
                     logger.error(f"Failed to apply {namespace_dir.name}/{app_dir.name}: {str(e)}")
 
-@proxy.get("/status/{namespace}/{app_name}", summary="Get TVP deployment status")
+@proxy.get("/status/{namespace}/{app_name}", summary="Get GitOps deployment status")
 async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]:
     """
-    Gets the status of a TVP deployment.
+    Gets the status of a GitOps deployment.
     
     Args:
         namespace (str): Kubernetes namespace of the application.

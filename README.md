@@ -299,7 +299,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 
 ## Table of Contents
 
-- [1. TVP GitOps Architecture Overview](#1-tvp-gitops-architecture-overview)
+- [1. GitOps Architecture Overview](#1-gitops-architecture-overview)
 - [2. GitOps Workflow Sequence](#2-gitops-workflow-sequence)
 - [3. GitOps Reconciliation Process](#3-gitops-reconciliation-process)
 - [4. Component Interaction Diagram](#4-component-interaction-diagram)
@@ -313,15 +313,15 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
 - [13. Conclusion: The Multiplication of Force](#13-conclusion-the-multiplication-of-force)
 
-## 1. TVP GitOps Architecture Overview
+## 1. GitOps Architecture Overview
 
 Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
 
 ```mermaid
 flowchart TB
-    title[Thinnest Viable Platform GitOps Architecture]
+    title[TVP GitOps Architecture]
     style title fill:none,stroke:none,font-size:18px,font-weight:bold
-    subgraph "Thinnest Viable Platform"
+    subgraph "TVP"
         API[FastAPI Application]
         RT[Reconciliation Thread]
         
@@ -363,16 +363,16 @@ With our architectural foundation established, let's see how engineers actually 
 sequenceDiagram
     actor Eng as Engineer
     participant Git as Git Repository
-    participant TVP as TVP API
+    participant GitOps as GitOps API
     participant Thread as Reconciliation Thread
     participant Kubernetes as Kubernetes API Server
     
     Eng->>Git: Push application changes
     
     alt Manual Trigger
-        Eng->>TVP: POST /tvp/reconcile
-        TVP->>Thread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>Eng: {"status": "started"}
+        Eng->>GitOps: POST /gitops/reconcile
+        GitOps->>Thread: background_tasks.add_task(reconcile_from_git)
+        GitOps-->>Eng: {"status": "started"}
     else Automatic Reconciliation
         Note over Thread: Periodic check<br>(every minute)
     end
@@ -386,8 +386,8 @@ sequenceDiagram
     
     Thread->>Thread: Update last_reconciliation timestamp
     
-    Eng->>TVP: GET /tvp/status
-    TVP-->>Eng: Application status information
+    Eng->>GitOps: GET /gitops/status
+    GitOps-->>Eng: Application status information
 ```
 
 **Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
@@ -402,23 +402,23 @@ Behind this simplified developer experience lies a sophisticated reconciliation 
 sequenceDiagram
     participant Client
     participant FastAPI as "FastAPI (api.index)"
-    participant TVP as "TVP (api.tvp)"
-    participant ReconcileThread as "Reconcile Thread (api.tvp)"
+    participant GitOps as "GitOps (api.gitops)"
+    participant ReconcileThread as "Reconcile Thread (api.gitops)"
     participant GitRepo
     participant KubernetesApiServer
     participant Logger as "Logging System"
     
-    Client->>FastAPI: POST /tvp/reconcile
-    FastAPI->>TVP: trigger_reconciliation()
+    Client->>FastAPI: POST /gitops/reconcile
+    FastAPI->>GitOps: trigger_reconciliation()
     
     alt Already reconciling
-        TVP-->>FastAPI: Return "already_running" status
-        Note over TVP,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+        GitOps-->>FastAPI: Return "already_running" status
+        Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
         FastAPI-->>Client: Response 200 OK
     else Not yet reconciling
-        TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>FastAPI: Return "started" status
-        Note over TVP,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
+        GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+        GitOps-->>FastAPI: Return "started" status
+        Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
         FastAPI-->>Client: Response 200 OK
         
         ReconcileThread->>ReconcileThread: is_reconciling = true
@@ -481,7 +481,7 @@ flowchart TB
     subgraph "FastAPI Application"
         API --> KR[Kubernetes Proxy]
         API --> AR[Argo CD Proxy]
-        API --> TR["TVP (Thinnest Viable Platform)"]
+        API --> TR["GitOps"]
         API --> Health[Health Check]
         TR --> RT[Reconciliation Thread]
     end
@@ -518,15 +518,15 @@ flowchart TD
     
     API -->|/kubernetes/*| KP[Kubernetes Proxy]
     API -->|/argo/cd/*| AP[Argo CD Proxy]
-    API -->|/tvp/*| TVP[TVP]
+    API -->|/gitops/*| GitOps[GitOps]
         
-    TVP -->|Status| TS[TVP Status]
-    TVP -->|Reconcile| R[Reconciliation]
+    GitOps -->|Status| TS[GitOps Status]
+    GitOps -->|Reconcile| R[Reconciliation]
     
     TS --> Git[Git Repository]
     R --> Git
     R --> KA
-    TVP -->|Auth token| KA[Kubernetes API Server]
+    GitOps -->|Auth token| KA[Kubernetes API Server]
     KP -->|Auth token| KA[Kubernetes API Server]
     AP -->|Auth token| AA[Argo CD API]
     subgraph "Kubernetes Cluster"
@@ -539,7 +539,7 @@ flowchart TD
     classDef external fill:#bfb,stroke:#3f3,stroke-width:2px
     
     class User user
-    class API,KP,AP,TVP,TS,R app
+    class API,KP,AP,GitOps,TS,R app
     class Kubernetes,ArgoCD,Git,KA,AA,Auth external
 ```
 
@@ -573,8 +573,8 @@ classDiagram
         +get_argo_cd_token()
     }
     
-    class TVP {
-        +get_tvp_status()
+    class GitOps {
+        +get_gitops_status()
         +trigger_reconciliation()
         +get_deployment_status()
     }
@@ -586,7 +586,7 @@ classDiagram
         +get_kubernetes_token()
     }
 
-    class TVPStatus {
+    class GitOpsStatus {
         +is_reconciling: bool
         +last_reconciliation: Optional[str]
         +status: str
@@ -613,19 +613,19 @@ classDiagram
     
     FastAPI --> KubernetesProxy : includes
     FastAPI --> ArgoCDProxy : includes
-    FastAPI --> TVP : includes
+    FastAPI --> GitOps : includes
     KubernetesProxy --> Config : depends on
     ArgoCDProxy --> Config : depends on
-    TVP --> Config : depends on
+    GitOps --> Config : depends on
     FastAPI --> Config : depends on
-    TVP --> TVPStatus : returns
+    GitOps --> GitOpsStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
     note for FastAPI "api.index"
     note for KubernetesProxy "api.kubernetes_api"
     note for ArgoCDProxy "api.argo_cd_api" 
-    note for TVP "api.tvp"
+    note for GitOps "api.gitops"
     note for Config "api.config"
 ```
 
@@ -643,7 +643,7 @@ sequenceDiagram
     participant FastAPI as "FastAPI (api.index)"
     participant Kubernetes as "Kubernetes API Server"
     participant ArgoCD as "Argo CD"
-    participant TVP as "TVP Reconciliation"
+    participant GitOps as "GitOps Reconciliation"
     participant Git as "Git Repository"
     participant Logger as "Logging System"
     
@@ -674,22 +674,22 @@ sequenceDiagram
             FastAPI->>FastAPI: Overall status = "degraded"
             FastAPI->>Logger: log_warning("Argo CD check: unhealthy")
         end
-    and Check TVP Status
-        FastAPI->>TVP: get_reconciliation_status()
-        alt TVP Healthy
-            TVP-->>FastAPI: Status OK
-            FastAPI->>FastAPI: TVP status = "healthy"
-            FastAPI->>Logger: log_debug("TVP reconciliation check: healthy")
-        else TVP Reconciliation Stuck
-            TVP-->>FastAPI: Reconciliation running > 30 min
-            FastAPI->>FastAPI: TVP status = "warning"
+    and Check GitOps Status
+        FastAPI->>GitOps: get_reconciliation_status()
+        alt GitOps Healthy
+            GitOps-->>FastAPI: Status OK
+            FastAPI->>FastAPI: GitOps status = "healthy"
+            FastAPI->>Logger: log_debug("GitOps reconciliation check: healthy")
+        else GitOps Reconciliation Stuck
+            GitOps-->>FastAPI: Reconciliation running > 30 min
+            FastAPI->>FastAPI: GitOps status = "warning"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("TVP reconciliation check: stuck")
-        else TVP Error
-            TVP-->>FastAPI: Error
-            FastAPI->>FastAPI: TVP status = "unhealthy"
+            FastAPI->>Logger: log_warning("GitOps reconciliation check: stuck")
+        else GitOps Error
+            GitOps-->>FastAPI: Error
+            FastAPI->>FastAPI: GitOps status = "unhealthy"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("TVP reconciliation check: unhealthy")
+            FastAPI->>Logger: log_warning("GitOps reconciliation check: unhealthy")
         end
     and Check Git Repository
         FastAPI->>Git: Test connection
@@ -877,7 +877,7 @@ stateDiagram-v2
     title: Application Deployment Workflow
     [*] --> GitRepoUpdate: Developer commits changes
     
-    GitRepoUpdate --> Reconciliation: TVP periodic reconciliation
+    GitRepoUpdate --> Reconciliation: GitOps periodic reconciliation
     GitRepoUpdate --> ManualReconcile: Manual trigger
     
     ManualReconcile --> Reconciliation
@@ -918,43 +918,43 @@ flowchart TD
     subgraph Tests
         conftest[conftest.py]
         test_index[test_index.py]
-        test_tvp[test_tvp.py]
+        test_gitops[test_gitops.py]
         test_kubernetes[test_kubernetes_api.py]
         test_argo[test_argo_cd_api.py]
     end
 
     subgraph "Application Code"
         main[index.py]
-        tvp[tvp.py]
+        gitops[gitops.py]
         kubernetes[kubernetes_api.py]
         argo[argo_cd_api.py]
         config[config.py]
     end
 
     conftest --> |fixtures| test_index
-    conftest --> |fixtures| test_tvp
+    conftest --> |fixtures| test_gitops
     conftest --> |fixtures| test_kubernetes
     conftest --> |fixtures| test_argo
 
     test_index --> |tests| main
-    test_tvp --> |tests| tvp
+    test_gitops --> |tests| gitops
     test_kubernetes --> |tests| kubernetes
     test_argo --> |tests| argo
 
-    main --> |imports| tvp
+    main --> |imports| gitops
     main --> |imports| kubernetes
     main --> |imports| argo
     main --> |imports| config
 
-    tvp --> |imports| config
+    gitops --> |imports| config
     kubernetes --> |imports| config
     argo --> |imports| config
 
     classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
     classDef appFile fill:#bef,stroke:#333,stroke-width:1px
     
-    class conftest,test_index,test_tvp,test_kubernetes,test_argo testFile
-    class main,tvp,kubernetes,argo,config appFile
+    class conftest,test_index,test_gitops,test_kubernetes,test_argo testFile
+    class main,gitops,kubernetes,argo,config appFile
 ```
 
 **Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application engineers, enabling faster iteration and more frequent releases.
