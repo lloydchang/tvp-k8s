@@ -129,11 +129,10 @@ def test_argo_cd_token_null_response(test_client):
 
 def test_uvicorn_main():
     """Test the __main__ block for running uvicorn"""
-    import index
+    from api.index import main  # Import the right module
     with patch("uvicorn.run") as mock_run:
-        # Simulate running as main module
-        index.__name__ = "__main__"
-        index.main()  # This would be defined in a moment
+        # Call the main function directly instead of modifying __name__
+        main()
         mock_run.assert_called_once_with(
             "api.index:app",
             host="0.0.0.0",

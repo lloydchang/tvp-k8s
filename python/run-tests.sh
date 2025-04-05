@@ -93,10 +93,10 @@ fi
 # Add coverage flags if requested
 if [ $COVERAGE -eq 1 ]; then
     # Updated to include api/index.py in coverage report
-    PYTEST_CMD="$PYTEST_CMD --cov=app --cov=../api/index.py --cov-report=term-missing"
+    PYTEST_CMD="$PYTEST_CMD --cov=app --cov=api --cov-report=term-missing"
 else
     # Add minimal coverage for api/index.py even when not explicitly requested
-    PYTEST_CMD="$PYTEST_CMD --cov=../api/index.py --cov-report=term-missing:skip-covered"
+    PYTEST_CMD="$PYTEST_CMD --cov=api --cov-report=term-missing:skip-covered"
 fi
 
 # Add -s to show print outputs which can help with debugging
