@@ -15,7 +15,6 @@ import httpx
 import yaml
 import aiofiles  # Add missing import
 
-# Fix the import to use relative import
 from .config import get_settings, get_kubernetes_client
 
 # Using APIRouter instead of APIProxy which doesn't exist in FastAPI

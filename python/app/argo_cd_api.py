@@ -9,7 +9,6 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from typing import Any
 import httpx
-# Fix import to use relative import
 from .config import get_settings, get_kubernetes_client
 
 proxy = APIRouter()

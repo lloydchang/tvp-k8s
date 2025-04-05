@@ -32,7 +32,6 @@ finally:
 @pytest.fixture
 def mock_settings():
     """Fixture to mock application settings"""
-    # Fix: Change from "api.config.get_settings" to "app.config.get_settings"
     with patch("app.config.get_settings") as mock_get_settings:
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
@@ -68,7 +67,6 @@ def mock_kubernetes_client():
 @pytest.fixture
 def mock_argo_cd_token():
     """Fixture to mock Argo CD authentication token where it's used in index.py"""
-    # Fix: Change from "api.index.get_argo_cd_token" to "index.get_argo_cd_token"
     with patch("index.get_argo_cd_token") as mock_token:
         # Make this an async mock to work with the async function
         from unittest.mock import AsyncMock
