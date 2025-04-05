@@ -1190,21 +1190,15 @@ def test_apply_configurations_fatal_errors(mock_git_commands, tmp_path):
 def test_reconcile_from_git_lock_timeout():
     """Test reconciliation when lock acquisition times out"""
     from python.app.gitops import reconcile_from_git, reconciliation_lock
-    import threading
     
-    def hold_lock():
-        with reconciliation_lock:
-            time.sleep(2)  # Hold the lock for 2 seconds
-    
-    # Start a thread that holds the lock
-    thread = threading.Thread(target=hold_lock)
-    thread.start()
-    time.sleep(0.1)  # Give the thread time to acquire the lock
-    
-    # Try to reconcile while the lock is held
-    reconcile_from_git()  # Should handle lock acquisition failure gracefully
-    
-    thread.join()
+    # Use a mock for the lock to simulate timeout without real waiting
+    with patch('python.app.gitops.reconciliation_lock') as mock_lock:
+        # Configure the lock to raise RuntimeError when __enter__ is called
+        # to simulate timeout/failure when acquiring the lock
+        mock_lock.__enter__.side_effect = RuntimeError("Lock acquisition timed out")
+        
+        # Call reconcile_from_git which should handle the lock acquisition failure gracefully
+        reconcile_from_git()  # Should handle lock acquisition failure without raising exceptions
 
 def test_error_handling_coverage():
     """Test various error handling paths"""
