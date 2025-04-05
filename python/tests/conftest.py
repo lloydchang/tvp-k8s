@@ -1,15 +1,39 @@
 import pytest
 import warnings
+import sys
+import os
+from pathlib import Path
 from unittest.mock import MagicMock, patch
-from fastapi.testclient import TestClient
-# Import the app from the correct location 
-import index  # Import from root directory, not app package
+from starlette.testclient import TestClient
+
+# Make sure system packages are prioritized over local directories
+# by temporarily removing the current directory from sys.path
+cwd = ""
+if "" in sys.path:
+    cwd = sys.path.pop(sys.path.index(""))
+    
+# Also remove the current directory if it's in the path
+current_dir = str(Path(__file__).parent.parent)
+if (current_dir in sys.path):
+    sys.path.remove(current_dir)
+
+# Add the API directory to the Python path so we can import index.py
+api_path = Path(__file__).parent.parent.parent / 'api'
+sys.path.append(str(api_path))
+
+# Now we can import from the api directory
+try:
+    import index
+finally:
+    # Restore the original path if we removed it
+    if cwd:
+        sys.path.insert(0, cwd)
 
 @pytest.fixture
 def mock_settings():
     """Fixture to mock application settings"""
-    # The patch path is correctly set to "api.config.get_settings"
-    with patch("api.config.get_settings") as mock_get_settings:
+    # Fix: Change from "api.config.get_settings" to "app.config.get_settings"
+    with patch("app.config.get_settings") as mock_get_settings:
         settings = MagicMock()
         settings.kubernetes_api_url = "https://test-kubernetes.local"
         settings.kubernetes_token_path = "/tmp/test-kubernetes-token"
@@ -44,7 +68,8 @@ def mock_kubernetes_client():
 @pytest.fixture
 def mock_argo_cd_token():
     """Fixture to mock Argo CD authentication token where it's used in index.py"""
-    with patch("api.index.get_argo_cd_token") as mock_token:
+    # Fix: Change from "api.index.get_argo_cd_token" to "index.get_argo_cd_token"
+    with patch("index.get_argo_cd_token") as mock_token:
         # Make this an async mock to work with the async function
         from unittest.mock import AsyncMock
         mock_async = AsyncMock()
