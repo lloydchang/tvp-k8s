@@ -10,8 +10,8 @@ sequenceDiagram
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVP: trigger_reconciliation()
     TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVP-->>FastAPI: {"status": "started", "request_id": "uuid"}
-    FastAPI-->>Client: Response 202 Accepted
+    TVP-->>FastAPI: {"status": "started", "message": "Reconciliation process started"}
+    FastAPI-->>Client: Response 200 OK
     
     ReconcileThread->>ReconcileThread: is_reconciling = true
     ReconcileThread->>Logger: log_info("Starting reconciliation")
