@@ -44,13 +44,13 @@ def test_health_check_argo_cd_unhealthy(test_client, test_health_check_argo_cd_u
 @pytest.mark.asyncio
 async def test_lifespan():
     """Test the lifespan context manager's startup and cleanup"""
-    from index import lifespan
+    from api.index import lifespan
     mock_app = MagicMock()
-    with patch("python.app.gitops.start_reconciliation_thread") as mock_start:
+    # Correct patch target
+    with patch("api.index.start_reconciliation_thread") as mock_start:
         async with lifespan(mock_app):
             # Check that startup operations were performed
             mock_start.assert_called_once()
-            # Here we would test any other startup operations
 
 @pytest.mark.asyncio
 async def test_lifespan_error_handling():
@@ -58,7 +58,8 @@ async def test_lifespan_error_handling():
     from api.index import lifespan
     mock_app = MagicMock()
     
-    with patch("python.app.gitops.start_reconciliation_thread") as mock_start:
+    # Correct patch target
+    with patch("api.index.start_reconciliation_thread") as mock_start:
         # Test startup error handling
         mock_start.side_effect = Exception("Failed to start reconciliation")
         async with lifespan(mock_app):
@@ -138,7 +139,8 @@ def test_uvicorn_main():
 
 def test_startup_reconciliation(test_client):
     """Test that reconciliation thread starts on application startup"""
-    with patch("python.app.gitops.start_reconciliation_thread") as mock_start:
+    # Correct patch target
+    with patch("api.index.start_reconciliation_thread") as mock_start:
         from api.index import lifespan
         mock_app = MagicMock()
         
@@ -293,8 +295,8 @@ async def test_startup_dependency_failure():
     from api.index import lifespan
     mock_app = MagicMock()
 
-    # Test with simpler mocking to avoid patching sys.path.append
-    with patch("python.app.gitops.start_reconciliation_thread") as mock_start:
+    # Correct patch target
+    with patch("api.index.start_reconciliation_thread") as mock_start:
         mock_start.side_effect = Exception("Failed to start")
         async with lifespan(mock_app):
             # Should not raise exception
