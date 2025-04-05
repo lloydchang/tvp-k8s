@@ -265,7 +265,7 @@ def test_app_initialization():
     # Test middleware configuration - fixed to access middleware stack properly
     middlewares = [type(m) for m in app.middleware]
     from fastapi.middleware.cors import CORSMiddleware
-    assert CORSMiddleware in middlewaresddleware' for m in middlewares)
+    assert CORSMiddleware in middlewares
 
 def test_router_prefix_conflicts():
     """Test that router prefixes don't conflict"""
