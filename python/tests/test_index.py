@@ -319,4 +319,3 @@ def test_health_check_timeout_scenarios(test_client):
         assert data["status"] == "degraded"
         assert all("timeout" in str(svc.get("error", "")).lower() 
                   for svc in data["services"].values())
-        assert data["status"] == "degraded"        assert all("timeout" in str(svc.get("error", "")).lower()                   for svc in data["services"].values())
