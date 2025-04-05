@@ -326,6 +326,9 @@ def start_reconciliation_thread() -> None:
     
     This function creates a daemon thread that runs reconciliation at regular intervals.
     If a thread is already running, it will not start a new one.
+    
+    Raises:
+        Exception: If thread creation or starting fails, with descriptive message
     """
     global reconciliation_thread
     
@@ -333,7 +336,7 @@ def start_reconciliation_thread() -> None:
         if reconciliation_thread and reconciliation_thread.is_alive():
             logger.info("Reconciliation thread already running")
             return
-        
+
         def periodic_reconcile() -> None:
             while True:
                 try:
@@ -342,14 +345,28 @@ def start_reconciliation_thread() -> None:
                     logger.error(f"Error in periodic reconciliation: {e}")
                 time.sleep(60)  # Reconcile every minute
         
-        reconciliation_thread = threading.Thread(target=periodic_reconcile, daemon=True)
-        reconciliation_thread.start()
-        logger.info("Started GitOps reconciliation thread")
+        # Create thread with explicit name for better debugging
+        thread = threading.Thread(
+            target=periodic_reconcile,
+            daemon=True,
+            name="GitOps-Reconciliation-Thread"
+        )
+        
+        # Start the thread with explicit error handling
+        try:
+            thread.start()
+            # Only set the global variable if start() succeeds
+            reconciliation_thread = thread
+            logger.info("Started GitOps reconciliation thread")
+        except RuntimeError as e:
+            # Handle specific thread starting errors
+            logger.error(f"Failed to start reconciliation thread: {str(e)}")
+            raise Exception(f"Failed to start reconciliation thread: {str(e)}")
     except Exception as e:
-        # Catch any exceptions that might occur during thread creation/starting
-        logger.error(f"Failed to start reconciliation thread: {str(e)}")
-        # Ensure thread reference is None if we failed to create it
+        # Catch any other exceptions during thread creation
+        logger.error(f"Failed to create reconciliation thread: {str(e)}")
         reconciliation_thread = None
+        raise Exception(f"Failed to start reconciliation thread: {str(e)}")
 
 def get_last_reconciliation_time() -> Optional[str]:
     """

@@ -11,41 +11,54 @@ from starlette.testclient import TestClient
 cwd = ""
 if "" in sys.path:
     cwd = sys.path.pop(sys.path.index(""))
-    
+
 # Also remove the current directory if it's in the path
 current_dir = str(Path(__file__).parent.parent)
 if (current_dir in sys.path):
     sys.path.remove(current_dir)
 
 # Add the API directory to the Python path so we can import index.py
-api_path = Path(__file__).parent.parent.parent / 'api'
-sys.path.append(str(api_path))
+api_dir = str(Path(__file__).parent.parent)
+sys.path.insert(0, api_dir)
 
-# Now we can import from the api directory
-try:
-    import index
-finally:
-    # Restore the original path if we removed it
-    if cwd:
-        sys.path.insert(0, cwd)
+# Patch GitOps reconciliation thread to avoid actual thread creation in tests
+with patch('python.app.gitops.start_reconciliation_thread') as mock_start_thread:
+    mock_start_thread.return_value = None
+    
+    # Import the app after path modifications
+    from api.index import app
 
 @pytest.fixture
+def test_client():
+    """Create a test client for the FastAPI application."""
+    with TestClient(app) as client:
+        yield client
+
+# Mock the settings to avoid reading actual configuration files
+@pytest.fixture
 def mock_settings():
-    """Fixture to mock application settings"""
-    with patch("python.app.config.get_settings") as mock_get_settings:
-        settings = MagicMock()
-        settings.kubernetes_api_url = "https://test-kubernetes.local"
-        settings.kubernetes_token_path = "/tmp/test-kubernetes-token"
-        settings.argo_cd_url = "https://test-argo-cd.local"
-        settings.argo_cd_username = "m0cK!us3R"
-        settings.argo_cd_password = "M0ckPa%%w0rd"
-        settings.gitops_repo_url = "git@github.com:test/test-repo.git"
-        settings.gitops_repo_path = "/tmp/test-repo"
-        settings.gitops_repo_branch = "main"
-        settings.environment = "test"
-        settings.verify_ssl = False
-        mock_get_settings.return_value = settings
-        yield settings # Yield the settings object
+    """Mock Settings to use test values."""
+    with patch('python.app.config.get_settings') as mock_get_settings:
+        mock_settings = MagicMock()
+        mock_settings.kubernetes_api_url = "https://kubernetes.example.com"
+        mock_settings.argo_cd_api_url = "https://argocd.example.com"
+        mock_settings.argo_cd_username = "test-user"
+        mock_settings.argo_cd_password = "test-password"
+        mock_settings.verify_ssl = False
+        mock_settings.gitops_repo_url = "https://github.com/example/repo.git"
+        mock_settings.gitops_repo_path = "/tmp/test-gitops-repo"
+        mock_settings.gitops_repo_branch = "main"
+        
+        mock_get_settings.return_value = mock_settings
+        yield mock_settings
+
+# Additional mock for Git commands
+@pytest.fixture
+def mock_git_commands():
+    """Mock Git commands to avoid actual Git operations."""
+    with patch('subprocess.run') as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        yield mock_run
 
 @pytest.fixture
 def mock_kubernetes_client():
@@ -76,13 +89,6 @@ def mock_argo_cd_token():
         yield mock_token
 
 @pytest.fixture
-def mock_git_commands():
-    """Fixture to mock Git subprocess commands"""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(returncode=0)
-        yield mock_run
-
-@pytest.fixture
 def mock_yaml_operations():
     """Fixture to mock YAML operations"""
     with patch("yaml.safe_load") as mock_yaml_load:
@@ -91,29 +97,6 @@ def mock_yaml_operations():
             "tag": "latest",
         }
         yield mock_yaml_load
-
-# Define a single, simple test_client fixture
-@pytest.fixture
-def test_client(mock_settings, mock_kubernetes_client, mock_argo_cd_token):
-    """Fixture to create a FastAPI TestClient with all dependencies properly mocked"""
-    with patch("index.get_kubernetes_client") as mock_get_k8s:
-        # Set up a mock that returns a client that won't raise exceptions
-        k8s_client = MagicMock()
-        namespace_list = MagicMock()
-        namespace_list.items = [MagicMock()]
-        k8s_client.list_namespace = MagicMock(return_value=namespace_list)
-        mock_get_k8s.return_value = k8s_client
-        
-        # Also patch the Argo CD token function in the main app
-        with patch("index.get_argo_cd_token") as mock_get_token:
-            from unittest.mock import AsyncMock
-            mock_async = AsyncMock()
-            mock_async.return_value = "test-argo-cd-token"
-            mock_get_token.side_effect = mock_async
-            
-            from index import app
-            client = TestClient(app)
-            yield client
 
 @pytest.fixture
 def test_health_check_kubernetes_unhealthy(test_client):
