@@ -14,6 +14,7 @@ from pydantic import BaseModel
 import httpx
 import yaml
 import aiofiles  # Add missing import
+from kubernetes import client  # Ensure client is imported
 
 from .config import get_settings, get_kubernetes_client
 

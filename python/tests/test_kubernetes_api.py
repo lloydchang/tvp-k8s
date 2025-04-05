@@ -1,5 +1,7 @@
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock, mock_open, AsyncMock
 import httpx
+import pytest
+from kubernetes import client
 
 def test_kubernetes_proxy(test_client, mock_settings):
     """Test the Kubernetes proxy endpoint"""
@@ -65,3 +67,131 @@ def test_kubernetes_proxy_failure(test_client):
                 response = test_client.get("/kubernetes/pods")
                 assert response.status_code == 503
                 assert "unavailable" in response.json()["detail"].lower()
+
+def test_kubernetes_proxy_file_not_found(test_client, mock_settings):
+    """Test the Kubernetes proxy endpoint when token file is not found"""
+    # Mock settings
+    with patch("python.app.kubernetes_api.get_settings") as mock_get_settings:
+        mock_get_settings.return_value = mock_settings
+        
+        # Mock aiofiles.open to raise FileNotFoundError
+        with patch("aiofiles.open") as mock_open:
+            mock_open.side_effect = FileNotFoundError("Token file not found")
+            
+            # Mock httpx client
+            with patch("httpx.AsyncClient") as mock_client:
+                # Configure the mock client's response
+                mock_response = MagicMock()
+                mock_response.json.return_value = {"kind": "Pod", "items": []}
+                
+                # Configure the mock client instance
+                mock_client_instance = MagicMock()
+                mock_client_instance.__aenter__.return_value.request.return_value = mock_response
+                mock_client.return_value = mock_client_instance
+                
+                # Test the proxy endpoint
+                response = test_client.get("/kubernetes/pods")
+                
+                # Verify response
+                assert response.status_code == 200
+                
+                # Verify headers (should not have Authorization header)
+                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
+                assert "Authorization" not in call_kwargs["headers"]
+
+def test_kubernetes_proxy_permission_error(test_client, mock_settings):
+    """Test the Kubernetes proxy endpoint when token file has permission error"""
+    # Mock settings
+    with patch("python.app.kubernetes_api.get_settings") as mock_get_settings:
+        mock_get_settings.return_value = mock_settings
+        
+        # Mock aiofiles.open to raise PermissionError
+        with patch("aiofiles.open") as mock_open:
+            mock_open.side_effect = PermissionError("Permission denied")
+            
+            # Mock httpx client
+            with patch("httpx.AsyncClient") as mock_client:
+                # Configure the mock client's response
+                mock_response = MagicMock()
+                mock_response.json.return_value = {"kind": "Pod", "items": []}
+                
+                # Configure the mock client instance
+                mock_client_instance = MagicMock()
+                mock_client_instance.__aenter__.return_value.request.return_value = mock_response
+                mock_client.return_value = mock_client_instance
+                
+                # Test the proxy endpoint
+                response = test_client.get("/kubernetes/pods")
+                
+                # Verify response
+                assert response.status_code == 200
+                
+                # Verify headers (should not have Authorization header)
+                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
+                assert "Authorization" not in call_kwargs["headers"]
+
+def test_kubernetes_proxy_post_request(test_client, mock_settings):
+    """Test the Kubernetes proxy endpoint with POST request"""
+    # Mock settings
+    with patch("python.app.kubernetes_api.get_settings") as mock_get_settings:
+        mock_get_settings.return_value = mock_settings
+        
+        # Mock aiofiles.open
+        async_mock = MagicMock()
+        async_cm = MagicMock()
+        async_cm.__aenter__.return_value.read.return_value = "test-token"
+        async_mock.return_value = async_cm
+        
+        with patch("aiofiles.open", async_mock):
+            # Mock httpx client
+            with patch("httpx.AsyncClient") as mock_client:
+                # Configure the mock client's response
+                mock_response = MagicMock()
+                mock_response.json.return_value = {"kind": "Pod", "metadata": {"name": "new-pod"}}
+                
+                # Configure the mock client instance
+                mock_client_instance = MagicMock()
+                mock_client_instance.__aenter__.return_value.request.return_value = mock_response
+                mock_client.return_value = mock_client_instance
+                
+                # Test POST request to create a pod
+                pod_data = {
+                    "apiVersion": "v1",
+                    "kind": "Pod",
+                    "metadata": {"name": "new-pod"},
+                    "spec": {"containers": [{"name": "nginx", "image": "nginx"}]}
+                }
+                
+                response = test_client.post("/kubernetes/namespaces/default/pods", json=pod_data)
+                
+                # Verify response
+                assert response.status_code == 200
+                assert response.json()["kind"] == "Pod"
+                
+                # Verify request details
+                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
+                assert call_kwargs["method"] == "POST"
+                assert call_kwargs["url"] == f"{mock_settings.kubernetes_api_url}/api/v1/namespaces/default/pods"
+                assert call_kwargs["content"] is not None  # Body content should be present
+
+def test_get_apps_v1_client():
+    """Test the get_apps_v1_client function"""
+    from python.app.kubernetes_api import get_apps_v1_client
+    
+    # Mock the Kubernetes client and configuration
+    with patch("python.app.kubernetes_api.get_kubernetes_client") as mock_get_client, \
+         patch("kubernetes.client.AppsV1Api") as mock_apps_api:
+        
+        # Configure mock AppsV1Api
+        mock_apps_client = MagicMock()
+        mock_apps_api.return_value = mock_apps_client
+        
+        # Call the function
+        result = get_apps_v1_client()
+        
+        # Verify get_kubernetes_client was called to set up configuration
+        mock_get_client.assert_called_once()
+        
+        # Verify AppsV1Api client was created and returned
+        mock_apps_api.assert_called_once()
+        assert result == mock_apps_client
