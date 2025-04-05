@@ -4,8 +4,10 @@ stateDiagram-v2
     
     GitRepoUpdate --> Reconciliation: GitOps periodic reconciliation
     GitRepoUpdate --> ManualReconcile: Manual trigger
+    [*] --> DirectDeployment: API deployment trigger
     
     ManualReconcile --> Reconciliation
+    DirectDeployment --> GitRepoUpdate: Update values.yaml
     
     Reconciliation --> ConfigReading: Read values.yaml
     ConfigReading --> ApplicationDeployment: Prepare deployment
@@ -27,4 +29,13 @@ stateDiagram-v2
         GitClone --> ProcessApps
         GitPull --> ProcessApps
         ProcessApps --> [*]
+    }
+    
+    state DirectDeployment {
+        [*] --> ValidateRequest: Validate deployment request
+        ValidateRequest --> UpdateConfig: Create/update values.yaml
+        UpdateConfig --> CommitChanges: Commit to Git
+        CommitChanges --> PushChanges: Push to repository
+        PushChanges --> TriggerReconcile: Start reconciliation
+        TriggerReconcile --> [*]
     }

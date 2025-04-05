@@ -135,3 +135,74 @@ def test_get_deployment_status(test_client, mock_settings):
         assert data["tag"] == "v1.0.0"
         assert data["status"] == "deployed"
         assert data["last_reconciliation"] == "2023-07-01T12:00:00"
+
+def test_trigger_deployment(test_client, mock_settings):
+    """Test triggering a deployment for a specific application"""
+    # Mock necessary functions to avoid actual file/git operations
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
+         patch("builtins.open", MagicMock()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
+         patch("subprocess.run") as mock_run, \
+         patch("python.app.gitops.reconcile_from_git") as mock_reconcile:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {
+            "image": "old-image:v1",
+            "replicas": 1
+        }
+        
+        # Test deployment request
+        deployment_data = {
+            "image": "test-registry/new-image:v2",
+            "replicas": 3,
+            "environment": {
+                "DEBUG": "false"
+            }
+        }
+        
+        # Test the deployment endpoint
+        response = test_client.post(
+            "/gitops/deploy/test-namespace/test-app",
+            json=deployment_data
+        )
+        
+        # Verify response
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "deployment_triggered"
+        assert data["details"]["namespace"] == "test-namespace"
+        assert data["details"]["application"] == "test-app"
+        assert data["details"]["image"] == "test-registry/new-image:v2"
+        assert data["details"]["replicas"] == 3
+        
+        # Verify Git operations
+        assert mock_run.call_count >= 3  # add, commit, push
+        
+        # Verify reconciliation was triggered
+        mock_reconcile.assert_called_once()
+
+def test_trigger_deployment_repo_error(test_client, mock_settings):
+    """Test deployment trigger when repository update fails"""
+    # Mock to simulate repository error
+    with patch("python.app.gitops._update_repository") as mock_update_repo:
+        # Simulate error in repository update
+        mock_update_repo.side_effect = Exception("Repository update failed")
+        
+        # Test deployment request
+        deployment_data = {
+            "image": "test-image:latest",
+            "replicas": 2
+        }
+        
+        # Test the deployment endpoint
+        response = test_client.post(
+            "/gitops/deploy/test-namespace/test-app",
+            json=deployment_data
+        )
+        
+        # Verify response shows error
+        assert response.status_code == 500
+        assert "Failed to update Git repository" in response.json()["detail"]

@@ -7,57 +7,77 @@ sequenceDiagram
     participant KubernetesApiServer
     participant Logger as "Logging System"
     
-    Client->>FastAPI: POST /gitops/reconcile
-    FastAPI->>GitOps: trigger_reconciliation()
-    
-    alt Already reconciling
-        GitOps-->>FastAPI: Return "already_running" status
-        Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
-        FastAPI-->>Client: Response 200 OK
-    else Not yet reconciling
-        GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-        GitOps-->>FastAPI: Return "started" status
-        Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
-        FastAPI-->>Client: Response 200 OK
+    alt Trigger Reconciliation
+        Client->>FastAPI: POST /gitops/reconcile
+        FastAPI->>GitOps: trigger_reconciliation()
         
-        ReconcileThread->>ReconcileThread: is_reconciling = true
-        ReconcileThread->>Logger: log_info("Starting reconciliation")
-        
-        alt Repository doesn't exist
-            ReconcileThread->>GitRepo: git clone
-            alt Clone failed
-                GitRepo-->>ReconcileThread: Error
-                ReconcileThread->>Logger: log_error("Failed to clone repository")
-                ReconcileThread->>ReconcileThread: is_reconciling = false
-            end
-        else Repository exists
-            ReconcileThread->>GitRepo: git fetch
-            ReconcileThread->>GitRepo: git checkout branch
-            ReconcileThread->>GitRepo: git pull
-            alt Git operations failed
-                GitRepo-->>ReconcileThread: Error
-                ReconcileThread->>Logger: log_error("Git operation failed")
-                ReconcileThread->>ReconcileThread: is_reconciling = false
-            end
+        alt Already reconciling
+            GitOps-->>FastAPI: Return "already_running" status
+            Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+            FastAPI-->>Client: Response 200 OK
+        else Not yet reconciling
+            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            GitOps-->>FastAPI: Return "started" status
+            Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
+            FastAPI-->>Client: Response 200 OK
         end
+    else Trigger Deployment
+        Client->>FastAPI: POST /gitops/deploy/{namespace}/{app_name}
+        FastAPI->>GitOps: trigger_deployment()
         
-        ReconcileThread->>ReconcileThread: Parse configuration files
-        
-        loop For each namespace/app
-            ReconcileThread->>ReconcileThread: Read values.yaml
-            ReconcileThread->>Logger: log_info("Applying configuration for {namespace}/{app_name}")
-            ReconcileThread->>KubernetesApiServer: Apply configuration
-            alt Application failed
-                KubernetesApiServer-->>ReconcileThread: Error
-                ReconcileThread->>Logger: log_error("Failed to apply config for {app_name}")
-                note over ReconcileThread: Continue with next app
-            else Application succeeded
-                KubernetesApiServer-->>ReconcileThread: Success
-                note over ReconcileThread: Continue with next app
-            end
+        GitOps->>GitRepo: Update Git repository
+        alt Repository update failed
+            GitRepo-->>GitOps: Error
+            GitOps-->>FastAPI: Error response
+            FastAPI-->>Client: Response 500 Error
+        else Repository updated successfully
+            GitRepo-->>GitOps: Success
+            GitOps->>GitRepo: Update deployment config
+            GitOps->>GitRepo: Commit and push changes
+            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            GitOps-->>FastAPI: Return "deployment_triggered" status
+            Note over GitOps,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
+            FastAPI-->>Client: Response 200 OK
         end
-        
-        ReconcileThread->>ReconcileThread: Update last_reconciliation timestamp
-        ReconcileThread->>Logger: log_info("GitOps reconciliation completed successfully")
-        ReconcileThread->>ReconcileThread: is_reconciling = false
     end
+    
+    ReconcileThread->>ReconcileThread: is_reconciling = true
+    ReconcileThread->>Logger: log_info("Starting reconciliation")
+    
+    alt Repository doesn't exist
+        ReconcileThread->>GitRepo: git clone
+        alt Clone failed
+            GitRepo-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Failed to clone repository")
+            ReconcileThread->>ReconcileThread: is_reconciling = false
+        end
+    else Repository exists
+        ReconcileThread->>GitRepo: git fetch
+        ReconcileThread->>GitRepo: git checkout branch
+        ReconcileThread->>GitRepo: git pull
+        alt Git operations failed
+            GitRepo-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Git operation failed")
+            ReconcileThread->>ReconcileThread: is_reconciling = false
+        end
+    end
+    
+    ReconcileThread->>ReconcileThread: Parse configuration files
+    
+    loop For each namespace/app
+        ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>Logger: log_info("Applying configuration for {namespace}/{app_name}")
+        ReconcileThread->>KubernetesApiServer: Apply configuration
+        alt Application failed
+            KubernetesApiServer-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Failed to apply config for {app_name}")
+            note over ReconcileThread: Continue with next app
+        else Application succeeded
+            KubernetesApiServer-->>ReconcileThread: Success
+            note over ReconcileThread: Continue with next app
+        end
+    end
+    
+    ReconcileThread->>ReconcileThread: Update last_reconciliation timestamp
+    ReconcileThread->>Logger: log_info("GitOps reconciliation completed successfully")
+    ReconcileThread->>ReconcileThread: is_reconciling = false

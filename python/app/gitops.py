@@ -393,6 +393,127 @@ async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]
     
     return app_info
 
+@proxy.post("/deploy/{namespace}/{app_name}", summary="Trigger a GitOps deployment")
+async def trigger_deployment(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+    """
+    Triggers a deployment for a specific application using GitOps.
+    
+    This endpoint updates the application's configuration in the Git repository
+    and then triggers a reconciliation to apply the changes.
+    
+    Args:
+        namespace (str): Kubernetes namespace for the application.
+        app_name (str): Name of the application to deploy.
+        deployment (DeploymentRequest): Deployment configuration including image and tag.
+        background_tasks (BackgroundTasks): FastAPI background tasks runner.
+        
+    Returns:
+        dict: Status message and deployment information.
+        
+    Raises:
+        HTTPException: If the application directory doesn't exist or there's an error updating the configuration.
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / app_name
+    
+    # Ensure the repository is up to date
+    try:
+        if not repo_path.exists():
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+        else:
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+    except Exception as e:
+        logger.error(f"Failed to update Git repository: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update Git repository")
+    
+    # Create namespace/app directories if they don't exist
+    app_path.parent.mkdir(exist_ok=True, parents=True)
+    app_path.mkdir(exist_ok=True)
+    
+    # Create or update values.yaml
+    values_file = app_path / "values.yaml"
+    
+    try:
+        # Load existing values if they exist
+        values = {}
+        if values_file.exists():
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f) or {}
+        
+        # Update with new values
+        values.update({
+            "image": deployment.image,
+            "replicas": deployment.replicas,
+            # Add any other fields from the deployment request
+        })
+        
+        # Write updated values back
+        with open(values_file, 'w') as f:
+            yaml.safe_dump(values, f)
+            
+        # Commit changes to Git
+        try:
+            subprocess.run(
+                ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            commit_message = f"Update {namespace}/{app_name} deployment"
+            subprocess.run(
+                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            subprocess.run(
+                ["git", "-C", str(repo_path), "push"],
+                check=True, capture_output=True, text=True, timeout=60
+            )
+        except CalledProcessError as e:
+            logger.error(f"Git operation failed: {e.stderr}")
+            # Don't fail if commit fails (e.g., no changes to commit)
+            if "nothing to commit" not in e.stderr:
+                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
+        
+        # Trigger reconciliation in the background
+        background_tasks.add_task(reconcile_from_git)
+        
+        return {
+            "status": "deployment_triggered",
+            "message": f"Deployment of {app_name} to {namespace} has been triggered",
+            "details": {
+                "namespace": namespace,
+                "application": app_name,
+                "image": deployment.image,
+                "replicas": deployment.replicas
+            }
+        }
+    except yaml.YAMLError as e:
+        logger.error(f"YAML error while updating values: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
+    except OSError as e:
+        logger.error(f"File operation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
+    except Exception as e:
+        logger.exception(f"Unexpected error during deployment: {e}")
+        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
+
+# Define the model for deployment requests
+class DeploymentRequest(BaseModel):
+    """
+    Model for GitOps deployment requests.
+    
+    Attributes:
+        image (str): Container image to deploy, typically in the format repository/image:tag.
+        replicas (int): Number of replicas to deploy, defaults to 1.
+        environment (Optional[Dict[str, str]]): Environment variables for the deployment.
+        resources (Optional[Dict[str, Any]]): Resource requests and limits.
+    """
+    image: str
+    replicas: int = 1
+    environment: Optional[Dict[str, str]] = None
+    resources: Optional[Dict[str, Any]] = None
+
 def sanitize_branch_name(branch_name: str) -> str:
     """
     Sanitize git branch name to prevent command injection.
