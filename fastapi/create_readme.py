@@ -194,7 +194,7 @@ def main():
             header_content = header_file.read()
     except FileNotFoundError:
         header_content = "# Thinnest Viable Platform (TVP) about Leverage\n\n"
-        header_content += "This [README.md](https://github.com/lloydchang/tvp/blob/main/README.md) provides a visual overview of the system architecture using various diagrams.\n\n"
+        header_content += "This README.md provides a visual overview of the system architecture using various diagrams.\n\n"
     
     # Read the measuring leverage and conclusion content
     measuring_leverage_content = read_markdown_file(
