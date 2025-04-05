@@ -50,6 +50,22 @@ class GitOpsStatus(BaseModel):
     status: str
     applications: List[Dict[str, Any]] = []
 
+# Define the model for deployment requests
+class DeploymentRequest(BaseModel):
+    """
+    Model for GitOps deployment requests.
+    
+    Attributes:
+        image (str): Container image to deploy, typically in the format repository/image:tag.
+        replicas (int): Number of replicas to deploy, defaults to 1.
+        environment (Optional[Dict[str, str]]): Environment variables for the deployment.
+        resources (Optional[Dict[str, Any]]): Resource requests and limits.
+    """
+    image: str
+    replicas: int = 1
+    environment: Optional[Dict[str, str]] = None
+    resources: Optional[Dict[str, Any]] = None
+
 @proxy.get("/status", summary="Get GitOps reconciliation status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
@@ -497,22 +513,6 @@ async def trigger_deployment(namespace: str, app_name: str, deployment: Deployme
     except Exception as e:
         logger.exception(f"Unexpected error during deployment: {e}")
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
-
-# Define the model for deployment requests
-class DeploymentRequest(BaseModel):
-    """
-    Model for GitOps deployment requests.
-    
-    Attributes:
-        image (str): Container image to deploy, typically in the format repository/image:tag.
-        replicas (int): Number of replicas to deploy, defaults to 1.
-        environment (Optional[Dict[str, str]]): Environment variables for the deployment.
-        resources (Optional[Dict[str, Any]]): Resource requests and limits.
-    """
-    image: str
-    replicas: int = 1
-    environment: Optional[Dict[str, str]] = None
-    resources: Optional[Dict[str, Any]] = None
 
 def sanitize_branch_name(branch_name: str) -> str:
     """
