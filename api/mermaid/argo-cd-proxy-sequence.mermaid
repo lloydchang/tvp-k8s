@@ -1,8 +1,8 @@
 sequenceDiagram
     participant Client
-    participant FastAPI as "FastAPI (app.main)"
-    participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
-    participant Config as "Config (app.config)"
+    participant FastAPI as "FastAPI (api.index)"
+    participant ArgoCDProxy as "Argo CD Proxy (api.argo_cd_api)"
+    participant Config as "Config (api.config)"
     participant TokenCache as "Token Cache"
     participant ArgoCD as "Argo CD"
     participant Logger as "Logging System"

@@ -12,10 +12,10 @@ echo -e "${YELLOW}Setting up test environment...${NC}"
 cd "$(dirname "$0")" || exit
 
 # Make sure we're using the correct Python path
-# Update to include the app directory explicitly in addition to parent and current dir
+# Updated to remove app directory reference since index.py is now directly in api folder
 parent=$(cd .. && pwd)
 current=$(pwd)
-export PYTHONPATH="$parent:$current:$current/app"
+export PYTHONPATH="$parent:$current"
 # Debug: Show Python path
 echo -e "${YELLOW}PYTHONPATH: $PYTHONPATH${NC}"
 
@@ -89,6 +89,5 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ All tests passed!${NC}"
 else
     echo -e "${RED}✗ Some tests failed.${NC}"
-    echo -e "${YELLOW}Check the import path in tests/conftest.py. The patch call should use 'app.config.get_settings' or similar, not 'fastapi.config.get_settings'${NC}"
     exit 1
 fi

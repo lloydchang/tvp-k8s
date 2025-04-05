@@ -401,9 +401,9 @@ Behind this simplified developer experience lies a sophisticated reconciliation 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI as "FastAPI (app.main)"
-    participant TVP as "TVP (app.tvp)"
-    participant ReconcileThread as "Reconcile Thread (app.tvp)"
+    participant FastAPI as "FastAPI (api.index)"
+    participant TVP as "TVP (api.tvp)"
+    participant ReconcileThread as "Reconcile Thread (api.tvp)"
     participant GitRepo
     participant KubernetesApiServer
     participant Logger as "Logging System"
@@ -549,7 +549,7 @@ As our exploration deepens, we arrive at the crucial API structure that serves a
 
 ## 6. API Structure Diagram
 
-At the heart of our platform lies the API structure - the central interface that ties everything together. This diagram reveals the elegant organization of endpoints and their supporting classes, showing how complexity is contained and exposed through simple interfaces:
+At the heart of our platform lies the API structure - the central interface that ties everything together. This diagram reveals the elegant organization of endpoints in api/index.py, showing how complexity is contained and exposed through simple interfaces:
 
 ```mermaid
 classDiagram
@@ -622,11 +622,11 @@ classDiagram
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
 
-    note for FastAPI "app.main"
-    note for KubernetesProxy "app.kubernetes_api"
-    note for ArgoCDProxy "app.argo_cd_api" 
-    note for TVP "app.tvp"
-    note for Config "app.config"
+    note for FastAPI "api.index"
+    note for KubernetesProxy "api.kubernetes_api"
+    note for ArgoCDProxy "api.argo_cd_api" 
+    note for TVP "api.tvp"
+    note for Config "api.config"
 ```
 
 **Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Engineering teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
@@ -640,7 +640,7 @@ With increased complexity comes the need for reliability. The health check mecha
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI as "FastAPI (app.main)"
+    participant FastAPI as "FastAPI (api.index)"
     participant Kubernetes as "Kubernetes API Server"
     participant ArgoCD as "Argo CD"
     participant TVP as "TVP Reconciliation"
@@ -723,9 +723,9 @@ We've now reached the core capability of our platform: secure access to underlyi
 sequenceDiagram
     title: Kubernetes Proxy Request Flow
     participant Client
-    participant FastAPI as "FastAPI (app.main)"
-    participant KubernetesProxy as "KubernetesProxy (app.kubernetes_api)"
-    participant Config as "Config (app.config)"
+    participant FastAPI as "FastAPI (api.index)"
+    participant KubernetesProxy as "KubernetesProxy (api.kubernetes_api)"
+    participant Config as "Config (api.config)"
     participant Cache as "Token Cache"
     participant KubernetesAPI
     participant RateLimiter as "Rate Limiter"
@@ -796,9 +796,9 @@ Similarly critical is our Argo CD integration, which extends the platform's reac
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI as "FastAPI (app.main)"
-    participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
-    participant Config as "Config (app.config)"
+    participant FastAPI as "FastAPI (api.index)"
+    participant ArgoCDProxy as "Argo CD Proxy (api.argo_cd_api)"
+    participant Config as "Config (api.config)"
     participant TokenCache as "Token Cache"
     participant ArgoCD as "Argo CD"
     participant Logger as "Logging System"
@@ -917,26 +917,26 @@ To ensure this system remains stable and can evolve over time, comprehensive tes
 flowchart TD
     subgraph Tests
         conftest[conftest.py]
-        test_main[test_main.py]
+        test_index[test_index.py]
         test_tvp[test_tvp.py]
         test_kubernetes[test_kubernetes_api.py]
         test_argo[test_argo_cd_api.py]
     end
 
     subgraph "Application Code"
-        main[main.py]
+        main[index.py]
         tvp[tvp.py]
         kubernetes[kubernetes_api.py]
         argo[argo_cd_api.py]
         config[config.py]
     end
 
-    conftest --> |fixtures| test_main
+    conftest --> |fixtures| test_index
     conftest --> |fixtures| test_tvp
     conftest --> |fixtures| test_kubernetes
     conftest --> |fixtures| test_argo
 
-    test_main --> |tests| main
+    test_index --> |tests| main
     test_tvp --> |tests| tvp
     test_kubernetes --> |tests| kubernetes
     test_argo --> |tests| argo
@@ -953,7 +953,7 @@ flowchart TD
     classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
     classDef appFile fill:#bef,stroke:#333,stroke-width:1px
     
-    class conftest,test_main,test_tvp,test_kubernetes,test_argo testFile
+    class conftest,test_index,test_tvp,test_kubernetes,test_argo testFile
     class main,tvp,kubernetes,argo,config appFile
 ```
 

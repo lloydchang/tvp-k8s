@@ -61,7 +61,7 @@ section_intros = [
     "These components don't exist in isolation - they communicate through carefully designed data flows that minimize redundancy and create consistency. As our story progresses, this diagram shows how information moves between components, creating standardized patterns:",
     
     # Approaching climax - Reaching peak complexity
-    "At the heart of our platform lies the API structure - the central interface that ties everything together. This diagram reveals the elegant organization of endpoints and their supporting classes, showing how complexity is contained and exposed through simple interfaces:",
+    "At the heart of our platform lies the API structure - the central interface that ties everything together. This diagram reveals the elegant organization of endpoints in api/index.py, showing how complexity is contained and exposed through simple interfaces:",
     
     "With increased complexity comes the need for reliability. The health check mechanism acts as the platform's nervous system, constantly monitoring component states to ensure operational integrity. This sequence shows how health checks verify system readiness:",
     

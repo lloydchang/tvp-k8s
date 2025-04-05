@@ -55,22 +55,18 @@ def test_tvp_status_endpoint(test_client) -> None:
         assert data["applications"][0]["namespace"] == "test-namespace"
         assert data["applications"][0]["image"] == "test-image"
         assert data["applications"][0]["tag"] == "v1.0.0"
+
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
     with patch("app.tvp.reconcile_from_git") as mock_reconcile:
-        # Set global flag to simulate not already reconciling
-        import app.tvp as tvp
-        tvp.is_reconciling = False
+        mock_reconcile.return_value = None
         
-        # Test the reconciliation endpoint
         response = test_client.post("/tvp/reconcile")
-        
         assert response.status_code == 200
-        assert response.json()["status"] == "started"
-        
-        # Test that background task was added (can't directly verify)
-        # but we can check that reconcile_from_git was imported
+        data = response.json()
+        assert data["status"] == "started"
+        mock_reconcile.assert_called_once()
 
 def test_trigger_reconciliation_already_running(test_client) -> None:
     """Test the reconciliation trigger when already in progress"""
@@ -78,14 +74,16 @@ def test_trigger_reconciliation_already_running(test_client) -> None:
     import app.tvp as tvp
     tvp.is_reconciling = True
 
-    # Test the reconciliation endpoint
-    response = test_client.post("/tvp/reconcile")
-    
-    assert response.status_code == 200
-    assert response.json()["status"] == "already_running"
-    
-    # Reset the flag for other tests
-    tvp.is_reconciling = False
+    try:
+        # Test the reconciliation endpoint
+        response = test_client.post("/tvp/reconcile")
+        
+        assert response.status_code == 200
+        assert response.json()["status"] == "already_running"
+    finally:
+        # Reset the flag for other tests
+        tvp.is_reconciling = False
+
 def test_trigger_reconciliation_background_task(test_client) -> None:
     """Test that the reconciliation task is properly added to background tasks"""
     import app.tvp as tvp
@@ -109,6 +107,7 @@ def test_trigger_reconciliation_background_task(test_client) -> None:
         
         # Check the result matches what we expect
         assert result["status"] == "started"
+
 def test_get_deployment_status(test_client, mock_settings):
     """Test getting deployment status for a specific app"""
     # Mock Path operations
