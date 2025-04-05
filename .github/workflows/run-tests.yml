@@ -26,12 +26,11 @@ jobs:
     
     - name: Run tests
       run: |
-        cd fastapi
-        ./run_tests.sh
+        ./fastapi/run_tests.sh
       
     - name: Upload test results on failure
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         path: fastapi/.pytest_cache
