@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash -x
 
-set -euo pipefail
+set -uo pipefail
 
 # Colors for terminal output
 GREEN='\033[0;32m'

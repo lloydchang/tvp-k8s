@@ -7,7 +7,7 @@ def test_root_endpoint(test_client):
     response = test_client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "Kubernetes Platform API"
+    assert data["name"] == "TVP API"
     assert "version" in data
     assert "endpoints" in data
     assert len(data["endpoints"]) == 3
