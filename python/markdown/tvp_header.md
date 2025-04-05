@@ -260,7 +260,7 @@ We are building a TVP, a declarative automation product, to accelerate applicati
 
 ---
 
-### Build only what is _necessary_ - _Thinnest Viable_
+### Build only what is _necessary - Thinnest Viable_
 - **Differentiate between customer wants and customer needs**
   - Customers may not always get what they want because it doesn't **_necessarily_** address their actual needs
 
