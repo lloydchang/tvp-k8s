@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor Eng as Engineer
+    participant Git as Git Repository
+    participant TVP as TVP API
+    participant Thread as Reconciliation Thread
+    participant Kubernetes as Kubernetes API Server
+    
+    Eng->>Git: Push application changes
+    
+    alt Manual Trigger
+        Eng->>TVP: POST /tvp/reconcile
+        TVP->>Thread: background_tasks.add_task(reconcile_from_git)
+        TVP-->>Eng: {"status": "started"}
+    else Automatic Reconciliation
+        Note over Thread: Periodic check<br>(every minute)
+    end
+    
+    Thread->>Git: Pull latest changes
+    Thread->>Thread: Parse configuration
+    
+    loop For each application
+        Thread->>Kubernetes: Apply configuration
+    end
+    
+    Thread->>Thread: Update last_reconciliation timestamp
+    
+    Eng->>TVP: GET /tvp/status
+    TVP-->>Eng: Application status information

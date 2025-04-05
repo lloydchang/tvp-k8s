@@ -1,0 +1,68 @@
+sequenceDiagram
+    participant Client
+    participant FastAPI as "FastAPI (app.main)"
+    participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
+    participant Config as "Config (app.config)"
+    participant TokenCache as "Token Cache"
+    participant ArgoCD as "Argo CD"
+    participant Logger as "Logging System"
+    
+    Client->>FastAPI: Request to /argo/cd/...
+    FastAPI->>ArgoCDProxy: Forward request
+    ArgoCDProxy->>Logger: log_debug("Processing Argo CD proxy request")
+    
+    ArgoCDProxy->>TokenCache: get_cached_token()
+    
+    alt Token exists and is valid
+        TokenCache-->>ArgoCDProxy: Return cached token
+    else Token missing or expired
+        ArgoCDProxy->>Config: get_settings()
+        Config-->>ArgoCDProxy: Returns settings
+        
+        ArgoCDProxy->>Logger: log_debug("Obtaining new Argo CD token")
+        ArgoCDProxy->>ArgoCD: POST /api/v1/session
+        Note over ArgoCDProxy,ArgoCD: Auth with service account credentials
+        
+        alt Authentication successful
+            ArgoCD-->>ArgoCDProxy: Session token
+            ArgoCDProxy->>TokenCache: cache_token(token, expiry)
+            ArgoCDProxy->>Logger: log_info("New Argo CD token obtained")
+        else Authentication failed
+            ArgoCD-->>ArgoCDProxy: Auth error
+            ArgoCDProxy->>Logger: log_error("Failed to authenticate with Argo CD")
+            ArgoCDProxy-->>FastAPI: 500 Internal Server Error
+            FastAPI-->>Client: 500 Internal Server Error
+        end
+    end
+    
+    alt Request requires path transformation
+        ArgoCDProxy->>ArgoCDProxy: transform_request_path()
+    end
+    
+    ArgoCDProxy->>ArgoCD: Original request with token
+    
+    alt Request successful
+        ArgoCD-->>ArgoCDProxy: Response data
+        ArgoCDProxy->>ArgoCDProxy: transform_response_data()
+        ArgoCDProxy->>Logger: log_info("Successful Argo CD API request")
+        ArgoCDProxy-->>FastAPI: Formatted response
+        FastAPI-->>Client: API response
+    else Token expired during request
+        ArgoCD-->>ArgoCDProxy: 401 Unauthorized
+        ArgoCDProxy->>TokenCache: invalidate_token()
+        ArgoCDProxy->>Logger: log_warning("Token expired, will retry with new token")
+        
+        ArgoCDProxy->>ArgoCD: POST /api/v1/session
+        ArgoCD-->>ArgoCDProxy: New session token
+        ArgoCDProxy->>TokenCache: cache_token(new_token, new_expiry)
+        
+        ArgoCDProxy->>ArgoCD: Retry original request with new token
+        ArgoCD-->>ArgoCDProxy: Response data
+        ArgoCDProxy-->>FastAPI: Formatted response
+        FastAPI-->>Client: API response
+    else Other error
+        ArgoCD-->>ArgoCDProxy: Error response
+        ArgoCDProxy->>Logger: log_error("Argo CD API error")
+        ArgoCDProxy-->>FastAPI: Error response
+        FastAPI-->>Client: Error response
+    end
