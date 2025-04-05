@@ -18,11 +18,8 @@ from api.index import app, lifespan, health_check, root, main
 
 """
 Module for API index tests to ensure they properly import from the correct location.
-
-This file was previously trying to import an 'index' module directly, which was failing.
-Now it should import from 'api.index'.
 """
-from tests.test_index import *
+from .test_index import *
 
 @pytest.fixture
 def test_client():
