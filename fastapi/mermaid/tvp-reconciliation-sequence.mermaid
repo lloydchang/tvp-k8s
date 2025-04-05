@@ -9,52 +9,53 @@ sequenceDiagram
     
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVP: trigger_reconciliation()
-    TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVP-->>FastAPI: {"status": "started", "message": "Reconciliation process started"}
-    FastAPI-->>Client: Response 200 OK
     
-    ReconcileThread->>ReconcileThread: is_reconciling = true
-    ReconcileThread->>Logger: log_info("Starting reconciliation")
-    
-    alt Repository doesn't exist
-        ReconcileThread->>GitRepo: git clone
-        alt Clone failed
-            GitRepo-->>ReconcileThread: Error
-            ReconcileThread->>Logger: log_error("Failed to clone repository")
-            ReconcileThread->>ReconcileThread: is_reconciling = false
-            ReconcileThread->>TVP: Update status with error
+    alt Already reconciling
+        TVP-->>FastAPI: {"status": "already_running", "message": "Reconciliation already in progress"}
+        FastAPI-->>Client: Response 200 OK
+    else Not yet reconciling
+        TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+        TVP-->>FastAPI: {"status": "started", "message": "Reconciliation process started"}
+        FastAPI-->>Client: Response 200 OK
+        
+        ReconcileThread->>ReconcileThread: is_reconciling = true
+        ReconcileThread->>Logger: log_info("Starting reconciliation")
+        
+        alt Repository doesn't exist
+            ReconcileThread->>GitRepo: git clone
+            alt Clone failed
+                GitRepo-->>ReconcileThread: Error
+                ReconcileThread->>Logger: log_error("Failed to clone repository")
+                ReconcileThread->>ReconcileThread: is_reconciling = false
+            end
+        else Repository exists
+            ReconcileThread->>GitRepo: git fetch
+            ReconcileThread->>GitRepo: git checkout branch
+            ReconcileThread->>GitRepo: git pull
+            alt Git operations failed
+                GitRepo-->>ReconcileThread: Error
+                ReconcileThread->>Logger: log_error("Git operation failed")
+                ReconcileThread->>ReconcileThread: is_reconciling = false
+            end
         end
-    else Repository exists
-        ReconcileThread->>GitRepo: git fetch
-        ReconcileThread->>GitRepo: git checkout branch
-        ReconcileThread->>GitRepo: git pull
-        alt Git operations failed
-            GitRepo-->>ReconcileThread: Error
-            ReconcileThread->>Logger: log_error("Git operation failed")
-            ReconcileThread->>ReconcileThread: is_reconciling = false
-            ReconcileThread->>TVP: Update status with error
+        
+        ReconcileThread->>ReconcileThread: Parse configuration files
+        
+        loop For each namespace/app
+            ReconcileThread->>ReconcileThread: Read values.yaml
+            ReconcileThread->>Logger: log_info("Applying configuration for {namespace}/{app_name}")
+            ReconcileThread->>KubernetesApiServer: Apply configuration
+            alt Application failed
+                KubernetesApiServer-->>ReconcileThread: Error
+                ReconcileThread->>Logger: log_error("Failed to apply config for {app_name}")
+                note over ReconcileThread: Continue with next app
+            else Application succeeded
+                KubernetesApiServer-->>ReconcileThread: Success
+                note over ReconcileThread: Continue with next app
+            end
         end
+        
+        ReconcileThread->>ReconcileThread: Update last_reconciliation timestamp
+        ReconcileThread->>Logger: log_info("GitOps reconciliation completed successfully")
+        ReconcileThread->>ReconcileThread: is_reconciling = false
     end
-    
-    ReconcileThread->>ReconcileThread: Parse configuration files
-    
-    loop For each namespace/app
-        ReconcileThread->>ReconcileThread: Read values.yaml
-        ReconcileThread->>Logger: log_debug("Processing app: {app_name}")
-        ReconcileThread->>KubernetesApiServer: Apply configuration
-        alt Application failed
-            KubernetesApiServer-->>ReconcileThread: Error
-            ReconcileThread->>Logger: log_error("Failed to apply config for {app_name}")
-            ReconcileThread->>ReconcileThread: Mark app as failed in status
-            note over ReconcileThread: Continue with next app
-        else Application succeeded
-            KubernetesApiServer-->>ReconcileThread: Success
-            ReconcileThread->>Logger: log_info("Successfully applied {app_name}")
-            ReconcileThread->>ReconcileThread: Mark app as succeeded in status
-        end
-    end
-    
-    ReconcileThread->>ReconcileThread: Update last_reconciliation timestamp
-    ReconcileThread->>ReconcileThread: Calculate success_rate
-    ReconcileThread->>Logger: log_info("Reconciliation completed")
-    ReconcileThread->>ReconcileThread: is_reconciling = false
