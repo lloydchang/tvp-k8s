@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Colors for terminal output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -32,11 +34,8 @@ fi
 # Check if required packages are installed
 echo -e "${YELLOW}Installing/upgrading required packages...${NC}"
 
-# First uninstall any existing pytest and pytest-asyncio to avoid version conflicts
-python -m pip uninstall -y pytest pytest-asyncio pytest-cov
-
-# Install specific compatible versions
-python -m pip install pytest==7.3.1 pytest-asyncio==0.21.1 pytest-cov==4.1.0 httpx pyyaml kubernetes fastapi uvicorn -q
+pip install -r ../requirements.txt
+pip install -r ../requirements-dev.txt
 
 # Debug: Print the file content of conftest.py to understand the import issue
 if [ -f "tests/conftest.py" ]; then
