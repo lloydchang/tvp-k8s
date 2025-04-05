@@ -1243,7 +1243,7 @@ categories, made possible by large-scale behavioral data.
 
 • **Leverage:** The idea that effort from a few platform engineers can reduce effort across the broader organization by curating well-designed APIs
 
-• **Value Proposition:** Creating leverage through platform engineering, allowing a small team to significantly increase effectiveness across an organization
+• **Value Proposition:** Creating leverage through platform engineering, allowing a small team to increase effectiveness across an organization significantly
 
 • **Product Thinking:** Treating the platform as a product with internal teams as customers, focusing on their needs rather than wants
 
