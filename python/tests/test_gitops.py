@@ -1271,3 +1271,118 @@ def test_reconcile_from_git_complex_errors():
         
         # Make sure is_reconciling is reset to False
         assert not gitops.is_reconciling
+
+def test_sanitization_functions_edge_cases(mock_git_commands):
+    """Test edge cases in sanitization functions"""
+    from python.app.gitops import sanitize_branch_name
+    
+    # Test branch names with special characters and potential injection attacks
+    assert sanitize_branch_name('feature/test-123') == 'feature-test-123'
+    assert sanitize_branch_name('master;rm -rf /') == 'master-rm-rf-'
+    assert sanitize_branch_name('HEAD~1;touch evil') == 'HEAD-1-touch-evil'
+    assert sanitize_branch_name('') == 'main'  # Default to main for empty string
+    assert sanitize_branch_name(None) == 'main'  # Default to main for None
+
+@patch('subprocess.run')
+def test_clone_repository_complex_failure(mock_run, tmp_path):
+    """Test _clone_repository function with complex failure scenarios"""
+    from python.app.gitops import _clone_repository
+    from subprocess import CalledProcessError, TimeoutExpired
+    
+    # Test timeout during clone
+    mock_run.side_effect = TimeoutExpired(cmd=['git', 'clone'], timeout=30)
+    with pytest.raises(TimeoutExpired):
+        _clone_repository("git@github.com:test/repo.git", str(tmp_path), "main")
+    
+    # Test permission error
+    mock_run.side_effect = PermissionError("Permission denied")
+    with pytest.raises(PermissionError):
+        _clone_repository("git@github.com:test/repo.git", str(tmp_path), "main")
+    
+    # Test invalid repository
+    mock_run.side_effect = CalledProcessError(128, ['git', 'clone'], "Repository not found")
+    with pytest.raises(CalledProcessError):
+        _clone_repository("git@github.com:test/repo.git", str(tmp_path), "main")
+
+def test_apply_configurations_fatal_errors(mock_git_commands, tmp_path):
+    """Test fatal error conditions in _apply_configurations_from_git"""
+    from python.app.gitops import _apply_configurations_from_git
+    import os
+    
+    # Create test manifests
+    manifest_dir = tmp_path / "manifests"
+    manifest_dir.mkdir()
+    
+    # Create an invalid manifest file
+    bad_manifest = manifest_dir / "bad.yaml"
+    bad_manifest.write_text("this: is: not: valid: yaml:")
+    
+    # Test with a directory that becomes inaccessible
+    with patch('os.walk') as mock_walk:
+        mock_walk.side_effect = PermissionError("Access denied")
+        with pytest.raises(PermissionError):
+            _apply_configurations_from_git(tmp_path)
+
+def test_reconcile_from_git_lock_timeout():
+    """Test reconciliation when lock acquisition times out"""
+    from python.app.gitops import reconcile_from_git, reconciliation_lock
+    import threading
+    
+    def hold_lock():
+        with reconciliation_lock:
+            time.sleep(2)  # Hold the lock for 2 seconds
+    
+    # Start a thread that holds the lock
+    thread = threading.Thread(target=hold_lock)
+    thread.start()
+    time.sleep(0.1)  # Give the thread time to acquire the lock
+    
+    # Try to reconcile while the lock is held
+    reconcile_from_git()  # Should handle lock acquisition failure gracefully
+    
+    thread.join()
+
+def test_error_handling_coverage():
+    """Test various error handling paths"""
+    from python.app.gitops import (
+        sanitize_branch_name, 
+        sanitize_git_url, 
+        _clone_repository,
+        _apply_configurations_from_git,
+        reconcile_from_git
+    )
+    
+    # Test sanitize_branch_name with import error simulation
+    with patch('re.sub') as mock_sub:
+        mock_sub.side_effect = ImportError("re module not available")
+        result = sanitize_branch_name("test/branch")
+        assert result == "test-branch"  # Should fall back to basic string replacement
+    
+    # Test sanitize_git_url with attribute error
+    with patch('re.sub') as mock_sub:
+        mock_sub.side_effect = AttributeError("'NoneType' object has no attribute 'sub'")
+        result = sanitize_git_url("git@github.com:test/repo.git")
+        assert "git@github.com" in result  # Should handle the error and return a safe URL
+
+    # Test lock acquisition error handling
+    with patch('threading.Lock.acquire') as mock_acquire:
+        mock_acquire.side_effect = RuntimeError("Lock acquisition failed")
+        reconcile_from_git()  # Should handle the error gracefully
+
+def test_sanitize_branch_name_none_input():
+    """Test sanitize_branch_name with None input"""
+    from python.app.gitops import sanitize_branch_name
+    assert sanitize_branch_name(None) == "main"
+
+@patch('subprocess.run')
+def test_clone_repository_validation(mock_run):
+    """Test repository URL validation in clone_repository"""
+    from python.app.gitops import _clone_repository
+    
+    # Test with potentially dangerous URL
+    with pytest.raises(ValueError, match="Invalid repository URL"):
+        _clone_repository("|rm -rf /|", "/tmp/test", "main")
+    
+    # Test with URL containing shell command injection attempt
+    with pytest.raises(ValueError, match="Invalid repository URL"):
+        _clone_repository("git@github.com;touch evil", "/tmp/test", "main")
