@@ -15,6 +15,7 @@ from fastapi import FastAPI, HTTPException
 
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
+import contextlib
 
 # Import our modules
 from app.kubernetes_api import proxy as kubernetes_proxy
@@ -22,7 +23,8 @@ from app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
 from app.tvp import proxy as tvp, start_reconciliation_thread
 from app.config import get_settings, get_kubernetes_client
 
-def lifespan(app: FastAPI):
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
     # This runs at startup
     start_reconciliation_thread()
     yield
