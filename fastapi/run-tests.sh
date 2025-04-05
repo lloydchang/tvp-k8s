@@ -60,7 +60,7 @@ for arg in "$@"; do
         shift
         ;;
         -h|--help)
-        echo "Usage: ./run_tests.sh [options] [test_path]"
+        echo "Usage: ./run-tests.sh [options] [test_path]"
         echo "Options:"
         echo "  --cov, --coverage  Enable coverage reporting."
         echo "  -v, --verbose      Run tests in verbose mode."

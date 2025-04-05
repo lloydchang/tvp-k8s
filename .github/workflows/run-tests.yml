@@ -26,7 +26,7 @@ jobs:
     
     - name: Run tests
       run: |
-        ./fastapi/run_tests.sh
+        ./fastapi/run-tests.sh
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
