@@ -6,8 +6,8 @@ and Argo CD, supporting both direct operations and pass-through proxy capabiliti
 
 The application provides:
 - Health checking for dependent services 
-- GitOps reconciliation functionalityons 
-- Argo CD API pass-through and operationsons 
+- GitOps reconciliation functionality 
+- Argo CD API pass-through and operations 
 - Kubernetes API pass-through and operations 
 """
 
@@ -49,7 +49,8 @@ app = FastAPI(
         {"name": "Deploy", "description": "Application deployment operations"},
         {"name": "Reconcile", "description": "GitOps reconciliation operations"},
         {"name": "Argo CD", "description": "Argo CD"},
-        {"name": "Kubernetes", "description": "Kubernetes"}
+        {"name": "Kubernetes", "description": "Kubernetes"},
+        {"name": "GitOps", "description": "GitOps operations"}
     ]
 )
 
@@ -65,6 +66,7 @@ app.add_middleware(
 # Create separate routers for deployment and reconciliation operations
 deploy_router = APIRouter()
 reconcile_router = APIRouter()
+gitops_api_router = APIRouter()
 
 # Include the gitops router in both deploy and reconcile routers
 # but tag the endpoints differently to categorize them in the API docs
@@ -80,9 +82,17 @@ reconcile_router.include_router(
     prefix=""
 )
 
+# Also include the gitops router with a dedicated path for direct access
+gitops_api_router.include_router(
+    gitops_router,
+    tags=["GitOps"],
+    prefix=""
+)
+
 # Include the routers with their respective prefixes
 app.include_router(deploy_router, prefix="/deploy")
 app.include_router(reconcile_router, prefix="/reconcile")
+app.include_router(gitops_api_router, prefix="/gitops")
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 
@@ -103,6 +113,7 @@ async def root():
         "endpoints": [
             {"prefix": "/deploy", "description": "Application Deployments"},
             {"prefix": "/reconcile", "description": "GitOps Reconciliation"},
+            {"prefix": "/gitops", "description": "GitOps Operations"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
         ]
