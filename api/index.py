@@ -60,7 +60,7 @@ app.add_middleware(
 )
 
 # Include routers from different modules
-app.include_router(gitops, prefix="/gitops", tags=["Deployments", "Reconciliations"])
+app.include_router(gitops, prefix="/gitops", tags=[])
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
 
