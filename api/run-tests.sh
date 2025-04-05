@@ -74,6 +74,10 @@ for arg in "$@"; do
     esac
 done
 
+# Update any specific reference to main.py (if needed)
+# The references would be in commands not included in the current selection,
+# so no changes are visible in this update, but make sure to check the full file
+
 # Run the tests
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"

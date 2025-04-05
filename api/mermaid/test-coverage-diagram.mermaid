@@ -1,34 +1,34 @@
 flowchart TD
     subgraph Tests
         conftest[conftest.py]
-        test_main[test_main.py]
+        test_index[test_index.py]
         test_tvp[test_tvp.py]
         test_kubernetes[test_kubernetes_api.py]
         test_argo[test_argo_cd_api.py]
     end
 
     subgraph "Application Code"
-        main[main.py]
+        index[index.py]
         tvp[tvp.py]
         kubernetes[kubernetes_api.py]
         argo[argo_cd_api.py]
         config[config.py]
     end
 
-    conftest --> |fixtures| test_main
+    conftest --> |fixtures| test_index
     conftest --> |fixtures| test_tvp
     conftest --> |fixtures| test_kubernetes
     conftest --> |fixtures| test_argo
 
-    test_main --> |tests| main
+    test_index --> |tests| index
     test_tvp --> |tests| tvp
     test_kubernetes --> |tests| kubernetes
     test_argo --> |tests| argo
 
-    main --> |imports| tvp
-    main --> |imports| kubernetes
-    main --> |imports| argo
-    main --> |imports| config
+    index --> |imports| tvp
+    index --> |imports| kubernetes
+    index --> |imports| argo
+    index --> |imports| config
 
     tvp --> |imports| config
     kubernetes --> |imports| config
@@ -37,5 +37,5 @@ flowchart TD
     classDef testFile fill:#f8d,stroke:#333,stroke-width:1px
     classDef appFile fill:#bef,stroke:#333,stroke-width:1px
     
-    class conftest,test_main,test_tvp,test_kubernetes,test_argo testFile
-    class main,tvp,kubernetes,argo,config appFile
+    class conftest,test_index,test_tvp,test_kubernetes,test_argo testFile
+    class index,tvp,kubernetes,argo,config appFile
