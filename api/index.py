@@ -1,5 +1,5 @@
 """
-Kubernetes & Argo CD Platform API - Main Application
+TVP API
 
 This FastAPI application serves as a unified API for interacting with Kubernetes
 and Argo CD, supporting both direct operations and pass-through proxy capabilities.
@@ -37,8 +37,8 @@ async def lifespan(app: FastAPI):
     # Cleanup if needed at shutdown
 
 app = FastAPI(
-    title="Kubernetes Platform API",
-    description="A unified API for Kubernetes and Argo CD operations",
+    title="TVP API",
+    description="Thinnest Viable Platform API",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -67,8 +67,8 @@ async def root():
               status, and available endpoints.
     """
     return {
-        "name": "Kubernetes Platform API",
-        "description": "Unified API for Kubernetes and Argo CD operations",
+        "name": "TVP API",
+        "description": "Thinnest Viable Platform API",
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
