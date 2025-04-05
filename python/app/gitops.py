@@ -591,9 +591,9 @@ def sanitize_branch_name(branch_name: str) -> str:
         # Remove other potentially dangerous characters
         sanitized = re.sub(r'[^\w\-\.]', '-', sanitized)
         
-        # Don't consolidate consecutive hyphens into a single hyphen
-        # The commented line below was causing test failures
-        # sanitized = re.sub(r'-+', '-', sanitized)
+        # Consolidate consecutive hyphens into a single hyphen
+        # The commented line below was causing test failures, but it's needed for tests to pass now
+        sanitized = re.sub(r'-+', '-', sanitized)
         
         # If after sanitization the string is empty, return "main"
         return sanitized if sanitized else "main"
@@ -607,7 +607,9 @@ def sanitize_branch_name(branch_name: str) -> str:
             branch_name = branch_name.replace("/", "-")
             # Keep only allowed characters
             result = ''.join(c if c.isalnum() or c in '-._' else '-' for c in branch_name)
-            # Don't replace multiple hyphens with a single hyphen
+            # Replace multiple hyphens with a single hyphen
+            while '--' in result:
+                result = result.replace('--', '-')
             return result
         return "main"
 
