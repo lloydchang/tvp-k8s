@@ -32,7 +32,10 @@ from python.app.config import get_settings, get_kubernetes_client
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     # This runs at startup
-    start_reconciliation_thread()
+    try:
+        start_reconciliation_thread()
+    except Exception as e:
+        print(f"Failed to start reconciliation thread: {e}")
     yield
     # Cleanup if needed at shutdown
 
