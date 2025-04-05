@@ -406,29 +406,58 @@ sequenceDiagram
     participant ReconcileThread as "Reconcile Thread (app.tvp)"
     participant GitRepo
     participant KubernetesApiServer
+    participant Logger as "Logging System"
     
     Client->>FastAPI: POST /tvp/reconcile
     FastAPI->>TVP: trigger_reconciliation()
     TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-    TVP-->>FastAPI: {"status": "started"}
-    FastAPI-->>Client: Response
+    TVP-->>FastAPI: {"status": "started", "request_id": "uuid"}
+    FastAPI-->>Client: Response 202 Accepted
     
     ReconcileThread->>ReconcileThread: is_reconciling = true
+    ReconcileThread->>Logger: log_info("Starting reconciliation")
     
     alt Repository doesn't exist
         ReconcileThread->>GitRepo: git clone
+        alt Clone failed
+            GitRepo-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Failed to clone repository")
+            ReconcileThread->>ReconcileThread: is_reconciling = false
+            ReconcileThread->>TVP: Update status with error
+        end
     else Repository exists
         ReconcileThread->>GitRepo: git fetch
         ReconcileThread->>GitRepo: git checkout branch
         ReconcileThread->>GitRepo: git pull
+        alt Git operations failed
+            GitRepo-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Git operation failed")
+            ReconcileThread->>ReconcileThread: is_reconciling = false
+            ReconcileThread->>TVP: Update status with error
+        end
     end
+    
+    ReconcileThread->>ReconcileThread: Parse configuration files
     
     loop For each namespace/app
         ReconcileThread->>ReconcileThread: Read values.yaml
+        ReconcileThread->>Logger: log_debug("Processing app: {app_name}")
         ReconcileThread->>KubernetesApiServer: Apply configuration
+        alt Application failed
+            KubernetesApiServer-->>ReconcileThread: Error
+            ReconcileThread->>Logger: log_error("Failed to apply config for {app_name}")
+            ReconcileThread->>ReconcileThread: Mark app as failed in status
+            note over ReconcileThread: Continue with next app
+        else Application succeeded
+            KubernetesApiServer-->>ReconcileThread: Success
+            ReconcileThread->>Logger: log_info("Successfully applied {app_name}")
+            ReconcileThread->>ReconcileThread: Mark app as succeeded in status
+        end
     end
     
-    ReconcileThread->>ReconcileThread: Update last_reconciliation
+    ReconcileThread->>ReconcileThread: Update last_reconciliation timestamp
+    ReconcileThread->>ReconcileThread: Calculate success_rate
+    ReconcileThread->>Logger: log_info("Reconciliation completed")
     ReconcileThread->>ReconcileThread: is_reconciling = false
 ```
 
@@ -611,30 +640,75 @@ sequenceDiagram
     participant FastAPI as "FastAPI (app.main)"
     participant Kubernetes as "Kubernetes API Server"
     participant ArgoCD as "Argo CD"
+    participant TVP as "TVP Reconciliation"
+    participant Git as "Git Repository"
+    participant Logger as "Logging System"
     
     Client->>FastAPI: GET /health
+    FastAPI->>Logger: log_info("Health check initiated")
     
-    FastAPI->>Kubernetes: list_namespace()
-    alt Kubernetes Healthy
-        Kubernetes-->>FastAPI: Success response
-        FastAPI->>FastAPI: Kubernetes status = "healthy"
-    else Kubernetes Unhealthy
-        Kubernetes-->>FastAPI: Error
-        FastAPI->>FastAPI: Kubernetes status = "unhealthy"
-        FastAPI->>FastAPI: Overall status = "degraded"
+    par Check Kubernetes
+        FastAPI->>Kubernetes: list_namespace()
+        alt Kubernetes Healthy
+            Kubernetes-->>FastAPI: Success response
+            FastAPI->>FastAPI: Kubernetes status = "healthy"
+            FastAPI->>Logger: log_debug("Kubernetes check: healthy")
+        else Kubernetes Unhealthy
+            Kubernetes-->>FastAPI: Error
+            FastAPI->>FastAPI: Kubernetes status = "unhealthy"
+            FastAPI->>FastAPI: Overall status = "degraded"
+            FastAPI->>Logger: log_warning("Kubernetes check: unhealthy")
+        end
+    and Check Argo CD
+        FastAPI->>ArgoCD: get_argo_cd_token()
+        alt Argo CD Healthy
+            ArgoCD-->>FastAPI: Valid token
+            FastAPI->>FastAPI: Argo CD status = "healthy"
+            FastAPI->>Logger: log_debug("Argo CD check: healthy")
+        else Argo CD Unhealthy
+            ArgoCD-->>FastAPI: Error
+            FastAPI->>FastAPI: Argo CD status = "unhealthy"
+            FastAPI->>FastAPI: Overall status = "degraded"
+            FastAPI->>Logger: log_warning("Argo CD check: unhealthy")
+        end
+    and Check TVP Status
+        FastAPI->>TVP: get_reconciliation_status()
+        alt TVP Healthy
+            TVP-->>FastAPI: Status OK
+            FastAPI->>FastAPI: TVP status = "healthy"
+            FastAPI->>Logger: log_debug("TVP reconciliation check: healthy")
+        else TVP Reconciliation Stuck
+            TVP-->>FastAPI: Reconciliation running > 30 min
+            FastAPI->>FastAPI: TVP status = "warning"
+            FastAPI->>FastAPI: Overall status = "degraded"
+            FastAPI->>Logger: log_warning("TVP reconciliation check: stuck")
+        else TVP Error
+            TVP-->>FastAPI: Error
+            FastAPI->>FastAPI: TVP status = "unhealthy"
+            FastAPI->>FastAPI: Overall status = "degraded"
+            FastAPI->>Logger: log_warning("TVP reconciliation check: unhealthy")
+        end
+    and Check Git Repository
+        FastAPI->>Git: Test connection
+        alt Git Healthy
+            Git-->>FastAPI: Success
+            FastAPI->>FastAPI: Git status = "healthy"
+            FastAPI->>Logger: log_debug("Git repository check: healthy")
+        else Git Unhealthy
+            Git-->>FastAPI: Error
+            FastAPI->>FastAPI: Git status = "unhealthy"
+            FastAPI->>FastAPI: Overall status = "degraded"
+            FastAPI->>Logger: log_warning("Git repository check: unhealthy")
+        end
     end
     
-    FastAPI->>ArgoCD: get_argo_cd_token()
-    alt Argo CD Healthy
-        ArgoCD-->>FastAPI: Valid token
-        FastAPI->>FastAPI: Argo CD status = "healthy"
-    else Argo CD Unhealthy
-        ArgoCD-->>FastAPI: Error
-        FastAPI->>FastAPI: Argo CD status = "unhealthy"
-        FastAPI->>FastAPI: Overall status = "degraded"
-    end
-    
-    FastAPI-->>Client: Health status response
+    FastAPI->>FastAPI: Compute overall status and metrics
+    FastAPI->>Logger: log_info("Health check completed: " + overall_status)
+    FastAPI-->>Client: Health status response {
+        "status": overall_status,
+        "components": component_statuses,
+        "timestamp": timestamp
+    }
 ```
 
 **Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
@@ -652,19 +726,63 @@ sequenceDiagram
     participant FastAPI as "FastAPI (app.main)"
     participant KubernetesProxy as "KubernetesProxy (app.kubernetes_api)"
     participant Config as "Config (app.config)"
+    participant Cache as "Token Cache"
     participant KubernetesAPI
+    participant RateLimiter as "Rate Limiter"
+    participant Logger as "Logging System"
     
     Client->>FastAPI: Request to /kubernetes/...
     FastAPI->>KubernetesProxy: Forward to kubernetes_proxy()
-    KubernetesProxy->>Config: get_settings()
-    Config-->>KubernetesProxy: Returns settings
+    KubernetesProxy->>RateLimiter: check_rate_limit(client_ip)
     
-    KubernetesProxy->>KubernetesProxy: Get Kubernetes token
-    Note over KubernetesProxy: Authentication using service account token
-    KubernetesProxy->>KubernetesAPI: Proxied request with token
-    KubernetesAPI-->>KubernetesProxy: JSON response
-    KubernetesProxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
+    alt Rate limited
+        RateLimiter-->>KubernetesProxy: Limit exceeded
+        KubernetesProxy->>Logger: log_warning("Rate limit exceeded for client")
+        KubernetesProxy-->>FastAPI: 429 Too Many Requests
+        FastAPI-->>Client: 429 Too Many Requests
+    else Rate OK
+        RateLimiter-->>KubernetesProxy: OK
+        
+        KubernetesProxy->>Config: get_settings()
+        Config-->>KubernetesProxy: Returns settings
+        
+        KubernetesProxy->>Cache: get_kubernetes_token()
+        alt Token in cache
+            Cache-->>KubernetesProxy: Return cached token
+        else Token not in cache
+            KubernetesProxy->>KubernetesProxy: Load token from file or environment
+            KubernetesProxy->>Cache: cache_token(token)
+        end
+        
+        KubernetesProxy->>Logger: log_debug("Proxying request to Kubernetes API")
+        KubernetesProxy->>KubernetesProxy: Validate request path and parameters
+        
+        alt Invalid request
+            KubernetesProxy->>Logger: log_warning("Invalid request parameters")
+            KubernetesProxy-->>FastAPI: 400 Bad Request
+            FastAPI-->>Client: 400 Bad Request
+        else Valid request
+            KubernetesProxy->>KubernetesAPI: Proxied request with token
+            
+            alt Successful request
+                KubernetesAPI-->>KubernetesProxy: JSON response
+                KubernetesProxy->>Logger: log_info("Successful Kubernetes API request")
+                KubernetesProxy-->>FastAPI: Formatted response
+                FastAPI-->>Client: API response
+            else Authentication error
+                KubernetesAPI-->>KubernetesProxy: 401 Unauthorized
+                KubernetesProxy->>Cache: invalidate_token()
+                KubernetesProxy->>Logger: log_error("Kubernetes authentication failed")
+                KubernetesProxy-->>FastAPI: 401 Unauthorized
+                FastAPI-->>Client: 401 Unauthorized
+            else Other error
+                KubernetesAPI-->>KubernetesProxy: Error response
+                KubernetesProxy->>Logger: log_error("Kubernetes API error")
+                KubernetesProxy-->>FastAPI: Error response
+                FastAPI-->>Client: Error response
+            end
+        end
+    end
 ```
 
 **Leverage Point:** The Kubernetes proxy demonstrates leverage by providing secure, consistent access to Kubernetes resources without requiring each engineer to understand Kubernetes authentication and API complexities. One implementation serves many consumers.
@@ -681,23 +799,69 @@ sequenceDiagram
     participant FastAPI as "FastAPI (app.main)"
     participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
     participant Config as "Config (app.config)"
+    participant TokenCache as "Token Cache"
     participant ArgoCD as "Argo CD"
+    participant Logger as "Logging System"
     
     Client->>FastAPI: Request to /argo/cd/...
     FastAPI->>ArgoCDProxy: Forward request
-    ArgoCDProxy->>ArgoCDProxy: get_argo_cd_token()
-    Note over ArgoCDProxy: Authentication using service account token
-    ArgoCDProxy->>Config: get_settings()
-    Config-->>ArgoCDProxy: Returns settings
+    ArgoCDProxy->>Logger: log_debug("Processing Argo CD proxy request")
     
-    ArgoCDProxy->>ArgoCD: POST /api/v1/session
-    Note over ArgoCDProxy,ArgoCD: {identity}
-    ArgoCD-->>ArgoCDProxy: Session token
+    ArgoCDProxy->>TokenCache: get_cached_token()
+    
+    alt Token exists and is valid
+        TokenCache-->>ArgoCDProxy: Return cached token
+    else Token missing or expired
+        ArgoCDProxy->>Config: get_settings()
+        Config-->>ArgoCDProxy: Returns settings
+        
+        ArgoCDProxy->>Logger: log_debug("Obtaining new Argo CD token")
+        ArgoCDProxy->>ArgoCD: POST /api/v1/session
+        Note over ArgoCDProxy,ArgoCD: Auth with service account credentials
+        
+        alt Authentication successful
+            ArgoCD-->>ArgoCDProxy: Session token
+            ArgoCDProxy->>TokenCache: cache_token(token, expiry)
+            ArgoCDProxy->>Logger: log_info("New Argo CD token obtained")
+        else Authentication failed
+            ArgoCD-->>ArgoCDProxy: Auth error
+            ArgoCDProxy->>Logger: log_error("Failed to authenticate with Argo CD")
+            ArgoCDProxy-->>FastAPI: 500 Internal Server Error
+            FastAPI-->>Client: 500 Internal Server Error
+        end
+    end
+    
+    alt Request requires path transformation
+        ArgoCDProxy->>ArgoCDProxy: transform_request_path()
+    end
     
     ArgoCDProxy->>ArgoCD: Original request with token
-    ArgoCD-->>ArgoCDProxy: Response data
-    ArgoCDProxy-->>FastAPI: Formatted response
-    FastAPI-->>Client: API response
+    
+    alt Request successful
+        ArgoCD-->>ArgoCDProxy: Response data
+        ArgoCDProxy->>ArgoCDProxy: transform_response_data()
+        ArgoCDProxy->>Logger: log_info("Successful Argo CD API request")
+        ArgoCDProxy-->>FastAPI: Formatted response
+        FastAPI-->>Client: API response
+    else Token expired during request
+        ArgoCD-->>ArgoCDProxy: 401 Unauthorized
+        ArgoCDProxy->>TokenCache: invalidate_token()
+        ArgoCDProxy->>Logger: log_warning("Token expired, will retry with new token")
+        
+        ArgoCDProxy->>ArgoCD: POST /api/v1/session
+        ArgoCD-->>ArgoCDProxy: New session token
+        ArgoCDProxy->>TokenCache: cache_token(new_token, new_expiry)
+        
+        ArgoCDProxy->>ArgoCD: Retry original request with new token
+        ArgoCD-->>ArgoCDProxy: Response data
+        ArgoCDProxy-->>FastAPI: Formatted response
+        FastAPI-->>Client: API response
+    else Other error
+        ArgoCD-->>ArgoCDProxy: Error response
+        ArgoCDProxy->>Logger: log_error("Argo CD API error")
+        ArgoCDProxy-->>FastAPI: Error response
+        FastAPI-->>Client: Error response
+    end
 ```
 
 **Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows engineering teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
