@@ -264,6 +264,16 @@ categories, made possible by large-scale behavioral data.
 
 • **Measurement Frameworks:** The Four Golden Signals (SRE), DORA, SPACE, DevEx, PULSE, HEART and CASTLE
 
+• **Key Principles of TVP:**
+
+  - Use modern software development techniques within the platform team
+
+  - Focus on _Product Thinking_, viewing internal teams as customers
+
+  - Accelerate and simplify software delivery for teams using the platform
+
+  - Build only what is _necessary - Thinnest Viable_
+
 ---
 
 ## TVP through Leverage:
