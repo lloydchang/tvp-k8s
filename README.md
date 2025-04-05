@@ -705,7 +705,8 @@ sequenceDiagram
     
     FastAPI->>FastAPI: Compute overall status and metrics
     FastAPI->>Logger: log_info("Health check completed: " + overall_status)
-    FastAPI-->>Client: Health status response {"status": overall_status, "components": component_statuses, "timestamp": timestamp}
+    FastAPI-->>Client: Return health status response
+    Note right of Client: Response format:<br>{"status": overall_status,<br>"components": component_statuses,<br>"timestamp": timestamp}
 ```
 
 **Leverage Point:** The health check system creates leverage by centralizing monitoring. Rather than each team building their own health monitoring, the platform provides this as a service, multiplying the effectiveness of operational efforts.
