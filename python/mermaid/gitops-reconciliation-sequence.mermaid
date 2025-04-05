@@ -1,7 +1,7 @@
 sequenceDiagram
     participant Client
     participant FastAPI as "FastAPI (api.index)"
-    participant GitOps as "GitOps (api.gitops)"
+    participant Reconciliation as "Reconciliation (api.gitops)"
     participant ReconcileThread as "Reconcile Thread (api.gitops)"
     participant GitRepo
     participant KubernetesApiServer
@@ -9,34 +9,34 @@ sequenceDiagram
     
     alt Trigger Deployment
         Client->>FastAPI: POST /gitops/deployments/{namespace}/{app_name}
-        FastAPI->>GitOps: deploy_application()
+        FastAPI->>Reconciliation: deploy_application()
         
-        GitOps->>GitRepo: Update Git repository
+        Reconciliation->>GitRepo: Update Git repository
         alt Repository update failed
-            GitRepo-->>GitOps: Error
-            GitOps-->>FastAPI: Error response
+            GitRepo-->>Reconciliation: Error
+            Reconciliation-->>FastAPI: Error response
             FastAPI-->>Client: Response 500 Error
         else Repository updated successfully
-            GitRepo-->>GitOps: Success
-            GitOps->>GitRepo: Update deployment config
-            GitOps->>GitRepo: Commit and push changes
-            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-            GitOps-->>FastAPI: Return "deployment_triggered" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
+            GitRepo-->>Reconciliation: Success
+            Reconciliation->>GitRepo: Update deployment config
+            Reconciliation->>GitRepo: Commit and push changes
+            Reconciliation->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            Reconciliation-->>FastAPI: Return "deployment_triggered" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
             FastAPI-->>Client: Response 200 OK
         end
     else Trigger Reconciliation
         Client->>FastAPI: POST /gitops/reconcile
-        FastAPI->>GitOps: trigger_reconciliation()
+        FastAPI->>Reconciliation: trigger_reconciliation()
         
         alt Already reconciling
-            GitOps-->>FastAPI: Return "already_running" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+            Reconciliation-->>FastAPI: Return "already_running" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
             FastAPI-->>Client: Response 200 OK
         else Not yet reconciling
-            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-            GitOps-->>FastAPI: Return "started" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
+            Reconciliation->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            Reconciliation-->>FastAPI: Return "started" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
             FastAPI-->>Client: Response 200 OK
         end
     end

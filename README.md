@@ -363,16 +363,16 @@ With our architectural foundation established, let's see how engineers actually 
 sequenceDiagram
     actor Eng as Engineer
     participant Git as Git Repository
-    participant GitOps as GitOps API
+    participant API as "Reconciliation API"
     participant Thread as Reconciliation Thread
     participant Kubernetes as Kubernetes API Server
     
     Eng->>Git: Push application changes
     
     alt Manual Trigger
-        Eng->>GitOps: POST /gitops/reconcile
-        GitOps->>Thread: background_tasks.add_task(reconcile_from_git)
-        GitOps-->>Eng: {"status": "started"}
+        Eng->>API: POST /gitops/reconcile
+        API->>Thread: background_tasks.add_task(reconcile_from_git)
+        API-->>Eng: {"status": "started"}
     else Automatic Reconciliation
         Note over Thread: Periodic check<br>(every minute)
     end
@@ -386,8 +386,8 @@ sequenceDiagram
     
     Thread->>Thread: Update last_reconciliation timestamp
     
-    Eng->>GitOps: GET /gitops/status
-    GitOps-->>Eng: Application status information
+    Eng->>API: GET /gitops/status
+    API-->>Eng: Application status information
 ```
 
 **Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
@@ -402,7 +402,7 @@ Behind this simplified developer experience lies a sophisticated reconciliation 
 sequenceDiagram
     participant Client
     participant FastAPI as "FastAPI (api.index)"
-    participant GitOps as "GitOps (api.gitops)"
+    participant Reconciliation as "Reconciliation (api.gitops)"
     participant ReconcileThread as "Reconcile Thread (api.gitops)"
     participant GitRepo
     participant KubernetesApiServer
@@ -410,34 +410,34 @@ sequenceDiagram
     
     alt Trigger Deployment
         Client->>FastAPI: POST /gitops/deployments/{namespace}/{app_name}
-        FastAPI->>GitOps: deploy_application()
+        FastAPI->>Reconciliation: deploy_application()
         
-        GitOps->>GitRepo: Update Git repository
+        Reconciliation->>GitRepo: Update Git repository
         alt Repository update failed
-            GitRepo-->>GitOps: Error
-            GitOps-->>FastAPI: Error response
+            GitRepo-->>Reconciliation: Error
+            Reconciliation-->>FastAPI: Error response
             FastAPI-->>Client: Response 500 Error
         else Repository updated successfully
-            GitRepo-->>GitOps: Success
-            GitOps->>GitRepo: Update deployment config
-            GitOps->>GitRepo: Commit and push changes
-            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-            GitOps-->>FastAPI: Return "deployment_triggered" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
+            GitRepo-->>Reconciliation: Success
+            Reconciliation->>GitRepo: Update deployment config
+            Reconciliation->>GitRepo: Commit and push changes
+            Reconciliation->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            Reconciliation-->>FastAPI: Return "deployment_triggered" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
             FastAPI-->>Client: Response 200 OK
         end
     else Trigger Reconciliation
         Client->>FastAPI: POST /gitops/reconcile
-        FastAPI->>GitOps: trigger_reconciliation()
+        FastAPI->>Reconciliation: trigger_reconciliation()
         
         alt Already reconciling
-            GitOps-->>FastAPI: Return "already_running" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+            Reconciliation-->>FastAPI: Return "already_running" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
             FastAPI-->>Client: Response 200 OK
         else Not yet reconciling
-            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-            GitOps-->>FastAPI: Return "started" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
+            Reconciliation->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            Reconciliation-->>FastAPI: Return "started" status
+            Note over Reconciliation,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
             FastAPI-->>Client: Response 200 OK
         end
     end
@@ -663,7 +663,7 @@ sequenceDiagram
     participant FastAPI as "FastAPI (api.index)"
     participant Kubernetes as "Kubernetes API Server"
     participant ArgoCD as "Argo CD"
-    participant GitOps as "GitOps Reconciliation"
+    participant Reconciliation as "Reconciliation System"
     participant Git as "Git Repository"
     participant Logger as "Logging System"
     
@@ -694,22 +694,22 @@ sequenceDiagram
             FastAPI->>FastAPI: Overall status = "degraded"
             FastAPI->>Logger: log_warning("Argo CD check: unhealthy")
         end
-    and Check GitOps Status
-        FastAPI->>GitOps: get_reconciliation_status()
-        alt GitOps Healthy
-            GitOps-->>FastAPI: Status OK
-            FastAPI->>FastAPI: GitOps status = "healthy"
-            FastAPI->>Logger: log_debug("GitOps reconciliation check: healthy")
-        else GitOps Reconciliation Stuck
-            GitOps-->>FastAPI: Reconciliation running > 30 min
-            FastAPI->>FastAPI: GitOps status = "warning"
+    and Check Reconciliation Status
+        FastAPI->>Reconciliation: get_reconciliation_status()
+        alt Reconciliation Healthy
+            Reconciliation-->>FastAPI: Status OK
+            FastAPI->>FastAPI: Reconciliation status = "healthy"
+            FastAPI->>Logger: log_debug("Reconciliation check: healthy")
+        else Reconciliation Stuck
+            Reconciliation-->>FastAPI: Reconciliation running > 30 min
+            FastAPI->>FastAPI: Reconciliation status = "warning"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("GitOps reconciliation check: stuck")
-        else GitOps Error
-            GitOps-->>FastAPI: Error
-            FastAPI->>FastAPI: GitOps status = "unhealthy"
+            FastAPI->>Logger: log_warning("Reconciliation check: stuck")
+        else Reconciliation Error
+            Reconciliation-->>FastAPI: Error
+            FastAPI->>FastAPI: Reconciliation status = "unhealthy"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("GitOps reconciliation check: unhealthy")
+            FastAPI->>Logger: log_warning("Reconciliation check: unhealthy")
         end
     and Check Git Repository
         FastAPI->>Git: Test connection

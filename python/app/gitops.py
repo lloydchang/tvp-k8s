@@ -244,11 +244,11 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         logger.exception(f"Unexpected error during deployment: {e}")
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
-# GitOps status operations - now after deployment operations
-@proxy.get("/status", tags=["GitOps"], summary="Get GitOps status", response_model=GitOpsStatus)
+# Reconciliation operations - renamed from GitOps status operations
+@proxy.get("/status", tags=["Reconciliations"], summary="Get reconciliation status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
-    Gets the overall status of the GitOps system.
+    Gets the overall status of the GitOps reconciliation system.
     
     Returns:
         GitOpsStatus: Object containing reconciliation status, applications list, and timestamps.
@@ -294,7 +294,7 @@ async def get_gitops_status() -> GitOpsStatus:
         applications=applications
     )
 
-@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger GitOps reconciliation", status_code=200)
+@proxy.post("/reconcile", tags=["Reconciliations"], summary="Trigger reconciliation", status_code=200)
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.

@@ -3,7 +3,7 @@ sequenceDiagram
     participant FastAPI as "FastAPI (api.index)"
     participant Kubernetes as "Kubernetes API Server"
     participant ArgoCD as "Argo CD"
-    participant GitOps as "GitOps Reconciliation"
+    participant Reconciliation as "Reconciliation System"
     participant Git as "Git Repository"
     participant Logger as "Logging System"
     
@@ -34,22 +34,22 @@ sequenceDiagram
             FastAPI->>FastAPI: Overall status = "degraded"
             FastAPI->>Logger: log_warning("Argo CD check: unhealthy")
         end
-    and Check GitOps Status
-        FastAPI->>GitOps: get_reconciliation_status()
-        alt GitOps Healthy
-            GitOps-->>FastAPI: Status OK
-            FastAPI->>FastAPI: GitOps status = "healthy"
-            FastAPI->>Logger: log_debug("GitOps reconciliation check: healthy")
-        else GitOps Reconciliation Stuck
-            GitOps-->>FastAPI: Reconciliation running > 30 min
-            FastAPI->>FastAPI: GitOps status = "warning"
+    and Check Reconciliation Status
+        FastAPI->>Reconciliation: get_reconciliation_status()
+        alt Reconciliation Healthy
+            Reconciliation-->>FastAPI: Status OK
+            FastAPI->>FastAPI: Reconciliation status = "healthy"
+            FastAPI->>Logger: log_debug("Reconciliation check: healthy")
+        else Reconciliation Stuck
+            Reconciliation-->>FastAPI: Reconciliation running > 30 min
+            FastAPI->>FastAPI: Reconciliation status = "warning"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("GitOps reconciliation check: stuck")
-        else GitOps Error
-            GitOps-->>FastAPI: Error
-            FastAPI->>FastAPI: GitOps status = "unhealthy"
+            FastAPI->>Logger: log_warning("Reconciliation check: stuck")
+        else Reconciliation Error
+            Reconciliation-->>FastAPI: Error
+            FastAPI->>FastAPI: Reconciliation status = "unhealthy"
             FastAPI->>FastAPI: Overall status = "degraded"
-            FastAPI->>Logger: log_warning("GitOps reconciliation check: unhealthy")
+            FastAPI->>Logger: log_warning("Reconciliation check: unhealthy")
         end
     and Check Git Repository
         FastAPI->>Git: Test connection
