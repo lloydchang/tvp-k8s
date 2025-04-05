@@ -399,10 +399,15 @@ def reconcile_from_git() -> None:
     """
     global is_reconciling
     
-    with reconciliation_lock:
-        if is_reconciling:
-            return
-        is_reconciling = True
+    try:
+        with reconciliation_lock:
+            if is_reconciling:
+                return
+            is_reconciling = True
+    except RuntimeError as e:
+        # Handle lock acquisition failure
+        logger.error(f"Failed to acquire reconciliation lock: {str(e)}")
+        return
     
     try:
         settings = get_settings()
@@ -434,7 +439,13 @@ def reconcile_from_git() -> None:
     except Exception as err:
         logger.exception("GitOps reconciliation failed with unexpected error", exc_info=err)
     finally:
-        with reconciliation_lock:
+        try:
+            with reconciliation_lock:
+                is_reconciling = False
+        except RuntimeError:
+            # If we can't acquire the lock here, just log it and continue
+            logger.error("Failed to acquire lock when resetting reconciliation flag")
+            # Set the flag directly without the lock as a last resort
             is_reconciling = False
 
 def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
@@ -547,11 +558,19 @@ def sanitize_branch_name(branch_name: str) -> str:
         str: Sanitized branch name
     """
     # Only allow alphanumeric characters, dashes, underscores, dots, and slashes
-    import re
-    sanitized = re.sub(r'[^a-zA-Z0-9\-_\./]', '', branch_name)
-    # Prevent path traversal
-    sanitized = sanitized.replace('..', '')
-    return sanitized
+    try:
+        import re
+        sanitized = re.sub(r'[^a-zA-Z0-9\-_\./]', '', branch_name)
+        # Prevent path traversal
+        sanitized = sanitized.replace('..', '')
+        return sanitized
+    except (ImportError, AttributeError) as e:
+        # If re module is not available or has an issue, use basic sanitization
+        logger.warning(f"Error using regex for branch sanitization: {str(e)}")
+        # Fallback: basic character filtering
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./")
+        sanitized = ''.join(c for c in branch_name if c in allowed_chars)
+        return sanitized.replace('..', '')
 
 def sanitize_git_url(url: str) -> str:
     """
@@ -564,6 +583,13 @@ def sanitize_git_url(url: str) -> str:
         str: Sanitized URL
     """
     # Only allow valid git URL characters
-    import re
-    sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
-    return sanitized
+    try:
+        import re
+        sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
+        return sanitized
+    except (ImportError, AttributeError) as e:
+        # If re module is not available or has an issue, use basic sanitization
+        logger.warning(f"Error using regex for URL sanitization: {str(e)}")
+        # Fallback: basic character filtering
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:@")
+        return ''.join(c for c in url if c in allowed_chars)
