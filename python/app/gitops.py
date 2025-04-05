@@ -329,10 +329,11 @@ def start_reconciliation_thread() -> None:
     """
     global reconciliation_thread
     
-    if reconciliation_thread and reconciliation_thread.is_alive():
-        return
-    
     try:
+        if reconciliation_thread and reconciliation_thread.is_alive():
+            logger.info("Reconciliation thread already running")
+            return
+        
         def periodic_reconcile() -> None:
             while True:
                 try:
@@ -345,8 +346,10 @@ def start_reconciliation_thread() -> None:
         reconciliation_thread.start()
         logger.info("Started GitOps reconciliation thread")
     except Exception as e:
+        # Catch any exceptions that might occur during thread creation/starting
         logger.error(f"Failed to start reconciliation thread: {str(e)}")
-        raise RuntimeError("Failed to start")
+        # Ensure thread reference is None if we failed to create it
+        reconciliation_thread = None
 
 def get_last_reconciliation_time() -> Optional[str]:
     """
