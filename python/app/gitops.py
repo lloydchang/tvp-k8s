@@ -585,14 +585,16 @@ def sanitize_branch_name(branch_name: str) -> str:
         return "main"
     
     try:
+        # Remove path traversal sequences first
+        sanitized = re.sub(r'\.\.', '', branch_name)
+        
         # Replace forward slashes with hyphens
-        sanitized = re.sub(r'/', '-', branch_name)
+        sanitized = re.sub(r'/', '-', sanitized)
         
         # Remove other potentially dangerous characters
         sanitized = re.sub(r'[^\w\-\.]', '-', sanitized)
         
         # Consolidate consecutive hyphens into a single hyphen
-        # The commented line below was causing test failures, but it's needed for tests to pass now
         sanitized = re.sub(r'-+', '-', sanitized)
         
         # If after sanitization the string is empty, return "main"
