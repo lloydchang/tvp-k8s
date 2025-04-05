@@ -34,3 +34,4 @@ jobs:
         name: test-results
         path: .
         if-no-files-found: warn
+        include-hidden-files: true
