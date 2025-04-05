@@ -24,7 +24,7 @@ import threading
 import yaml
 from pathlib import Path
 from datetime import datetime, timezone
-from app.config import get_settings
+from .config import get_settings
 
 # Using APIRouter instead of APIProxy which doesn't exist in FastAPI
 proxy = APIRouter()

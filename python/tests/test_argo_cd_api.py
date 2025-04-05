@@ -4,7 +4,7 @@ import httpx
 from fastapi import HTTPException
 
 # Import the function to be tested at the module level
-from app.argo_cd_api import get_argo_cd_token
+from python.app.argo_cd_api import get_argo_cd_token
 
 @pytest.mark.asyncio
 async def test_get_argo_cd_token_success(test_client, mock_settings):
@@ -14,7 +14,7 @@ async def test_get_argo_cd_token_success(test_client, mock_settings):
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used in get_argo_cd_token function
-    with patch("app.argo_cd_api.get_settings") as mock_get_settings:
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings:
         mock_get_settings.return_value = mock_settings
 
         # Create mock response
@@ -32,7 +32,7 @@ async def test_get_argo_cd_token_success(test_client, mock_settings):
         mock_cm.__aexit__.return_value = None
 
         # Patch AsyncClient where it's used in the argo_cd_api module
-        with patch("app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
+        with patch("python.app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
             # Configure the instance returned by the async context manager
             MockAsyncClientClass.return_value.__aenter__.return_value = mock_client_instance
             MockAsyncClientClass.return_value.__aexit__.return_value = None
@@ -63,7 +63,7 @@ async def test_get_argo_cd_token_failure(test_client, mock_settings):
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used in get_argo_cd_token function
-    with patch("app.argo_cd_api.get_settings") as mock_get_settings:
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings:
         mock_get_settings.return_value = mock_settings
 
         # Create mock response
@@ -81,7 +81,7 @@ async def test_get_argo_cd_token_failure(test_client, mock_settings):
         mock_cm.__aexit__.return_value = None
 
         # Patch AsyncClient where it's used in the argo_cd_api module
-        with patch("app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
+        with patch("python.app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
              # Configure the instance returned by the async context manager
             MockAsyncClientClass.return_value.__aenter__.return_value = mock_client_instance
             MockAsyncClientClass.return_value.__aexit__.return_value = None
@@ -108,11 +108,11 @@ async def test_argo_cd_proxy(test_client, mock_settings):
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used
-    with patch("app.argo_cd_api.get_settings") as mock_get_settings:
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings:
         mock_get_settings.return_value = mock_settings
 
         # Mock the get_argo_cd_token function
-        with patch("app.argo_cd_api.get_argo_cd_auth_token") as mock_token:
+        with patch("python.app.argo_cd_api.get_argo_cd_auth_token") as mock_token:
             mock_token.return_value = "test-argo-cd-token"
 
             # Create mock response for the proxy request
@@ -125,7 +125,7 @@ async def test_argo_cd_proxy(test_client, mock_settings):
             mock_client.request = AsyncMock(return_value=mock_proxy_response)
 
             # Patch AsyncClient where it's used in the argo_cd_api module
-            with patch("app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
+            with patch("python.app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
                 # Configure the instance returned by the async context manager
                 MockAsyncClientClass.return_value.__aenter__.return_value = mock_client
                 MockAsyncClientClass.return_value.__aexit__.return_value = None
@@ -141,11 +141,11 @@ async def test_argo_cd_proxy(test_client, mock_settings):
 
 @pytest.mark.asyncio
 async def test_get_argo_cd_token_request_error(test_client, mock_settings):
-    with patch("app.argo_cd_api.get_settings") as mock_get_settings:
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings:
         mock_get_settings.return_value = mock_settings
         mock_settings.argo_cd_password = "Invalid"
 
-        with patch("app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
+        with patch("python.app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
             mock_client_instance = AsyncMock()
             # Simulate a request error
             mock_client_instance.post.side_effect = httpx.RequestError("Connection issue")

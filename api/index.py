@@ -23,11 +23,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import contextlib
 
-# Fix imports to use local modules instead of the non-existent api package
-from app.kubernetes_api import proxy as kubernetes_proxy
-from app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
-from app.tvp import proxy as tvp, start_reconciliation_thread
-from app.config import get_settings, get_kubernetes_client
+# Fix imports to use python.app modules instead of app modules
+from python.app.kubernetes_api import proxy as kubernetes_proxy
+from python.app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
+from python.app.tvp import proxy as tvp, start_reconciliation_thread
+from python.app.config import get_settings, get_kubernetes_client
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):

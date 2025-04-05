@@ -59,7 +59,7 @@ def test_tvp_status_endpoint(test_client) -> None:
 def test_trigger_reconciliation(test_client):
     """Test the reconciliation trigger endpoint"""
     # Mock the reconciliation function to avoid actual execution
-    with patch("app.tvp.reconcile_from_git") as mock_reconcile:
+    with patch("python.app.tvp.reconcile_from_git") as mock_reconcile:
         mock_reconcile.return_value = None
         
         response = test_client.post("/tvp/reconcile")
@@ -71,7 +71,7 @@ def test_trigger_reconciliation(test_client):
 def test_trigger_reconciliation_already_running(test_client) -> None:
     """Test the reconciliation trigger when already in progress"""
     # Set global flag to simulate already reconciling
-    import app.tvp as tvp
+    import python.app.tvp as tvp
     tvp.is_reconciling = True
 
     try:
@@ -86,7 +86,7 @@ def test_trigger_reconciliation_already_running(test_client) -> None:
 
 def test_trigger_reconciliation_background_task(test_client) -> None:
     """Test that the reconciliation task is properly added to background tasks"""
-    import app.tvp as tvp
+    import python.app.tvp as tvp
     tvp.is_reconciling = False
     
     # Create a mock for background_tasks
@@ -96,7 +96,7 @@ def test_trigger_reconciliation_background_task(test_client) -> None:
     # This is where it's actually imported in the trigger_reconciliation function
     with patch("fastapi.BackgroundTasks", return_value=mock_tasks):
         # Simulate a direct call to the endpoint function with our mock
-        from app.tvp import trigger_reconciliation
+        from python.app.tvp import trigger_reconciliation
         import asyncio
         
         # Call the function directly with our mock
@@ -114,7 +114,7 @@ def test_get_deployment_status(test_client, mock_settings):
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("builtins.open", MagicMock()), \
          patch("yaml.safe_load") as mock_yaml_load, \
-         patch("app.tvp.get_last_reconciliation_time") as mock_get_time:
+         patch("python.app.tvp.get_last_reconciliation_time") as mock_get_time:
         
         # Setup mocks
         mock_exists.return_value = True

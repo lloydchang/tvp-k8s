@@ -1,25 +1,22 @@
 """
 Kubernetes API Module
 
-This module provides direct API operations and pass-through proxy functionality
-for Kubernetes cluster management.
-
-Features:
-- Transparent proxy to the Kubernetes API
-- Authentication handling for cluster access
-- Models for Kubernetes resource creation
-- Helper functions for accessing the Kubernetes API clients
+This module provides direct API operations and proxy functionality 
+for Kubernetes resources.
 """
 
-from fastapi import APIRouter, Request, Depends, HTTPException
-from kubernetes import client, config
-from kubernetes.client.rest import ApiException
+import os
+import json
+import base64
+from typing import Dict, Any, List, Optional
+from fastapi import APIRouter, Request, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
 import httpx
-import aiofiles
+import yaml
+import aiofiles  # Add missing import
 
-from app.config import get_settings, get_kubernetes_client
+# Fix the import to use relative import
+from .config import get_settings, get_kubernetes_client
 
 # Using APIRouter instead of APIProxy which doesn't exist in FastAPI
 proxy = APIRouter()
