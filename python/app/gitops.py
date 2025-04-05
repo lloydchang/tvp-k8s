@@ -594,6 +594,9 @@ def sanitize_branch_name(branch_name: str) -> str:
         # Remove other potentially dangerous characters
         sanitized = re.sub(r'[^\w\-\.]', '-', sanitized)
         
+        # Replace multiple consecutive hyphens with single hyphen
+        sanitized = re.sub(r'-+', '-', sanitized)
+        
         # If after sanitization the string is empty, return "main"
         return sanitized if sanitized else "main"
     except Exception as e:
@@ -605,7 +608,11 @@ def sanitize_branch_name(branch_name: str) -> str:
             # Replace forward slashes with hyphens
             branch_name = branch_name.replace("/", "-")
             # Keep only allowed characters
-            return ''.join(c if c.isalnum() or c in '-._' else '-' for c in branch_name)
+            result = ''.join(c if c.isalnum() or c in '-._' else '-' for c in branch_name)
+            # Replace multiple consecutive hyphens with single hyphen
+            while '--' in result:
+                result = result.replace('--', '-')
+            return result
         return "main"
 
 def sanitize_git_url(url: str) -> str:

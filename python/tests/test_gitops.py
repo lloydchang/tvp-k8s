@@ -1175,14 +1175,15 @@ def test_apply_configurations_fatal_errors(mock_git_commands, tmp_path):
     from python.app.gitops import _apply_configurations_from_git
     from pathlib import Path
     import os
+    import builtins
 
     # Create dummy directories/files so iterdir can be called
     (tmp_path / "test-namespace").mkdir()
 
     # Test with PermissionError when iterating the main repo path
-    # Patch iterdir specifically on the tmp_path object instance
-    with patch.object(tmp_path, 'iterdir', side_effect=PermissionError("Access denied")):
-        # We expect the PermissionError raised by iterdir to propagate up.
+    # We'll use a different approach - mock Path.iterdir at the module level
+    with patch("pathlib.Path.iterdir", side_effect=PermissionError("Access denied")):
+        # We expect the PermissionError to propagate up
         with pytest.raises(PermissionError):
             _apply_configurations_from_git(tmp_path)
 
