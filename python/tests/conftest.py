@@ -73,14 +73,14 @@ def mock_kubernetes_client():
         mock_get_client_function.return_value = kubernetes_client
         
         # Now, also patch the direct import in index.py
-        with patch("index.get_kubernetes_client") as mock_index_client:
+        with patch("api.index.get_kubernetes_client") as mock_index_client:
             mock_index_client.return_value = kubernetes_client
             yield kubernetes_client
 
 @pytest.fixture
 def mock_argo_cd_token():
     """Fixture to mock Argo CD authentication token where it's used in index.py"""
-    with patch("index.get_argo_cd_token") as mock_token:
+    with patch("api.index.get_argo_cd_token") as mock_token:
         # Make this an async mock to work with the async function
         from unittest.mock import AsyncMock
         mock_async = AsyncMock()
@@ -101,7 +101,7 @@ def mock_yaml_operations():
 @pytest.fixture
 def test_health_check_kubernetes_unhealthy(test_client):
     """Special fixture to mock Kubernetes client for health check tests where it's unhealthy"""
-    with patch("index.get_kubernetes_client") as mock_client:
+    with patch("api.index.get_kubernetes_client") as mock_client:
         k8s_client = MagicMock()
         k8s_client.list_namespace = MagicMock(side_effect=Exception("Connection refused"))
         mock_client.return_value = k8s_client
@@ -110,7 +110,7 @@ def test_health_check_kubernetes_unhealthy(test_client):
 @pytest.fixture
 def test_health_check_argo_cd_unhealthy(test_client):
     """Special fixture to mock Argo CD token for health check tests where it's unhealthy"""
-    with patch("index.get_argo_cd_token") as mock_token:
+    with patch("api.index.get_argo_cd_token") as mock_token:
         mock_token.side_effect = Exception("Argo CD unavailable")
         yield test_client
 
