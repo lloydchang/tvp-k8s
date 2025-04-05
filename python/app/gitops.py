@@ -557,20 +557,21 @@ def sanitize_branch_name(branch_name: str) -> str:
     Returns:
         str: Sanitized branch name
     """
-    # Only allow alphanumeric characters, dashes, underscores, dots, and slashes
+    if branch_name is None:
+        return "main"
+    
     try:
-        import re
-        sanitized = re.sub(r'[^a-zA-Z0-9\-_\./]', '', branch_name)
-        # Prevent path traversal
-        sanitized = sanitized.replace('..', '')
+        # First replace slashes with hyphens
+        branch_name = branch_name.replace('/', '-')
+        # Then clean up any other invalid characters
+        sanitized = re.sub(r'[^a-zA-Z0-9\-_\.]', '', branch_name)
         return sanitized
-    except (ImportError, AttributeError) as e:
-        # If re module is not available or has an issue, use basic sanitization
-        logger.warning(f"Error using regex for branch sanitization: {str(e)}")
-        # Fallback: basic character filtering
-        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./")
-        sanitized = ''.join(c for c in branch_name if c in allowed_chars)
-        return sanitized.replace('..', '')
+    except Exception as e:
+        logging.warning(f"Error using regex for branch sanitization: {e}")
+        # Fallback to basic string replacement if regex fails
+        if branch_name:
+            return branch_name.replace('/', '-').replace(' ', '-')
+        return "main"
 
 def sanitize_git_url(url: str) -> str:
     """

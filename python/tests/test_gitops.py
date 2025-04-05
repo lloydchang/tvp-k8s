@@ -7,6 +7,7 @@ import os
 import re
 from pathlib import Path
 from datetime import datetime, timezone
+import time  # Add missing time import
 
 def test_get_gitops_status(test_client) -> None:
     """Test the GitOps status endpoint"""
@@ -1102,8 +1103,7 @@ def test_reconcile_errors_different_error_types():
     # Test with OSError during configuration application
     with patch("python.app.gitops._update_repository"), \
          patch("pathlib.Path.exists") as mock_exists, \
-         patch("python.app.gitops._apply_configurations_from_git") as mock_apply, \
-         patch("python.app.gitops.set_last_reconciliation_time"):
+         patch("python.app.gitops.reconciliation_lock", MagicMock()):
         
         mock_exists.return_value = True
         
@@ -1116,8 +1116,7 @@ def test_reconcile_errors_different_error_types():
     # Test TimeoutExpired error in subprocess
     with patch("python.app.gitops._clone_repository") as mock_clone, \
          patch("pathlib.Path.exists") as mock_exists, \
-         patch("python.app.gitops._apply_configurations_from_git") as mock_apply, \
-         patch("python.app.gitops.set_last_reconciliation_time"):
+         patch("python.app.gitops.reconciliation_lock", MagicMock()):
         
         mock_exists.return_value = False  # Force clone
         mock_clone.side_effect = subprocess.TimeoutExpired(cmd=["git", "clone"], timeout=120)
