@@ -45,7 +45,7 @@ def test_get_gitops_status(test_client) -> None:
             "tag": "v1.0.0"
         }
         
-        # Test the GitOps status endpoint with the new URL path
+        # Test the GitOps status endpoint with the reconcile path
         response = test_client.get("/reconcile/status")
         
         assert response.status_code == 200
@@ -126,7 +126,7 @@ def test_get_deployment_status(test_client, mock_settings):
         }
         mock_get_time.return_value = "2023-07-01T12:00:00"
         
-        # Test the deployment status endpoint (using the new path)
+        # Test the deployment status endpoint using the deploy path
         response = test_client.get("/deploy/status/test-namespace/test-app")
         
         assert response.status_code == 200
@@ -165,7 +165,7 @@ def test_deploy_application(test_client, mock_settings):
             }
         }
         
-        # Test the deployment endpoint (using the new path)
+        # Test the deployment endpoint using the deploy path
         response = test_client.post(
             "/deploy/test-namespace/test-app",
             json=deployment_data
@@ -204,7 +204,7 @@ def test_deploy_application_repo_error(test_client, mock_settings):
             "replicas": 2
         }
         
-        # Test the deployment endpoint with the new path
+        # Test the deployment endpoint with the deploy path
         response = test_client.post(
             "/deploy/test-namespace/test-app",
             json=deployment_data

@@ -10,7 +10,22 @@ def test_root_endpoint(test_client):
     assert data["name"] == "TVP API"
     assert "version" in data
     assert "endpoints" in data
+    
+    # Check the new endpoints structure
     assert len(data["endpoints"]) == 4
+    
+    # Get all endpoint prefixes for easier assertion
+    endpoint_prefixes = [ep["prefix"] for ep in data["endpoints"]]
+    
+    # Check that the current paths are present
+    assert "/deploy" in endpoint_prefixes
+    assert "/reconcile" in endpoint_prefixes
+    assert "/argo/cd" in endpoint_prefixes
+    assert "/kubernetes" in endpoint_prefixes
+    
+    # Old paths should not be present
+    assert "/gitops/deployments" not in endpoint_prefixes
+    assert "/gitops" not in endpoint_prefixes
 
 def test_health_check_all_healthy(test_client, mock_kubernetes_client, mock_argo_cd_token):
     """Test the health check endpoint when all services are healthy"""

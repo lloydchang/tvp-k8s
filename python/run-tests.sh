@@ -44,18 +44,18 @@ if [ -f "tests/conftest.py" ]; then
 fi
 
 # Parse command line arguments
-COVERAGE=""
-VERBOSE=""
+COVERAGE=0
+VERBOSE=0
 SPECIFIC_TEST=""
 
 for arg in "$@"; do
     case $arg in
         --cov|--coverage)
-        COVERAGE="--cov=. --cov-report=term-missing"
+        COVERAGE=1
         shift
         ;;
         -v|--verbose)
-        VERBOSE="-v"
+        VERBOSE=1
         shift
         ;;
         -h|--help)
@@ -73,15 +73,33 @@ for arg in "$@"; do
     esac
 done
 
-# Run the tests
+# Build the pytest command with proper arguments
+PYTEST_CMD="python -m pytest"
+
+# Add the test path
 if [ -z "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Running all tests...${NC}"
-    # Add -s to show print outputs which can help with debugging
-    python -m pytest tests/ "$VERBOSE" "$COVERAGE" -s
+    PYTEST_CMD="$PYTEST_CMD tests/"
 else
     echo -e "${YELLOW}Running specific test: $SPECIFIC_TEST${NC}"
-    python -m pytest "$SPECIFIC_TEST" "$VERBOSE" "$COVERAGE" -s
+    PYTEST_CMD="$PYTEST_CMD $SPECIFIC_TEST"
 fi
+
+# Add verbose flag if requested
+if [ $VERBOSE -eq 1 ]; then
+    PYTEST_CMD="$PYTEST_CMD -v"
+fi
+
+# Add coverage flags if requested
+if [ $COVERAGE -eq 1 ]; then
+    PYTEST_CMD="$PYTEST_CMD --cov=app --cov-report=term-missing"
+fi
+
+# Add -s to show print outputs which can help with debugging
+PYTEST_CMD="$PYTEST_CMD -s"
+
+# Run the tests
+eval $PYTEST_CMD
 
 # Check the test result
 if [ $? -eq 0 ]; then
