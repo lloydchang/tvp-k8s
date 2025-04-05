@@ -40,9 +40,9 @@ def mock_settings():
         settings.argo_cd_url = "https://test-argo-cd.local"
         settings.argo_cd_username = "m0cK!us3R"
         settings.argo_cd_password = "M0ckPa%%w0rd"
-        settings.tvp_repo_url = "git@github.com:test/test-repo.git"
-        settings.tvp_repo_path = "/tmp/test-repo"
-        settings.tvp_branch = "main"
+        settings.gitops_repo_url = "git@github.com:test/test-repo.git"
+        settings.gitops_repo_path = "/tmp/test-repo"
+        settings.gitops_repo_branch = "main"
         settings.environment = "test"
         settings.verify_ssl = False
         mock_get_settings.return_value = settings

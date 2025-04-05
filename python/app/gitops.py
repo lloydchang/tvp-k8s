@@ -1,5 +1,5 @@
 """
-Thinnest Viable Platform (TVP) Module
+GitOps Module
 
 This module provides functionality for platform operations using a minimal,
 focused approach that reduces cognitive load for developers while providing
@@ -8,8 +8,8 @@ just enough functionality to enable rapid, safe delivery.
 Following GitOps principles:
 1. Declarative - Configuration stored in Git as YAML
 2. Versioned and Immutable - Git provides versioning and history
-3. Pulled Automatically - TVP agent pulls from Git
-4. Continuously Reconciled - TVP agent applies changes automatically
+3. Pulled Automatically - GitOps agent pulls from Git
+4. Continuously Reconciled - GitOps agent applies changes automatically
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
@@ -34,21 +34,6 @@ logger = logging.getLogger(__name__)
 is_reconciling = False
 reconciliation_thread = None
 reconciliation_lock = threading.Lock()
-
-class TVPStatus(BaseModel):
-    """
-    Status of TVP GitOps reconciliation.
-    
-    Attributes:
-        is_reconciling (bool): Whether reconciliation is currently in progress.
-        last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
-        status (str): Current status of the TVP service ("active" or "inactive").
-        applications (List[Dict[str, Any]]): List of applications managed by TVP.
-    """
-    is_reconciling: bool
-    last_reconciliation: Optional[str] = None
-    status: str
-    applications: List[Dict[str, Any]] = []
 
 class GitOpsStatus(BaseModel):
     """
@@ -76,7 +61,7 @@ async def get_gitops_status() -> GitOpsStatus:
     settings = get_settings()
     
     # Get status about the Git repository
-    repo_path = Path(settings.tvp_repo_path)
+    repo_path = Path(settings.gitops_repo_path)
     
     applications = []
     
@@ -170,7 +155,7 @@ def get_last_reconciliation_time() -> Optional[str]:
         Optional[str]: ISO formatted timestamp of the last reconciliation, or None if unavailable.
     """
     settings = get_settings()
-    timestamp_file = Path(settings.tvp_repo_path) / ".last_reconciliation"
+    timestamp_file = Path(settings.gitops_repo_path) / ".last_reconciliation"
     
     if timestamp_file.exists():
         try:
@@ -190,7 +175,7 @@ def set_last_reconciliation_time() -> None:
         OSError: If there's an error writing the timestamp file.
     """
     settings = get_settings()
-    timestamp_file = Path(settings.tvp_repo_path) / ".last_reconciliation"
+    timestamp_file = Path(settings.gitops_repo_path) / ".last_reconciliation"
     
     timestamp = datetime.now(tz=timezone.utc).isoformat()
 
@@ -227,13 +212,13 @@ def reconcile_from_git() -> None:
         settings = get_settings()
         
         # Ensure repo path exists
-        repo_path = Path(settings.tvp_repo_path)
+        repo_path = Path(settings.gitops_repo_path)
         
         # Clone/update the repository
         if not repo_path.exists():
-            _clone_repository(settings.tvp_repo_url, settings.tvp_repo_path, settings.tvp_branch)
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            _update_repository(settings.tvp_repo_path, settings.tvp_branch)
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
         
         # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
@@ -372,7 +357,7 @@ async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]
         Exception: If there's an error reading the application's values file.
     """
     settings = get_settings()
-    repo_path = Path(settings.tvp_repo_path)
+    repo_path = Path(settings.gitops_repo_path)
     app_path = repo_path / namespace / app_name
     
     if not app_path.exists():
@@ -382,7 +367,7 @@ async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]
     app_info = {
         "application": app_name,
         "namespace": namespace,
-        "repository": settings.tvp_repo_url,
+        "repository": settings.gitops_repo_url,
         "status": "unknown"
     }
     

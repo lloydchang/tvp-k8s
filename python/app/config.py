@@ -30,10 +30,10 @@ class Settings(BaseSettings):
     def argo_cd_identity(self) -> str:
         return self.argo_cd_username
     
-    # TVP settings
-    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "https://github.com/lloydchang/tvp.git")
-    tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/kubernetes-apps")
-    tvp_branch: str = os.getenv("TVP_BRANCH", "main")
+    # GitOps settings
+    gitops_repo_url: str = os.getenv("GITOPS_REPO_URL", "https://github.com/lloydchang/tvp.git")
+    gitops_repo_path: str = os.getenv("GITOPS_REPO_PATH", "/tmp/kubernetes-apps")
+    gitops_repo_branch: str = os.getenv("GITOPS_REPO_BRANCH", "main")
     
     # Environment
     environment: str = os.getenv("ENVIRONMENT", "development")
