@@ -10,7 +10,7 @@ from app.argo_cd_api import get_argo_cd_token
 async def test_get_argo_cd_token_success(test_client, mock_settings):
     """Test successful Argo CD token retrieval"""
     # Configure the mock settings
-    mock_settings.argo_cd_username = "m0ck!us3r"
+    mock_settings.argo_cd_username = "m0cK!us3R"
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used in get_argo_cd_token function
@@ -59,7 +59,7 @@ async def test_get_argo_cd_token_success(test_client, mock_settings):
 async def test_get_argo_cd_token_failure(test_client, mock_settings):
     """Test Argo CD token retrieval when authentication fails"""
     # Configure the mock settings
-    mock_settings.argo_cd_username = "m0ck!us3r"
+    mock_settings.argo_cd_username = "m0cK!us3R"
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used in get_argo_cd_token function
@@ -104,7 +104,7 @@ async def test_get_argo_cd_token_failure(test_client, mock_settings):
 async def test_argo_cd_proxy(test_client, mock_settings):
     """Test the Argo CD proxy endpoint"""
     # Configure the mock settings
-    mock_settings.argo_cd_username = "m0ck!us3r"
+    mock_settings.argo_cd_username = "m0cK!us3R"
     mock_settings.argo_cd_password = "M0ckPa%%w0rd"
 
     # Ensure the mock_settings is being used
