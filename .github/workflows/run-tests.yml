@@ -21,12 +21,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r api/requirements.txt
-        pip install -r api/requirements-dev.txt
+        pip install -r python/requirements.txt
+        pip install -r python/requirements-dev.txt
     
     - name: Run tests
       run: |
-        ./api/run-tests.sh
+        ./python/run-tests.sh
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
