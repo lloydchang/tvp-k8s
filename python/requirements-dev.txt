@@ -1,0 +1,5 @@
+# Development dependencies including testing
+pytest>=8.3.5
+pytest-asyncio>=0.23.5
+pytest-cov>=5.0.0
+starlette>=0.46.1
