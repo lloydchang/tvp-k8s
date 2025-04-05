@@ -32,4 +32,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: fastapi/.pytest_cache
+        path: fastapi/tests
+        if-no-files-found: warn
