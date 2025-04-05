@@ -189,9 +189,14 @@ def test_deploy_application(test_client, mock_settings):
 def test_deploy_application_repo_error(test_client, mock_settings):
     """Test deployment when repository update fails"""
     # Mock to simulate repository error
-    with patch("python.app.gitops._update_repository") as mock_update_repo:
+    with patch("python.app.gitops._update_repository") as mock_update_repo, \
+         patch("subprocess.run") as mock_subprocess_run, \
+         patch("pathlib.Path.exists") as mock_exists:
+        
         # Simulate error in repository update
         mock_update_repo.side_effect = Exception("Repository update failed")
+        # Ensure Path.exists returns True to avoid cloning operations
+        mock_exists.return_value = True
         
         # Test deployment request
         deployment_data = {
@@ -208,3 +213,6 @@ def test_deploy_application_repo_error(test_client, mock_settings):
         # Verify response shows error
         assert response.status_code == 500
         assert "Failed to update Git repository" in response.json()["detail"]
+        
+        # Verify subprocess.run was not called (git operations)
+        mock_subprocess_run.assert_not_called()
