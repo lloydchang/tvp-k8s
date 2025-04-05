@@ -260,8 +260,8 @@ def test_cors_configuration():
     
     assert cors_middleware is not None, "CORS middleware not found"
     
-    # Check CORS settings
-    assert cors_middleware.options.get("allow_origins") == ["*"], "CORS allow_origins should be ['*']"
-    assert cors_middleware.options.get("allow_credentials") is True, "CORS allow_credentials should be True"
-    assert cors_middleware.options.get("allow_methods") == ["*"], "CORS allow_methods should be ['*']"
-    assert cors_middleware.options.get("allow_headers") == ["*"], "CORS allow_headers should be ['*']"
+    # Check CORS settings - access kwargs instead of options
+    assert cors_middleware.kwargs.get("allow_origins") == ["*"], "CORS allow_origins should be ['*']"
+    assert cors_middleware.kwargs.get("allow_credentials") is True, "CORS allow_credentials should be True"
+    assert cors_middleware.kwargs.get("allow_methods") == ["*"], "CORS allow_methods should be ['*']"
+    assert cors_middleware.kwargs.get("allow_headers") == ["*"], "CORS allow_headers should be ['*']"
