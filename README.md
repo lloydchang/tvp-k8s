@@ -412,11 +412,13 @@ sequenceDiagram
     FastAPI->>TVP: trigger_reconciliation()
     
     alt Already reconciling
-        TVP-->>FastAPI: {"status": "already_running", "message": "Reconciliation already in progress"}
+        TVP-->>FastAPI: Return "already_running" status
+        Note over TVP,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
         FastAPI-->>Client: Response 200 OK
     else Not yet reconciling
         TVP->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-        TVP-->>FastAPI: {"status": "started", "message": "Reconciliation process started"}
+        TVP-->>FastAPI: Return "started" status
+        Note over TVP,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
         FastAPI-->>Client: Response 200 OK
         
         ReconcileThread->>ReconcileThread: is_reconciling = true
