@@ -1255,3 +1255,79 @@ def test_clone_repository_validation(mock_run):
     # Test with URL containing shell command injection attempt
     with pytest.raises(ValueError, match="Invalid repository URL"):
         _clone_repository("git@github.com;touch evil", "/tmp/test", "main")
+
+def test_deploy_application_invalid_image(test_client, mock_settings):
+    """Test deployment with invalid image format to test YAML error handling."""
+    # Mock necessary functions but leave yaml.safe_dump to trigger error
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
+         patch("builtins.open", MagicMock()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
+         patch("subprocess.run") as mock_run:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {"image": "old-image:v1"}
+        
+        # Make yaml.safe_dump raise a YAML error
+        mock_yaml_dump.side_effect = yaml.YAMLError("Invalid format")
+        
+        # Test deployment request with complex data that might trigger YAML errors
+        deployment_data = {
+            "image": "test-image:v1",
+            "replicas": 3
+        }
+        
+        # Test the deployment endpoint
+        response = test_client.post(
+            "/deploy/test-namespace/test-app",
+            json=deployment_data
+        )
+        
+        # Verify response shows error
+        assert response.status_code == 500
+        assert "Failed to update deployment configuration" in response.json()["detail"]
+
+def test_start_reconciliation_thread_runtime_error():
+    """Test handling of RuntimeError during thread starting"""
+    from python.app.gitops import start_reconciliation_thread
+    
+    # Mock the threading module to avoid actually starting a thread
+    with patch("threading.Thread") as mock_thread:
+        mock_thread_instance = MagicMock()
+        mock_thread.return_value = mock_thread_instance
+        
+        # Make thread.start() raise RuntimeError
+        mock_thread_instance.start.side_effect = RuntimeError("Thread starting error")
+        
+        # Set the global variable to None to ensure a new thread is started
+        import python.app.gitops as gitops
+        gitops.reconciliation_thread = None
+        
+        # Call the function - should raise exception
+        with pytest.raises(Exception, match="Failed to start reconciliation thread"):
+            start_reconciliation_thread()
+            
+        # Verify the exception was handled correctly
+        assert gitops.reconciliation_thread is None  # Should not have been set
+
+def test_thread_creation_exception():
+    """Test handling of generic exceptions during thread creation"""
+    from python.app.gitops import start_reconciliation_thread
+    
+    # Mock threading.Thread to raise a generic exception
+    with patch("threading.Thread") as mock_thread:
+        # Make the Thread constructor raise an exception
+        mock_thread.side_effect = Exception("Thread creation error")
+        
+        # Set the global variable to None to ensure a new thread is attempted
+        import python.app.gitops as gitops
+        gitops.reconciliation_thread = None
+        
+        # Call the function - should raise exception with our error message
+        with pytest.raises(Exception, match="Failed to start reconciliation thread: Thread creation error"):
+            start_reconciliation_thread()
+            
+        # Verify the global thread is still None after failure
+        assert gitops.reconciliation_thread is None
