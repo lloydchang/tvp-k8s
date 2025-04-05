@@ -43,7 +43,8 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=[
         {"name": "Health", "description": "Health check and system status endpoints"},
-        {"name": "GitOps", "description": "GitOps operations and reconciliation"},
+        {"name": "Deployments", "description": "Application deployment operations"},
+        {"name": "GitOps", "description": "GitOps reconciliation operations"},
         {"name": "Argo CD", "description": "Argo CD operations and integrations"},
         {"name": "Kubernetes", "description": "Kubernetes operations and resources"}
     ]

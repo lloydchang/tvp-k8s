@@ -35,6 +35,7 @@ is_reconciling = False
 reconciliation_thread = None
 reconciliation_lock = threading.Lock()
 
+# Define the models
 class GitOpsStatus(BaseModel):
     """
     Status of GitOps reconciliation.
@@ -50,7 +51,6 @@ class GitOpsStatus(BaseModel):
     status: str
     applications: List[Dict[str, Any]] = []
 
-# Define the model for deployment requests
 class DeploymentRequest(BaseModel):
     """
     Model for GitOps deployment requests.
@@ -66,10 +66,189 @@ class DeploymentRequest(BaseModel):
     environment: Optional[Dict[str, str]] = None
     resources: Optional[Dict[str, Any]] = None
 
-@proxy.get("/status", summary="Get GitOps reconciliation status", response_model=GitOpsStatus)
+class DeploymentStatus(BaseModel):
+    """
+    Status of a specific application deployment.
+    
+    Attributes:
+        application (str): Name of the application.
+        namespace (str): Kubernetes namespace of the application.
+        repository (str): Git repository URL containing the application configuration.
+        status (str): Deployment status (e.g., "deployed", "failed", "unknown").
+        image (Optional[str]): Container image of the deployment.
+        tag (Optional[str]): Container image tag of the deployment.
+        last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
+    """
+    application: str
+    namespace: str
+    repository: str
+    status: str
+    image: Optional[str] = None
+    tag: Optional[str] = None
+    last_reconciliation: Optional[str] = None
+
+# Deployment operations - now first in order
+@proxy.get("/deployments/{namespace}/{app_name}", tags=["Deployments"], summary="Get deployment status", response_model=DeploymentStatus)
+async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
+    """
+    Gets the status of a specific application deployment.
+    
+    Args:
+        namespace (str): Kubernetes namespace of the application.
+        app_name (str): Name of the application.
+        
+    Returns:
+        DeploymentStatus: Application deployment information including image, tag, and status.
+        
+    Raises:
+        HTTPException: If the application is not found in the repository (404).
+        HTTPException: If there's an error reading the application's values file (500).
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / app_name
+    
+    if not app_path.exists():
+        raise HTTPException(status_code=404, detail=f"Application {app_name} not found in repository")
+    
+    values_file = app_path / "values.yaml"
+    app_info = DeploymentStatus(
+        application=app_name,
+        namespace=namespace,
+        repository=settings.gitops_repo_url,
+        status="unknown"
+    )
+    
+    if values_file.exists():
+        try:
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f)
+                app_info.image = values.get("image", "unknown")
+                app_info.tag = values.get("tag", "unknown")
+                app_info.last_reconciliation = get_last_reconciliation_time()
+                
+                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
+                # For now, we'll just assume it's deployed if it's in the repo
+                app_info.status = "deployed"
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in {values_file}: {e}")
+            raise HTTPException(status_code=500, detail=f"Invalid YAML in application configuration")
+        except OSError as e:
+            logger.error(f"Error reading values file: {e}")
+            raise HTTPException(status_code=500, detail=f"Error reading application configuration")
+    
+    return app_info
+
+@proxy.post("/deployments/{namespace}/{app_name}", tags=["Deployments"], summary="Deploy an application", status_code=200)
+async def deploy_application(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+    """
+    Deploys or updates an application using GitOps.
+    
+    This endpoint updates the application's configuration in the Git repository
+    and then triggers a reconciliation to apply the changes.
+    
+    Args:
+        namespace (str): Kubernetes namespace for the application.
+        app_name (str): Name of the application to deploy.
+        deployment (DeploymentRequest): Deployment configuration including image and tag.
+        background_tasks (BackgroundTasks): FastAPI background tasks runner.
+        
+    Returns:
+        dict: Status message and deployment information.
+        
+    Raises:
+        HTTPException: If the application directory doesn't exist or there's an error updating the configuration.
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / app_name
+    
+    # Ensure the repository is up to date
+    try:
+        if not repo_path.exists():
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+        else:
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+    except Exception as e:
+        logger.error(f"Failed to update Git repository: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update Git repository")
+    
+    # Create namespace/app directories if they don't exist
+    app_path.parent.mkdir(exist_ok=True, parents=True)
+    app_path.mkdir(exist_ok=True)
+    
+    # Create or update values.yaml
+    values_file = app_path / "values.yaml"
+    
+    try:
+        # Load existing values if they exist
+        values = {}
+        if values_file.exists():
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f) or {}
+        
+        # Update with new values
+        values.update({
+            "image": deployment.image,
+            "replicas": deployment.replicas,
+            # Add any other fields from the deployment request
+        })
+        
+        # Write updated values back
+        with open(values_file, 'w') as f:
+            yaml.safe_dump(values, f)
+            
+        # Commit changes to Git
+        try:
+            subprocess.run(
+                ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            commit_message = f"Update {namespace}/{app_name} deployment"
+            subprocess.run(
+                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            subprocess.run(
+                ["git", "-C", str(repo_path), "push"],
+                check=True, capture_output=True, text=True, timeout=60
+            )
+        except CalledProcessError as e:
+            logger.error(f"Git operation failed: {e.stderr}")
+            # Don't fail if commit fails (e.g., no changes to commit)
+            if "nothing to commit" not in e.stderr:
+                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
+        
+        # Trigger reconciliation in the background
+        background_tasks.add_task(reconcile_from_git)
+        
+        return {
+            "status": "deployment_triggered",
+            "message": f"Deployment of {app_name} to {namespace} has been triggered",
+            "details": {
+                "namespace": namespace,
+                "application": app_name,
+                "image": deployment.image,
+                "replicas": deployment.replicas
+            }
+        }
+    except yaml.YAMLError as e:
+        logger.error(f"YAML error while updating values: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
+    except OSError as e:
+        logger.error(f"File operation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
+    except Exception as e:
+        logger.exception(f"Unexpected error during deployment: {e}")
+        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
+
+# GitOps status operations - now after deployment operations
+@proxy.get("/status", tags=["GitOps"], summary="Get GitOps status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
-    Gets the status of the GitOps reconciliation.
+    Gets the overall status of the GitOps system.
     
     Returns:
         GitOpsStatus: Object containing reconciliation status, applications list, and timestamps.
@@ -115,7 +294,7 @@ async def get_gitops_status() -> GitOpsStatus:
         applications=applications
     )
 
-@proxy.post("/reconcile", summary="Trigger a GitOps reconciliation")
+@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger GitOps reconciliation", status_code=200)
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
@@ -139,6 +318,7 @@ async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str,
     
     return {"status": "started", "message": "Reconciliation process started"}
 
+# Helper functions remain mostly unchanged
 def start_reconciliation_thread() -> None:
     """
     Start a background thread that periodically reconciles from Git.
@@ -355,164 +535,6 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
                     logger.error(f"File operation error for {app_dir}: {e}")
                 except Exception as e:
                     logger.error(f"Failed to apply {namespace_dir.name}/{app_dir.name}: {str(e)}")
-
-@proxy.get("/status/{namespace}/{app_name}", summary="Get GitOps deployment status")
-async def get_deployment_status(namespace: str, app_name: str) -> Dict[str, Any]:
-    """
-    Gets the status of a GitOps deployment.
-    
-    Args:
-        namespace (str): Kubernetes namespace of the application.
-        app_name (str): Name of the application.
-        
-    Returns:
-        dict: Application status information including image, tag, and deployment status.
-        
-    Raises:
-        HTTPException: If the application is not found in the repository (404).
-        Exception: If there's an error reading the application's values file.
-    """
-    settings = get_settings()
-    repo_path = Path(settings.gitops_repo_path)
-    app_path = repo_path / namespace / app_name
-    
-    if not app_path.exists():
-        raise HTTPException(status_code=404, detail=f"Application {app_name} not found in repository")
-    
-    values_file = app_path / "values.yaml"
-    app_info = {
-        "application": app_name,
-        "namespace": namespace,
-        "repository": settings.gitops_repo_url,
-        "status": "unknown"
-    }
-    
-    if values_file.exists():
-        try:
-            with open(values_file, 'r') as f:
-                values = yaml.safe_load(f)
-                app_info.update({
-                    "image": values.get("image", "unknown"),
-                    "tag": values.get("tag", "unknown"),
-                    "last_reconciliation": get_last_reconciliation_time()
-                })
-                
-                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
-                # For now, we'll just assume it's deployed if it's in the repo
-                app_info["status"] = "deployed"
-        except yaml.YAMLError as e:
-            logger.error(f"YAML parsing error in {values_file}: {e}")
-            raise HTTPException(status_code=500, detail=f"Invalid YAML in application configuration")
-        except OSError as e:
-            logger.error(f"Error reading values file: {e}")
-            raise HTTPException(status_code=500, detail=f"Error reading application configuration")
-    
-    return app_info
-
-@proxy.post("/deploy/{namespace}/{app_name}", summary="Trigger a GitOps deployment")
-async def trigger_deployment(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
-    """
-    Triggers a deployment for a specific application using GitOps.
-    
-    This endpoint updates the application's configuration in the Git repository
-    and then triggers a reconciliation to apply the changes.
-    
-    Args:
-        namespace (str): Kubernetes namespace for the application.
-        app_name (str): Name of the application to deploy.
-        deployment (DeploymentRequest): Deployment configuration including image and tag.
-        background_tasks (BackgroundTasks): FastAPI background tasks runner.
-        
-    Returns:
-        dict: Status message and deployment information.
-        
-    Raises:
-        HTTPException: If the application directory doesn't exist or there's an error updating the configuration.
-    """
-    settings = get_settings()
-    repo_path = Path(settings.gitops_repo_path)
-    app_path = repo_path / namespace / app_name
-    
-    # Ensure the repository is up to date
-    try:
-        if not repo_path.exists():
-            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
-        else:
-            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
-    except Exception as e:
-        logger.error(f"Failed to update Git repository: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to update Git repository")
-    
-    # Create namespace/app directories if they don't exist
-    app_path.parent.mkdir(exist_ok=True, parents=True)
-    app_path.mkdir(exist_ok=True)
-    
-    # Create or update values.yaml
-    values_file = app_path / "values.yaml"
-    
-    try:
-        # Load existing values if they exist
-        values = {}
-        if values_file.exists():
-            with open(values_file, 'r') as f:
-                values = yaml.safe_load(f) or {}
-        
-        # Update with new values
-        values.update({
-            "image": deployment.image,
-            "replicas": deployment.replicas,
-            # Add any other fields from the deployment request
-        })
-        
-        # Write updated values back
-        with open(values_file, 'w') as f:
-            yaml.safe_dump(values, f)
-            
-        # Commit changes to Git
-        try:
-            subprocess.run(
-                ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
-                check=True, capture_output=True, text=True, timeout=30
-            )
-            
-            commit_message = f"Update {namespace}/{app_name} deployment"
-            subprocess.run(
-                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
-                check=True, capture_output=True, text=True, timeout=30
-            )
-            
-            subprocess.run(
-                ["git", "-C", str(repo_path), "push"],
-                check=True, capture_output=True, text=True, timeout=60
-            )
-        except CalledProcessError as e:
-            logger.error(f"Git operation failed: {e.stderr}")
-            # Don't fail if commit fails (e.g., no changes to commit)
-            if "nothing to commit" not in e.stderr:
-                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
-        
-        # Trigger reconciliation in the background
-        background_tasks.add_task(reconcile_from_git)
-        
-        return {
-            "status": "deployment_triggered",
-            "message": f"Deployment of {app_name} to {namespace} has been triggered",
-            "details": {
-                "namespace": namespace,
-                "application": app_name,
-                "image": deployment.image,
-                "replicas": deployment.replicas
-            }
-        }
-    except yaml.YAMLError as e:
-        logger.error(f"YAML error while updating values: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
-    except OSError as e:
-        logger.error(f"File operation error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
-    except Exception as e:
-        logger.exception(f"Unexpected error during deployment: {e}")
-        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 def sanitize_branch_name(branch_name: str) -> str:
     """

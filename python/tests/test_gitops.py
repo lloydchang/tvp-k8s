@@ -1,5 +1,7 @@
 from unittest.mock import patch, MagicMock
-def test_gitops_status_endpoint(test_client) -> None:
+import pytest
+
+def test_get_gitops_status(test_client) -> None:
     """Test the GitOps status endpoint"""
     # Mock Path.exists and Path.iterdir
     with patch("pathlib.Path.exists") as mock_exists, \
@@ -124,8 +126,8 @@ def test_get_deployment_status(test_client, mock_settings):
         }
         mock_get_time.return_value = "2023-07-01T12:00:00"
         
-        # Test the deployment status endpoint
-        response = test_client.get("/gitops/status/test-namespace/test-app")
+        # Test the deployment status endpoint (using the new path)
+        response = test_client.get("/gitops/deployments/test-namespace/test-app")
         
         assert response.status_code == 200
         data = response.json()
@@ -136,8 +138,8 @@ def test_get_deployment_status(test_client, mock_settings):
         assert data["status"] == "deployed"
         assert data["last_reconciliation"] == "2023-07-01T12:00:00"
 
-def test_trigger_deployment(test_client, mock_settings):
-    """Test triggering a deployment for a specific application"""
+def test_deploy_application(test_client, mock_settings):
+    """Test deploying a specific application"""
     # Mock necessary functions to avoid actual file/git operations
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
@@ -163,9 +165,9 @@ def test_trigger_deployment(test_client, mock_settings):
             }
         }
         
-        # Test the deployment endpoint
+        # Test the deployment endpoint (using the new path)
         response = test_client.post(
-            "/gitops/deploy/test-namespace/test-app",
+            "/gitops/deployments/test-namespace/test-app",
             json=deployment_data
         )
         
@@ -184,8 +186,8 @@ def test_trigger_deployment(test_client, mock_settings):
         # Verify reconciliation was triggered
         mock_reconcile.assert_called_once()
 
-def test_trigger_deployment_repo_error(test_client, mock_settings):
-    """Test deployment trigger when repository update fails"""
+def test_deploy_application_repo_error(test_client, mock_settings):
+    """Test deployment when repository update fails"""
     # Mock to simulate repository error
     with patch("python.app.gitops._update_repository") as mock_update_repo:
         # Simulate error in repository update
@@ -197,9 +199,9 @@ def test_trigger_deployment_repo_error(test_client, mock_settings):
             "replicas": 2
         }
         
-        # Test the deployment endpoint
+        # Test the deployment endpoint (using the new path)
         response = test_client.post(
-            "/gitops/deploy/test-namespace/test-app",
+            "/gitops/deployments/test-namespace/test-app",
             json=deployment_data
         )
         

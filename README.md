@@ -408,23 +408,9 @@ sequenceDiagram
     participant KubernetesApiServer
     participant Logger as "Logging System"
     
-    alt Trigger Reconciliation
-        Client->>FastAPI: POST /gitops/reconcile
-        FastAPI->>GitOps: trigger_reconciliation()
-        
-        alt Already reconciling
-            GitOps-->>FastAPI: Return "already_running" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
-            FastAPI-->>Client: Response 200 OK
-        else Not yet reconciling
-            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
-            GitOps-->>FastAPI: Return "started" status
-            Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
-            FastAPI-->>Client: Response 200 OK
-        end
-    else Trigger Deployment
-        Client->>FastAPI: POST /gitops/deploy/{namespace}/{app_name}
-        FastAPI->>GitOps: trigger_deployment()
+    alt Trigger Deployment
+        Client->>FastAPI: POST /gitops/deployments/{namespace}/{app_name}
+        FastAPI->>GitOps: deploy_application()
         
         GitOps->>GitRepo: Update Git repository
         alt Repository update failed
@@ -438,6 +424,20 @@ sequenceDiagram
             GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
             GitOps-->>FastAPI: Return "deployment_triggered" status
             Note over GitOps,FastAPI: Response:<br>{"status": "deployment_triggered",<br>"message": "Deployment triggered"}
+            FastAPI-->>Client: Response 200 OK
+        end
+    else Trigger Reconciliation
+        Client->>FastAPI: POST /gitops/reconcile
+        FastAPI->>GitOps: trigger_reconciliation()
+        
+        alt Already reconciling
+            GitOps-->>FastAPI: Return "already_running" status
+            Note over GitOps,FastAPI: Response:<br>{"status": "already_running",<br>"message": "Reconciliation already in progress"}
+            FastAPI-->>Client: Response 200 OK
+        else Not yet reconciling
+            GitOps->>ReconcileThread: background_tasks.add_task(reconcile_from_git)
+            GitOps-->>FastAPI: Return "started" status
+            Note over GitOps,FastAPI: Response:<br>{"status": "started",<br>"message": "Reconciliation process started"}
             FastAPI-->>Client: Response 200 OK
         end
     end
