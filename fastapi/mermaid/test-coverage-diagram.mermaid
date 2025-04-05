@@ -8,11 +8,11 @@ flowchart TD
     end
 
     subgraph "Application Code"
-        main[main.py]
-        tvp[tvp.py]
-        kubernetes[kubernetes_api.py]
-        argo[argo_cd_api.py]
-        config[config.py]
+        main[app.main.py]
+        tvp[app.tvp.py]
+        kubernetes[app.kubernetes_api.py]
+        argo[app.argo_cd_api.py]
+        config[app.config.py]
     end
 
     conftest --> |fixtures| test_main

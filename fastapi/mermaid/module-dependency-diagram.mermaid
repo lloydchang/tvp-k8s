@@ -1,8 +1,8 @@
 flowchart TD
-    main[main.py] --> tvp[tvp.py]
-    main --> kubernetes[kubernetes_api.py]
-    main --> argo[argo_cd_api.py]
-    main --> config[config.py]
+    main[app.main] --> tvp[app.tvp]
+    main --> kubernetes[app.kubernetes_api]
+    main --> argo[app.argo_cd_api]
+    main --> config[app.config]
     
     tvp --> git[git commands]
     tvp --> config

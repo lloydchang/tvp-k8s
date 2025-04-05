@@ -1,9 +1,9 @@
 sequenceDiagram
     title: Kubernetes Proxy Request Flow
     participant Client
-    participant FastAPI
-    participant KubernetesProxy
-    participant Config
+    participant FastAPI as "FastAPI (app.main)"
+    participant KubernetesProxy as "KubernetesProxy (app.kubernetes_api)"
+    participant Config as "Config (app.config)"
     participant KubernetesAPI
     
     Client->>FastAPI: Request to /kubernetes/...

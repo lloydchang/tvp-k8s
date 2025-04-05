@@ -401,9 +401,9 @@ Behind this simplified developer experience lies a sophisticated reconciliation 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant TVP
-    participant ReconcileThread
+    participant FastAPI as "FastAPI (app.main)"
+    participant TVP as "TVP (app.tvp)"
+    participant ReconcileThread as "Reconcile Thread (app.tvp)"
     participant GitRepo
     participant KubernetesApiServer
     
@@ -589,6 +589,12 @@ classDiagram
     TVP --> TVPStatus : returns
     KubernetesProxy --> DeploymentRequest : accepts
     ArgoCDProxy --> ArgoCDApplicationRequest : accepts
+
+    note for FastAPI "app.main"
+    note for KubernetesProxy "app.kubernetes_api"
+    note for ArgoCDProxy "app.argo_cd_api" 
+    note for TVP "app.tvp"
+    note for Config "app.config"
 ```
 
 **Leverage Point:** The API structure provides leverage by offering clear, consistent interfaces that hide implementation complexity. Engineering teams can focus on their business logic while the platform handles infrastructure concerns - a classic example of how abstraction creates leverage.
@@ -602,9 +608,9 @@ With increased complexity comes the need for reliability. The health check mecha
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant Kubernetes as Kubernetes API Server
-    participant ArgoCD as Argo CD
+    participant FastAPI as "FastAPI (app.main)"
+    participant Kubernetes as "Kubernetes API Server"
+    participant ArgoCD as "Argo CD"
     
     Client->>FastAPI: GET /health
     
@@ -643,9 +649,9 @@ We've now reached the core capability of our platform: secure access to underlyi
 sequenceDiagram
     title: Kubernetes Proxy Request Flow
     participant Client
-    participant FastAPI
-    participant KubernetesProxy
-    participant Config
+    participant FastAPI as "FastAPI (app.main)"
+    participant KubernetesProxy as "KubernetesProxy (app.kubernetes_api)"
+    participant Config as "Config (app.config)"
     participant KubernetesAPI
     
     Client->>FastAPI: Request to /kubernetes/...
@@ -672,25 +678,25 @@ Similarly critical is our Argo CD integration, which extends the platform's reac
 ```mermaid
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant Argo CD Proxy
-    participant Config
-    participant Argo CD
+    participant FastAPI as "FastAPI (app.main)"
+    participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
+    participant Config as "Config (app.config)"
+    participant ArgoCD as "Argo CD"
     
     Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Proxy: Forward request
-    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
-    Note over Argo CD Proxy: Authentication using service account token
-    Argo CD Proxy->>Config: get_settings()
-    Config-->>Argo CD Proxy: Returns settings
+    FastAPI->>ArgoCDProxy: Forward request
+    ArgoCDProxy->>ArgoCDProxy: get_argo_cd_token()
+    Note over ArgoCDProxy: Authentication using service account token
+    ArgoCDProxy->>Config: get_settings()
+    Config-->>ArgoCDProxy: Returns settings
     
-    Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {identity}
-    Argo CD-->>Argo CD Proxy: Session token
+    ArgoCDProxy->>ArgoCD: POST /api/v1/session
+    Note over ArgoCDProxy,ArgoCD: {identity}
+    ArgoCD-->>ArgoCDProxy: Session token
     
-    Argo CD Proxy->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Proxy: Response data
-    Argo CD Proxy-->>FastAPI: Formatted response
+    ArgoCDProxy->>ArgoCD: Original request with token
+    ArgoCD-->>ArgoCDProxy: Response data
+    ArgoCDProxy-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
 ```
 
@@ -754,11 +760,11 @@ flowchart TD
     end
 
     subgraph "Application Code"
-        main[main.py]
-        tvp[tvp.py]
-        kubernetes[kubernetes_api.py]
-        argo[argo_cd_api.py]
-        config[config.py]
+        main[app.main.py]
+        tvp[app.tvp.py]
+        kubernetes[app.kubernetes_api.py]
+        argo[app.argo_cd_api.py]
+        config[app.config.py]
     end
 
     conftest --> |fixtures| test_main

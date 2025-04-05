@@ -1,8 +1,8 @@
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant Kubernetes as Kubernetes API Server
-    participant ArgoCD as Argo CD
+    participant FastAPI as "FastAPI (app.main)"
+    participant Kubernetes as "Kubernetes API Server"
+    participant ArgoCD as "Argo CD"
     
     Client->>FastAPI: GET /health
     

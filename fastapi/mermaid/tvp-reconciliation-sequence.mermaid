@@ -1,8 +1,8 @@
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant TVP
-    participant ReconcileThread
+    participant FastAPI as "FastAPI (app.main)"
+    participant TVP as "TVP (app.tvp)"
+    participant ReconcileThread as "Reconcile Thread (app.tvp)"
     participant GitRepo
     participant KubernetesApiServer
     

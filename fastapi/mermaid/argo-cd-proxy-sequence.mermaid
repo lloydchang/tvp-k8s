@@ -1,22 +1,22 @@
 sequenceDiagram
     participant Client
-    participant FastAPI
-    participant Argo CD Proxy
-    participant Config
-    participant Argo CD
+    participant FastAPI as "FastAPI (app.main)"
+    participant ArgoCDProxy as "Argo CD Proxy (app.argo_cd_api)"
+    participant Config as "Config (app.config)"
+    participant ArgoCD as "Argo CD"
     
     Client->>FastAPI: Request to /argo/cd/...
-    FastAPI->>Argo CD Proxy: Forward request
-    Argo CD Proxy->>Argo CD Proxy: get_argo_cd_token()
-    Note over Argo CD Proxy: Authentication using service account token
-    Argo CD Proxy->>Config: get_settings()
-    Config-->>Argo CD Proxy: Returns settings
+    FastAPI->>ArgoCDProxy: Forward request
+    ArgoCDProxy->>ArgoCDProxy: get_argo_cd_token()
+    Note over ArgoCDProxy: Authentication using service account token
+    ArgoCDProxy->>Config: get_settings()
+    Config-->>ArgoCDProxy: Returns settings
     
-    Argo CD Proxy->>Argo CD: POST /api/v1/session
-    Note over Argo CD Proxy,Argo CD: {identity}
-    Argo CD-->>Argo CD Proxy: Session token
+    ArgoCDProxy->>ArgoCD: POST /api/v1/session
+    Note over ArgoCDProxy,ArgoCD: {identity}
+    ArgoCD-->>ArgoCDProxy: Session token
     
-    Argo CD Proxy->>Argo CD: Original request with token
-    Argo CD-->>Argo CD Proxy: Response data
-    Argo CD Proxy-->>FastAPI: Formatted response
+    ArgoCDProxy->>ArgoCD: Original request with token
+    ArgoCD-->>ArgoCDProxy: Response data
+    ArgoCDProxy-->>FastAPI: Formatted response
     FastAPI-->>Client: API response
