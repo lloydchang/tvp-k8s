@@ -4,20 +4,6 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app  # Import the FastAPI app instance
 
-# Only suppress warnings from pytest's internal code, not from our application code
-warnings.filterwarnings(
-    "ignore", 
-    category=DeprecationWarning, 
-    message="ast.Str is deprecated",
-    module="_pytest.assertion.rewrite"
-)
-warnings.filterwarnings(
-    "ignore", 
-    category=DeprecationWarning, 
-    message="ast.NameConstant is deprecated",
-    module="_pytest.assertion.rewrite"
-)
-
 @pytest.fixture
 def mock_settings():
     """Fixture to mock application settings"""
