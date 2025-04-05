@@ -31,7 +31,7 @@ class Settings(BaseSettings):
         return self.argo_cd_username
     
     # TVP settings
-    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "git@github.com:your-org/kubernetes-apps.git")
+    tvp_repo_url: str = os.getenv("TVP_REPO_URL", "https://github.com/lloydchang/tvp.git")
     tvp_repo_path: str = os.getenv("TVP_REPO_PATH", "/tmp/kubernetes-apps")
     tvp_branch: str = os.getenv("TVP_BRANCH", "main")
     
