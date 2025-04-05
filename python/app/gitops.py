@@ -461,13 +461,23 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     Raises:
         subprocess.CalledProcessError: If Git clone operation fails.
         OSError: If directory creation fails.
+        ValueError: If the repository URL contains potentially dangerous characters.
     """
+    # First validate repository URL to prevent command injection
+    safe_url = sanitize_git_url(repo_url)
+    if safe_url != repo_url:
+        # If the URL had to be modified during sanitization, it might be suspicious
+        logger.error(f"Potentially dangerous repository URL rejected: {repo_url}")
+        raise ValueError("Invalid repository URL. URLs should only contain alphanumeric characters, hyphens, dots, slashes, colons, and @ symbols.")
+        
+    # Validate branch name
+    safe_branch = sanitize_branch_name(branch)
+    if safe_branch != branch and branch not in ["", None]:
+        logger.warning(f"Branch name sanitized from '{branch}' to '{safe_branch}'")
+    
     os.makedirs(os.path.dirname(repo_path), exist_ok=True)
     try:
         # Add timeout to prevent hanging on network issues
-        # Validate or sanitize `branch` and `repo_url` before usage
-        safe_branch = sanitize_branch_name(branch)
-        safe_url = sanitize_git_url(repo_url)
         subprocess.run(
             ["git", "clone", "-b", safe_branch, safe_url, repo_path], 
             check=True,
@@ -518,35 +528,48 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
         OSError: For filesystem-related errors
         yaml.YAMLError: For YAML parsing errors
         CalledProcessError: If Kubernetes command execution fails
+        PermissionError: If access to required directories is denied
     """
-    # Scan repository for application configurations
-    for namespace_dir in [d for d in repo_path.iterdir() if d.is_dir() and not d.name.startswith('.')]:
-        for app_dir in [d for d in namespace_dir.iterdir() if d.is_dir()]:
-            values_file = app_dir / "values.yaml"
-            if values_file.exists():
-                try:
-                    # Read values file to get configuration details
-                    with open(values_file, 'r') as f:
-                        values = yaml.safe_load(f)
+    try:
+        # Scan repository for application configurations
+        for namespace_dir in [d for d in repo_path.iterdir() if d.is_dir() and not d.name.startswith('.')]:
+            for app_dir in [d for d in namespace_dir.iterdir() if d.is_dir()]:
+                values_file = app_dir / "values.yaml"
+                if values_file.exists():
+                    try:
+                        # Read values file to get configuration details
+                        with open(values_file, 'r') as f:
+                            values = yaml.safe_load(f)
+                            
+                        logger.info(f"Applying configuration for {namespace_dir.name}/{app_dir.name}")
                         
-                    logger.info(f"Applying configuration for {namespace_dir.name}/{app_dir.name}")
-                    
-                    # Check if manifests directory exists
-                    manifests_dir = app_dir / "manifests"
-                    if manifests_dir.exists() and manifests_dir.is_dir():
-                        # Example: Apply with kubectl
-                        # subprocess.run([
-                        #    "kubectl", "apply", "-f", str(manifests_dir),
-                        #    "-n", namespace_dir.name
-                        # ], check=True, capture_output=True, text=True, timeout=60)
-                        pass
-                        
-                except yaml.YAMLError as e:
-                    logger.error(f"YAML parsing error in {values_file}: {e}")
-                except OSError as e:
-                    logger.error(f"File operation error for {app_dir}: {e}")
-                except Exception as e:
-                    logger.error(f"Failed to apply {namespace_dir.name}/{app_dir.name}: {str(e)}")
+                        # Check if manifests directory exists
+                        manifests_dir = app_dir / "manifests"
+                        if manifests_dir.exists() and manifests_dir.is_dir():
+                            # Apply manifests from the directory using os.walk to handle
+                            # potential nested directories of YAML files
+                            for root, dirs, files in os.walk(str(manifests_dir)):
+                                # Process each YAML file in order (sorted)
+                                for f in sorted(files):
+                                    if f.endswith(('.yaml', '.yml')):
+                                        manifest_path = os.path.join(root, f)
+                                        logger.debug(f"Processing manifest: {manifest_path}")
+                                        # Example: Apply with kubectl
+                                        # subprocess.run([
+                                        #    "kubectl", "apply", "-f", manifest_path,
+                                        #    "-n", namespace_dir.name
+                                        # ], check=True, capture_output=True, text=True, timeout=60)
+                            
+                    except yaml.YAMLError as e:
+                        logger.error(f"YAML parsing error in {values_file}: {e}")
+                    except OSError as e:
+                        logger.error(f"File operation error for {app_dir}: {e}")
+                    except Exception as e:
+                        logger.error(f"Failed to apply {namespace_dir.name}/{app_dir.name}: {str(e)}")
+    except PermissionError as e:
+        logger.error(f"Permission denied when accessing repository directories: {e}")
+        # Re-raise to ensure proper handling by caller
+        raise
 
 def sanitize_branch_name(branch_name: str) -> str:
     """
@@ -574,7 +597,7 @@ def sanitize_branch_name(branch_name: str) -> str:
         # If after sanitization the string is empty, return "main"
         return sanitized if sanitized else "main"
     except Exception as e:
-        logging.warning(f"Error using regex for branch sanitization: {e}")
+        logger.warning(f"Error using regex for branch sanitization: {e}")
         # Fallback to basic string replacement if regex fails
         if branch_name:
             # First remove path traversal sequences
