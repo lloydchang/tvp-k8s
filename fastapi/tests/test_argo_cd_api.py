@@ -137,3 +137,22 @@ async def test_argo_cd_proxy(test_client, mock_settings):
 
                 # Verify request was made with proper headers
                 mock_client.request.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_get_argo_cd_token_request_error(test_client, mock_settings):
+    with patch("app.argo_cd_api.get_settings") as mock_get_settings:
+        mock_get_settings.return_value = mock_settings
+        mock_settings.argo_cd_password = "Invalid"
+
+        with patch("app.argo_cd_api.httpx.AsyncClient") as MockAsyncClientClass:
+            mock_client_instance = AsyncMock()
+            # Simulate a request error
+            mock_client_instance.post.side_effect = httpx.RequestError("Connection issue")
+            MockAsyncClientClass.return_value.__aenter__.return_value = mock_client_instance
+
+            with pytest.raises(HTTPException) as excinfo:
+                await get_argo_cd_token()
+
+            assert excinfo.value.status_code == 503
+            assert "Argo CD service unavailable" in str(excinfo.value.detail)
