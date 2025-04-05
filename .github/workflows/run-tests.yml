@@ -21,15 +21,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f fastapi/requirements.txt ]; then pip install -r fastapi/requirements.txt; fi
-        if [ -f fastapi/requirements-dev.txt ]; then pip install -r fastapi/requirements-dev.txt; fi
+        pip install -r fastapi/requirements.txt
+        pip install -r fastapi/requirements-dev.txt
     
     - name: Run tests
       run: |
         ./fastapi/run_tests.sh
       
-    - name: Upload test results on failure
-      if: failure()
+    - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: test-results
