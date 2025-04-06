@@ -1629,6 +1629,7 @@ def test_periodic_reconcile_error_handling():
         threading.Thread = original_thread
         gitops.reconciliation_thread = None
 
+@pytest.mark.asyncio
 async def test_deploy_application_with_environment_and_resources():
     """Test deploying an application with environment variables and resources"""
     from python.app.gitops import DeploymentRequest, deploy_application
