@@ -184,5 +184,7 @@ def main():
     import uvicorn
     uvicorn.run("api.index:app", host="0.0.0.0", port=8000, reload=True)
 
-if __name__ == "__main__":
+# This if statement allows for easier testing of the main function
+# while still allowing it to be run as a script
+if __name__ == "__main__":  # pragma: no cover
     main()
