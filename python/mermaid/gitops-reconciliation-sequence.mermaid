@@ -8,7 +8,7 @@ sequenceDiagram
     participant Logger as "Logging System"
     
     alt Trigger Deployment
-        Client->>FastAPI: POST /gitops/deployments/{namespace}/{app_name}
+        Client->>FastAPI: POST /gitops/deploy/{namespace}/{app_name}
         FastAPI->>Reconciliation: deploy_application()
         
         Reconciliation->>GitRepo: Update Git repository

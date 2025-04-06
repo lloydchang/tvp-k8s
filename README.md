@@ -409,7 +409,7 @@ sequenceDiagram
     participant Logger as "Logging System"
     
     alt Trigger Deployment
-        Client->>FastAPI: POST /gitops/deployments/{namespace}/{app_name}
+        Client->>FastAPI: POST /gitops/deploy/{namespace}/{app_name}
         FastAPI->>Reconciliation: deploy_application()
         
         Reconciliation->>GitRepo: Update Git repository
@@ -648,7 +648,7 @@ classDiagram
     note for FastAPI "api.index"
     note for KubernetesProxy "api.kubernetes_api"
     note for ArgoCDProxy "api.argo_cd_api" 
-    note for GitOpsAPI "api.gitops (consolidated)"
+    note for GitOpsAPI "api.gitops"
     note for Config "api.config"
 ```
 
