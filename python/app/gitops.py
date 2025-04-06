@@ -140,7 +140,7 @@ async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStat
     
     return app_info
 
-@proxy.post("/deploy/{namespace}/{app_name}", tags=["Deployments"], summary="Deploy an application", status_code=200)
+@proxy.post("/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy an application", status_code=200)
 async def deploy_application(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
     Deploys or updates an application using GitOps.
@@ -246,7 +246,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
-@proxy.get("/status", tags=["Reconciliations"], summary="Get reconciliation status", response_model=GitOpsStatus)
+@proxy.get("/status", tags=["GitOps"], summary="Get reconciliation status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
@@ -295,7 +295,7 @@ async def get_gitops_status() -> GitOpsStatus:
         applications=applications
     )
 
-@proxy.post("/reconcile", tags=["Reconciliations"], summary="Trigger reconciliation", status_code=200)
+@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger reconciliation", status_code=200)
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
