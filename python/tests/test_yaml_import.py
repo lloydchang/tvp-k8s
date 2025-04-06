@@ -75,3 +75,34 @@ def test_argo_cd_api_test_full_coverage():
         # Restore the original yaml module if it existed
         if original_yaml:
             sys.modules['yaml'] = original_yaml
+
+def test_argo_cd_api_test_direct_import():
+    """
+    Test direct import of argo_cd_api_test.py to cover its implementation.
+    This file is specifically designed to test import errors when PyYAML is missing.
+    """
+    import importlib
+    import sys
+    from unittest.mock import patch
+    
+    # Save the original import mechanism
+    original_import = __import__
+    
+    def mock_import(name, *args, **kwargs):
+        if name == 'yaml':
+            raise ImportError("Simulated missing PyYAML")
+        return original_import(name, *args, **kwargs)
+    
+    # Remove the module if it's already been imported
+    if 'python.app.argo_cd_api_test' in sys.modules:
+        del sys.modules['python.app.argo_cd_api_test']
+    
+    # Patch the import mechanism
+    with patch('builtins.__import__', side_effect=mock_import):
+        try:
+            # Attempt to import the module that should raise ImportError
+            importlib.import_module('python.app.argo_cd_api_test')
+            assert False, "Expected ImportError was not raised"
+        except ImportError as e:
+            # Verify the error message matches what we expect
+            assert "PyYAML is required" in str(e)
