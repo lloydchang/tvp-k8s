@@ -191,36 +191,59 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         # Update with new values
         values.update({
             "image": deployment.image,
-            "replicas": deployment.replicas,
-            # Add any other fields from the deployment request
+            "replicas": deployment.replicas
         })
+        
+        # Add environment variables if provided
+        if deployment.environment:
+            values["environment"] = deployment.environment
+            
+        # Add resource requests/limits if provided
+        if deployment.resources:
+            values["resources"] = deployment.resources
         
         # Write updated values back
         with open(values_file, 'w') as f:
             yaml.safe_dump(values, f)
-            
-        # Commit changes to Git
+        
+        nothing_to_commit = False
+        
+        # Git operations with specific error handling
         try:
+            # Add the file
             subprocess.run(
                 ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
                 check=True, capture_output=True, text=True, timeout=30
             )
             
-            commit_message = f"Update {namespace}/{app_name} deployment"
-            subprocess.run(
-                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
-                check=True, capture_output=True, text=True, timeout=30
-            )
+            # Try to commit
+            try:
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "commit", "-m", f"Update {namespace}/{app_name} deployment"],
+                    check=True, capture_output=True, text=True, timeout=30
+                )
+            except CalledProcessError as e:
+                if e.stderr and "nothing to commit" in e.stderr:
+                    logger.info("No changes to commit - values match existing configuration")
+                    nothing_to_commit = True
+                else:
+                    logger.error(f"Git commit failed: {e.stderr}")
+                    raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
             
-            subprocess.run(
-                ["git", "-C", str(repo_path), "push"],
-                check=True, capture_output=True, text=True, timeout=60
-            )
+            # Only push if we successfully committed changes
+            if not nothing_to_commit:
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "push"],
+                    check=True, capture_output=True, text=True, timeout=60
+                )
         except CalledProcessError as e:
-            logger.error(f"Git operation failed: {e.stderr}")
-            # Don't fail if commit fails (e.g., no changes to commit)
-            if "nothing to commit" not in e.stderr:
-                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
+            # Special handling for 'nothing to commit' errors at any stage
+            if hasattr(e, 'stderr') and "nothing to commit" in e.stderr:
+                logger.info("No changes to commit - values match existing configuration")
+                nothing_to_commit = True
+            else:
+                logger.error(f"Git operation failed: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Git operation failed: {str(e)}")
         
         # Trigger reconciliation in the background
         background_tasks.add_task(reconcile_from_git)
@@ -237,12 +260,30 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         }
     except yaml.YAMLError as e:
         logger.error(f"YAML error while updating values: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
+        raise HTTPException(status_code=500, detail=f"Failed to update deployment configuration: {str(e)}")
     except OSError as e:
         logger.error(f"File operation error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
+        raise HTTPException(status_code=500, detail=f"Failed to write deployment configuration: {str(e)}")
+    except HTTPException:
+        # Re-raise HTTP exceptions directly
+        raise
     except Exception as e:
         logger.exception(f"Unexpected error during deployment: {e}")
+        # Check if this is a CalledProcessError with "nothing to commit" message
+        if isinstance(e, CalledProcessError) and hasattr(e, 'stderr') and e.stderr and isinstance(e.stderr, str) and "nothing to commit" in e.stderr:
+            logger.info("No changes to commit - values match existing configuration")
+            # Still trigger reconciliation and return success
+            background_tasks.add_task(reconcile_from_git)
+            return {
+                "status": "deployment_triggered",
+                "message": f"Deployment of {app_name} to {namespace} has been triggered (no changes)",
+                "details": {
+                    "namespace": namespace,
+                    "application": app_name,
+                    "image": deployment.image,
+                    "replicas": deployment.replicas
+                }
+            }
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
