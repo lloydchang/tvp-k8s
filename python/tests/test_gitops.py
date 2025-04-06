@@ -1331,3 +1331,80 @@ def test_thread_creation_exception():
             
         # Verify the global thread is still None after failure
         assert gitops.reconciliation_thread is None
+
+def test_deploy_application_with_complete_configuration(test_client, mock_settings):
+    """Test deploying an application with complete configuration including env vars and resources"""
+    # Mock necessary functions to avoid actual file/git operations
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
+         patch("builtins.open", MagicMock()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
+         patch("subprocess.run") as mock_run, \
+         patch("python.app.gitops.reconcile_from_git") as mock_reconcile:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {
+            "image": "old-image:v1",
+            "replicas": 1
+        }
+        
+        # Test deployment request with complete configuration
+        deployment_data = {
+            "image": "test-registry/new-image:v2",
+            "replicas": 3,
+            "environment": {
+                "DEBUG": "false",
+                "LOG_LEVEL": "info",
+                "API_KEY": "secret-key",
+                "APP_ENV": "production"
+            },
+            "resources": {
+                "limits": {
+                    "cpu": "500m",
+                    "memory": "512Mi"
+                },
+                "requests": {
+                    "cpu": "200m",
+                    "memory": "256Mi"
+                }
+            }
+        }
+        
+        # Test the deployment endpoint
+        response = test_client.post(
+            "/deploy/test-namespace/test-app",
+            json=deployment_data
+        )
+        
+        # Verify response
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "deployment_triggered"
+        assert data["details"]["namespace"] == "test-namespace"
+        assert data["details"]["application"] == "test-app"
+        assert data["details"]["image"] == "test-registry/new-image:v2"
+        assert data["details"]["replicas"] == 3
+        
+        # Verify values were updated correctly
+        # Extract the values that were passed to yaml.safe_dump
+        yaml_values = mock_yaml_dump.call_args[0][0]
+        assert yaml_values["image"] == "test-registry/new-image:v2"
+        assert yaml_values["replicas"] == 3
+        
+        # Verify all Git operations were called
+        git_ops_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "git"]
+        assert len(git_ops_calls) >= 3  # add, commit, push
+        
+        # Verify each Git operation in detail
+        git_add_calls = [call for call in git_ops_calls if "add" in call[0][0]]
+        git_commit_calls = [call for call in git_ops_calls if "commit" in call[0][0]]
+        git_push_calls = [call for call in git_ops_calls if "push" in call[0][0]]
+        
+        assert len(git_add_calls) >= 1
+        assert len(git_commit_calls) >= 1
+        assert len(git_push_calls) >= 1
+        
+        # Verify reconciliation was triggered
+        mock_reconcile.assert_called_once()
