@@ -89,7 +89,7 @@ class DeploymentStatus(BaseModel):
     last_reconciliation: Optional[str] = None
 
 # Deployment operations - now first in order
-@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["Deployments"], summary="Get deployment status", response_model=DeploymentStatus)
+@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Get deployment status", response_model=DeploymentStatus)
 async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
     """
     Gets the status of a specific application deployment.
