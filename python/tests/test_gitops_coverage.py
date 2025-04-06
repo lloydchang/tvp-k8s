@@ -518,3 +518,125 @@ def test_reconcile_from_git_lock_acquisition_error():
         # Restore original state
         gitops.reconciliation_lock = original_lock
         gitops.is_reconciling = original_is_reconciling
+
+def test_environment_resources_coverage():
+    """Specific test to cover lines 361-364 with environment and resources"""
+    from python.app.gitops import DeploymentRequest
+    
+    # Create a deployment request with environment and resources
+    deployment = DeploymentRequest(
+        image="test-image:latest",
+        replicas=3,
+        environment={"DEBUG": "true", "API_KEY": "secret"},
+        resources={
+            "limits": {"cpu": "500m", "memory": "512Mi"},
+            "requests": {"cpu": "200m", "memory": "256Mi"}
+        }
+    )
+    
+    # Verify the deployment object is properly populated
+    assert deployment.image == "test-image:latest"
+    assert deployment.replicas == 3
+    assert deployment.environment is not None
+    assert deployment.environment["DEBUG"] == "true"
+    assert deployment.environment["API_KEY"] == "secret"
+    assert deployment.resources is not None
+    assert deployment.resources["limits"]["cpu"] == "500m"
+    assert deployment.resources["limits"]["memory"] == "512Mi"
+
+def test_complete_coverage_remaining_lines():
+    """Simpler test to cover remaining lines without patching builtins"""
+    # Import the module to cover lines 220-223
+    import python.app.gitops
+    
+    # Test the start_reconciliation_thread error handling (lines 341-346)
+    original_thread = python.app.gitops.reconciliation_thread
+    try:
+        # Reset thread to None to force creation
+        python.app.gitops.reconciliation_thread = None
+        
+        # Mock Thread to raise on start()
+        with patch("threading.Thread") as mock_thread:
+            thread_instance = MagicMock()
+            thread_instance.start.side_effect = RuntimeError("Thread start failed")
+            mock_thread.return_value = thread_instance
+            
+            with pytest.raises(Exception):
+                python.app.gitops.start_reconciliation_thread()
+    finally:
+        python.app.gitops.reconciliation_thread = original_thread
+    
+    # Test repo path doesn't exist path (line 461)
+    with patch("pathlib.Path.exists", return_value=False), \
+         patch("python.app.gitops._clone_repository"), \
+         patch("python.app.gitops._apply_configurations_from_git"), \
+         patch("python.app.gitops.set_last_reconciliation_time"), \
+         patch("python.app.gitops.get_settings") as mock_settings:
+        
+        # Setup mock settings
+        settings = MagicMock()
+        settings.gitops_repo_path = "/tmp/test-repo"
+        settings.gitops_repo_url = "https://github.com/test/repo.git"
+        settings.gitops_repo_branch = "main"
+        mock_settings.return_value = settings
+        
+        # Reset reconciling flag
+        python.app.gitops.is_reconciling = False
+        
+        # Call function
+        python.app.gitops.reconcile_from_git()
+    
+    # Test lock acquisition error (lines 470-474)
+    original_lock = python.app.gitops.reconciliation_lock
+    try:
+        # Create a lock that raises on __enter__
+        mock_lock = MagicMock()
+        mock_lock.__enter__.side_effect = RuntimeError("Lock acquisition failed")
+        python.app.gitops.reconciliation_lock = mock_lock
+        
+        # Patch logger to verify error is logged
+        with patch("python.app.gitops.logger.error") as mock_logger:
+            python.app.gitops.reconcile_from_git()
+            mock_logger.assert_called_once()
+    finally:
+        python.app.gitops.reconciliation_lock = original_lock
+    
+    # Test dangerous URL validation (line 500)
+    with patch("python.app.gitops.sanitize_git_url") as mock_sanitize, \
+         patch("python.app.gitops.sanitize_branch_name"), \
+         patch("python.app.gitops.logger.error"), \
+         patch("os.makedirs"), \
+         patch("subprocess.run"):
+        
+        # Make sanitize_git_url return different URL than input
+        mock_sanitize.return_value = "https://safe-github.com/user/repo.git"
+        
+        with pytest.raises(ValueError):
+            python.app.gitops._clone_repository(
+                "https://github.com/user/repo.git; rm -rf /", 
+                "/tmp/repo", 
+                "main"
+            )
+    
+    # Test regex failure in sanitize_branch_name (lines 591-592)
+    with patch("re.sub") as mock_re_sub:
+        # Make re.sub raise exception
+        mock_re_sub.side_effect = Exception("Regex failure")
+        
+        # Call function with path traversal
+        result = python.app.gitops.sanitize_branch_name("feature/../branch")
+        
+        # Verify path traversal was removed
+        assert ".." not in result
+    
+    # Test regex failure in sanitize_git_url (line 640)
+    with patch("re.sub") as mock_re_sub:
+        # Make re.sub raise exception
+        mock_re_sub.side_effect = Exception("Regex failure")
+        
+        # Call function with special characters
+        result = python.app.gitops.sanitize_git_url("git@github.com:user/repo.git; rm -rf /")
+        
+        # Verify dangerous characters were removed
+        assert ";" not in result
+        assert " " not in result

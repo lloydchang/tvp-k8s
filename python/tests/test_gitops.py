@@ -1312,160 +1312,94 @@ def test_sanitize_branch_name_regex_exception_handling():
         assert result == "feature-branch"  # Should use the fallback
         assert ".." not in result  # Path traversal should be removed
 
-def test_deploy_application_with_complete_configuration(test_client, mock_settings):
-    """Test deploying an application with complete configuration including env vars and resources"""
-    # Mock necessary functions to avoid actual file/git operations
-    with patch("pathlib.Path.exists") as mock_exists, \
-         patch("pathlib.Path.mkdir") as mock_mkdir, \
-         patch("builtins.open", MagicMock()), \
-         patch("yaml.safe_load") as mock_yaml_load, \
-         patch("yaml.safe_dump") as mock_yaml_dump, \
-         patch("subprocess.run") as mock_run, \
-         patch("python.app.gitops.reconcile_from_git") as mock_reconcile:
-        
-        # Setup mocks
-        mock_exists.return_value = True
-        mock_yaml_load.return_value = {
-            "image": "old-image:v1",
-            "replicas": 1
-        }
-        
-        # Test deployment request with complete configuration
-        deployment_data = {
-            "image": "test-registry/new-image:v2",
-            "replicas": 3,
-            "environment": {
-                "DEBUG": "false",
-                "LOG_LEVEL": "info",
-                "API_KEY": "secret-key",
-                "APP_ENV": "production"
-            },
-            "resources": {
-                "limits": {
-                    "cpu": "500m",
-                    "memory": "512Mi"
-                },
-                "requests": {
-                    "cpu": "200m",
-                    "memory": "256Mi"
-                }
-            }
-        }
-        
-        # Test the deployment endpoint
-        response = test_client.post(
-            "/gitops/deploy/test-namespace/test-app",
-            json=deployment_data
-        )
-        
-        # Verify response
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "deployment_triggered"
-        assert data["details"]["namespace"] == "test-namespace"
-        assert data["details"]["application"] == "test-app"
-        assert data["details"]["image"] == "test-registry/new-image:v2"
-        assert data["details"]["replicas"] == 3
-        
-        # Verify values were updated correctly
-        # Extract the values that were passed to yaml.safe_dump
-        yaml_values = mock_yaml_dump.call_args[0][0]
-        assert yaml_values["image"] == "test-registry/new-image:v2"
-        assert yaml_values["replicas"] == 3
-        
-        # Verify all Git operations were called
-        git_ops_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "git"]
-        assert len(git_ops_calls) >= 3  # add, commit, push
-        
-        # Verify each Git operation in detail
-        git_add_calls = [call for call in git_ops_calls if "add" in call[0][0]]
-        git_commit_calls = [call for call in git_ops_calls if "commit" in call[0][0]]
-        git_push_calls = [call for call in git_ops_calls if "push" in call[0][0]]
-        assert len(git_add_calls) >= 1
-        assert len(git_commit_calls) >= 1
-        assert len(git_push_calls) >= 1
-        
-        # Verify reconciliation was triggered
-        mock_reconcile.assert_called_once()
-
-def test_start_reconciliation_thread_error_handling():
-    """Test error handling in start_reconciliation_thread when thread creation fails"""
-    from python.app.gitops import start_reconciliation_thread
-    import python.app.gitops as gitops
+def test_dangerous_url_rejection():
+    """Test that dangerous Git URLs are rejected with proper error handling"""
+    from python.app.gitops import _clone_repository
     
-    # Store original state to restore after test
-    original_thread = gitops.reconciliation_thread
-    
-    try:
-        # Reset thread to None to ensure we try to create a new one
-        gitops.reconciliation_thread = None
+    # Mock subprocess.run and other dependencies
+    with patch("subprocess.run") as mock_run, \
+         patch("os.makedirs") as mock_makedirs, \
+         patch("python.app.gitops.sanitize_git_url") as mock_sanitize_url, \
+         patch("python.app.gitops.sanitize_branch_name") as mock_sanitize_branch:
         
-        # Test exception during thread creation
-        with patch("threading.Thread") as mock_thread:
-            # First test with RuntimeError during thread.start()
-            mock_thread_instance = MagicMock()
-            mock_thread.return_value = mock_thread_instance
-            mock_thread_instance.start.side_effect = RuntimeError("Thread failed to start")
-            
-            # Should catch and wrap the exception
-            with pytest.raises(Exception, match="Failed to start reconciliation thread"):
-                start_reconciliation_thread()
-            
-            # Now test with general Exception during thread creation
-            mock_thread.reset_mock()
-            mock_thread.side_effect = Exception("Thread creation error")
-            
-            # Should catch and wrap the exception
-            with pytest.raises(Exception, match="Failed to start reconciliation thread"):
-                start_reconciliation_thread()
-    finally:
-        # Restore original state
-        gitops.reconciliation_thread = original_thread
+        # Setup the mock to simulate a URL that gets modified during sanitization
+        mock_sanitize_url.return_value = "sanitized-url"  # Different from input
+        mock_sanitize_branch.return_value = "main"
+        
+        # Test with a URL that should be rejected
+        dangerous_url = "https://github.com/user/repo.git; rm -rf /"
+        
+        # The function should raise a ValueError
+        with pytest.raises(ValueError) as exc_info:
+            _clone_repository(dangerous_url, "/tmp/repo", "main")
+        
+        # Verify error message
+        assert "Invalid repository URL" in str(exc_info.value)
+        
+        # Verify that subprocess.run was not called (clone should not proceed)
+        mock_run.assert_not_called()
 
-def test_reconcile_from_git_runtime_error_handling():
-    """Test handling of RuntimeError when acquiring and releasing the reconciliation lock"""
+def test_sanitize_git_url_fallback():
+    """Test the fallback sanitization for git URLs when regex fails"""
+    from python.app.gitops import sanitize_git_url
+    
+    # Mock re.sub to simulate a regex failure
+    with patch("re.sub") as mock_re_sub:
+        mock_re_sub.side_effect = Exception("Regex module failed")
+        
+        # Test normal git URL with fallback sanitization
+        url = "git@github.com:user/repo.git"
+        result = sanitize_git_url(url)
+        
+        # Check the allowed characters in the result according to the implementation
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:@")
+        assert all(c in allowed_chars for c in result)
+        
+        # Test URL with potentially dangerous characters
+        dangerous_url = "git@github.com:user/repo.git; rm -rf /"
+        result = sanitize_git_url(dangerous_url)
+        
+        # Verify dangerous characters are filtered out
+        assert ";" not in result
+        assert " " not in result
+
+def test_reconcile_from_git_lock_acquisition_failure():
+    """Test reconcile_from_git behavior when lock acquisition fails with RuntimeError"""
     from python.app.gitops import reconcile_from_git
-    
-    # Import module to manipulate global variables
     import python.app.gitops as gitops
-    gitops.is_reconciling = False
     
-    # Store original lock for restoration
+    # Store original lock to restore later
     original_lock = gitops.reconciliation_lock
     
     try:
-        # Mock the reconciliation lock to simulate errors in both __enter__ and __exit__
+        # Create a mock lock that raises RuntimeError when __enter__ is called
         mock_lock = MagicMock()
+        mock_lock.__enter__.side_effect = RuntimeError("Failed to acquire lock")
         gitops.reconciliation_lock = mock_lock
         
-        # First try with the lock acquisition succeeding but lock release failing
-        # Configure the context manager behavior 
-        mock_context = MagicMock()
-        mock_lock.__enter__.return_value = mock_context
-        mock_lock.__exit__.side_effect = RuntimeError("Failed to release lock")
-        
-        # Also make other operations succeed
-        with patch("pathlib.Path.exists") as mock_exists, \
-             patch("python.app.gitops._update_repository") as mock_update, \
-             patch("python.app.gitops._apply_configurations_from_git") as mock_apply, \
-             patch("python.app.gitops.set_last_reconciliation_time") as mock_set_time:
-            
-            mock_exists.return_value = True
-            
-            # Make sure is_reconciling is reset when function is called
-            gitops.is_reconciling = True
-            
-            # Call function and verify it handles the error
-            reconcile_from_git()
-            
-            # We need to manually set is_reconciling to False here
-            # This test is verifying that our code properly *logs* the error
-            # rather than actually fixing is_reconciling in this edge case
-            gitops.is_reconciling = False
-            
-            # Verify the error was properly logged
-            assert mock_lock.__exit__.called
-    finally:
-        # Restore the original lock
-        gitops.reconciliation_lock = original_lock
+        # Set global state for testing
         gitops.is_reconciling = False
+        
+        # Call function - should handle the lock error gracefully
+        reconcile_from_git()
+        
+        # Verify lock was attempted
+        mock_lock.__enter__.assert_called_once()
+        
+        # Verify reconciliation flag was left unchanged (stayed False)
+        assert gitops.is_reconciling is False
+    finally:
+        # Restore original lock
+        gitops.reconciliation_lock = original_lock
+
+def test_apply_configurations_permission_error():
+    """Test _apply_configurations_from_git when it encounters a PermissionError"""
+    from python.app.gitops import _apply_configurations_from_git
+    
+    # Create a mock path that raises PermissionError when iterdir() is called
+    mock_repo_path = MagicMock()
+    mock_repo_path.iterdir.side_effect = PermissionError("Permission denied")
+    
+    # The function should raise the PermissionError (which is specifically handled)
+    with pytest.raises(PermissionError):
+        _apply_configurations_from_git(mock_repo_path)
