@@ -129,64 +129,248 @@ def test_deploy_application_git_error():
         # Run the test
         asyncio.run(test())
 
-def test_gitops_status_yaml_error():
-    """Test get_gitops_status when YAML parsing raises an error"""
-    from python.app.gitops import get_gitops_status
+def test_deploy_application_general_exception():
+    """Test deploy_application with unexpected general exception"""
+    from python.app.gitops import deploy_application, DeploymentRequest
     
-    # Mock necessary functions
+    # Create a deployment request
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=3
+    )
+    
+    # Mock for the background_tasks
+    background_tasks = MagicMock()
+    
+    # Setup a patch that raises a general Exception during the operation
     with patch("pathlib.Path.exists") as mock_exists, \
-         patch("pathlib.Path.iterdir") as mock_iterdir, \
-         patch("pathlib.Path.is_dir") as mock_is_dir, \
-         patch("builtins.open", mock_open(read_data="invalid: yaml: content")), \
-         patch("yaml.safe_load") as mock_yaml_load, \
-         patch("python.app.gitops.reconciliation_lock") as mock_lock, \
-         patch("python.app.gitops.reconciliation_thread") as mock_thread:
+         patch("python.app.gitops._update_repository") as mock_update_repo:
+        
+        # First mock exits to test lines 220-223
+        mock_exists.return_value = True
+        # Raise an unexpected exception type that isn't explicitly caught
+        mock_update_repo.side_effect = AttributeError("Unexpected attribute error")
+        
+        # Call the function and check it properly wraps the exception
+        async def test():
+            with pytest.raises(HTTPException) as excinfo:
+                await deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                )
+            
+            # Update the assertion to match the actual error message
+            assert excinfo.value.status_code == 500
+            assert "Failed to update Git repository" in excinfo.value.detail
+        
+        asyncio.run(test())
+
+def test_deploy_application_yaml_error():
+    """Test deploy_application handling of YAML errors (lines 242-243)"""
+    from python.app.gitops import deploy_application, DeploymentRequest
+    
+    # Create a deployment request
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=3
+    )
+    
+    # Mock for the background_tasks
+    background_tasks = MagicMock()
+    
+    # Setup patches to trigger the YAML error handling path
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir"), \
+         patch("builtins.open", mock_open()), \
+         patch("yaml.safe_load"), \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
+         patch("python.app.gitops._update_repository"):
         
         # Setup mocks
         mock_exists.return_value = True
         
-        # Set up directory structure
-        namespace_dir = MagicMock()
-        namespace_dir.name = "test-namespace"
-        namespace_dir.is_dir.return_value = True
+        # Make yaml.safe_dump raise a YAMLError
+        mock_yaml_dump.side_effect = yaml.YAMLError("Invalid YAML format")
         
-        app_dir = MagicMock()
-        app_dir.name = "test-app"
-        app_dir.is_dir.return_value = True
+        # Call the function and verify exception is properly handled
+        async def test():
+            with pytest.raises(HTTPException) as excinfo:
+                await deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                )
+            
+            # Verify the error details
+            assert excinfo.value.status_code == 500
+            assert "Failed to update deployment configuration" in excinfo.value.detail
         
-        values_file = MagicMock()
-        values_file.exists.return_value = True
-        values_file.relative_to.return_value = Path("test-namespace/test-app/values.yaml")
+        asyncio.run(test())
+
+def test_deploy_application_os_error():
+    """Test deploy_application handling of OS errors (lines 239-240)"""
+    from python.app.gitops import deploy_application, DeploymentRequest
+    
+    # Create a deployment request
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=3
+    )
+    
+    # Mock for the background_tasks
+    background_tasks = MagicMock()
+    
+    # Setup patches to trigger the OS error handling path
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir"), \
+         patch("builtins.open") as mock_open_patch, \
+         patch("yaml.safe_load"), \
+         patch("python.app.gitops._update_repository"):
         
-        # Setup mock directory structure
-        namespace_dir.iterdir.return_value = [app_dir]
-        mock_iterdir.return_value = [namespace_dir]
+        # Setup mocks
+        mock_exists.return_value = True
         
-        # Add custom __truediv__ implementation
-        def mock_truediv(self, other):
-            if other == "values.yaml":
-                return values_file
-            elif other == "test-namespace":
-                return namespace_dir
-            return MagicMock()
+        # Make open raise an OSError
+        mock_file = MagicMock()
+        mock_file.__enter__.side_effect = OSError("Permission denied")
+        mock_open_patch.return_value = mock_file
         
-        MagicMock.__truediv__ = mock_truediv
+        # Call the function and verify exception is properly handled
+        async def test():
+            with pytest.raises(HTTPException) as excinfo:
+                await deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                )
+            
+            # Verify the error details
+            assert excinfo.value.status_code == 500
+            assert "Failed to write deployment configuration" in excinfo.value.detail
         
-        # Make yaml.safe_load raise a YAMLError to trigger the exception handler
-        # This tests lines 280-286
-        mock_yaml_load.side_effect = yaml.YAMLError("Invalid YAML")
+        asyncio.run(test())
+
+def test_gitops_status_yaml_error():
+    """Test get_gitops_status when YAML parsing raises an error"""
+    from python.app.gitops import get_gitops_status
+    import python.app.gitops as gitops
+    
+    # Store original state
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Set to False for the test
+        gitops.is_reconciling = False
         
-        # Set up the mock_thread to control is_alive() behavior
-        mock_thread.is_alive.return_value = True
+        # Mock necessary functions
+        with patch("pathlib.Path.exists") as mock_exists, \
+             patch("pathlib.Path.iterdir") as mock_iterdir, \
+             patch("pathlib.Path.is_dir") as mock_is_dir, \
+             patch("builtins.open", mock_open(read_data="invalid: yaml: content")), \
+             patch("yaml.safe_load") as mock_yaml_load, \
+             patch("python.app.gitops.reconciliation_lock") as mock_lock, \
+             patch("python.app.gitops.reconciliation_thread") as mock_thread:
+            
+            # Setup mocks
+            mock_exists.return_value = True
+            
+            # Set up directory structure
+            namespace_dir = MagicMock()
+            namespace_dir.name = "test-namespace"
+            namespace_dir.is_dir.return_value = True
+            
+            app_dir = MagicMock()
+            app_dir.name = "test-app"
+            app_dir.is_dir.return_value = True
+            
+            values_file = MagicMock()
+            values_file.exists.return_value = True
+            values_file.relative_to.return_value = Path("test-namespace/test-app/values.yaml")
+            
+            # Setup mock directory structure
+            namespace_dir.iterdir.return_value = [app_dir]
+            mock_iterdir.return_value = [namespace_dir]
+            
+            # Add custom __truediv__ implementation
+            def mock_truediv(self, other):
+                if other == "values.yaml":
+                    return values_file
+                elif other == "test-namespace":
+                    return namespace_dir
+                return MagicMock()
+            
+            MagicMock.__truediv__ = mock_truediv
+            
+            # Make yaml.safe_load raise a YAMLError to trigger the exception handler
+            # This tests lines 280-286
+            mock_yaml_load.side_effect = yaml.YAMLError("Invalid YAML")
+            
+            # Set up the mock_thread to control is_alive() behavior
+            mock_thread.is_alive.return_value = True
+            
+            # Execute the function asynchronously
+            async def test():
+                result = await get_gitops_status()
+                
+                # Verify the result - should have empty applications list despite YAML error
+                assert result.is_reconciling is False  # Default value
+                assert len(result.applications) == 0  # Should be empty due to YAML error
+                assert result.status == "active"  # Because thread.is_alive() returned True
+            
+            asyncio.run(test())
+    finally:
+        # Restore original state
+        gitops.is_reconciling = original_is_reconciling
+
+def test_get_gitops_status_general_exception():
+    """Test get_gitops_status with general exception (lines 283-286)"""
+    from python.app.gitops import get_gitops_status
+    
+    # Setup patches to trigger the general exception handling
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.iterdir") as mock_iterdir:
         
-        # Execute the function asynchronously
+        # Setup mocks
+        mock_exists.return_value = True
+        # Raise a general exception when iterating directory
+        mock_iterdir.side_effect = Exception("Unexpected error during directory listing")
+        
+        # Run the test
         async def test():
             result = await get_gitops_status()
             
-            # Verify the result - should have empty applications list despite YAML error
-            assert result.is_reconciling is False  # Default value
-            assert len(result.applications) == 0  # Should be empty due to YAML error
-            assert result.status == "active"  # Because thread.is_alive() returned True
+            # Even with exception, we should get a valid response with empty applications
+            assert hasattr(result, "applications")
+            assert isinstance(result.applications, list)
+            assert len(result.applications) == 0
+        
+        asyncio.run(test())
+
+def test_get_gitops_status_os_error():
+    """Test get_gitops_status with OS error during directory reading (line 284)"""
+    from python.app.gitops import get_gitops_status
+    
+    # Setup patches to trigger the OS error handling path
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.iterdir") as mock_iterdir:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        # Raise an OSError when iterating directory
+        mock_iterdir.side_effect = OSError("Permission denied")
+        
+        # Run the test
+        async def test():
+            result = await get_gitops_status()
+            
+            # Even with exception, we should get a valid response with empty applications
+            assert hasattr(result, "applications")
+            assert isinstance(result.applications, list)
+            assert len(result.applications) == 0
         
         asyncio.run(test())
 
@@ -244,6 +428,18 @@ def test_apply_configurations_empty_hidden_folders():
     
     # No assertions needed - we're just ensuring these code paths are covered
 
+def test_apply_configurations_permission_error():
+    """Test _apply_configurations_from_git with permission error (lines 591-596)"""
+    from python.app.gitops import _apply_configurations_from_git
+    
+    # Create a mock repo path that raises PermissionError when iterating
+    mock_repo_path = MagicMock()
+    mock_repo_path.iterdir.side_effect = PermissionError("Permission denied")
+    
+    # Call function and verify it raises the PermissionError (doesn't catch it)
+    with pytest.raises(PermissionError):
+        _apply_configurations_from_git(mock_repo_path)
+
 def test_sanitize_branch_name_fallback_empty_input():
     """Test sanitize_branch_name fallback with empty input"""
     from python.app.gitops import sanitize_branch_name
@@ -255,3 +451,70 @@ def test_sanitize_branch_name_fallback_empty_input():
         # Test with empty string to cover line 640
         result = sanitize_branch_name("")
         assert result == "main"
+
+def test_sanitize_url_regex_exception():
+    """Test URL sanitization when regex fails (line 640)"""
+    from python.app.gitops import sanitize_git_url
+    
+    # Mock re.sub to raise an exception, forcing the fallback path
+    with patch("re.sub") as mock_re_sub:
+        mock_re_sub.side_effect = Exception("Simulated regex failure")
+        
+        # Test with a URL containing various characters to exercise the fallback path
+        result = sanitize_git_url("git@github.com:user/repo.git;rm -rf /")
+        
+        # Verify the result doesn't contain dangerous characters
+        assert ";" not in result
+        assert " " not in result
+        assert "@" in result  # Valid URL character should be preserved
+
+def test_start_reconciliation_thread_multiple_exceptions():
+    """Test error handling in start_reconciliation_thread with different exception types (lines 341-346)"""
+    from python.app.gitops import start_reconciliation_thread
+    import python.app.gitops as gitops
+    
+    # Store original state
+    original_thread = gitops.reconciliation_thread
+    
+    try:
+        # Ensure thread is None to trigger creation path
+        gitops.reconciliation_thread = None
+        
+        # Test with RuntimeError during thread creation
+        with patch("threading.Thread") as mock_thread:
+            # Make the Thread constructor itself raise the exception
+            mock_thread.side_effect = RuntimeError("Failed to create thread")
+            
+            # Should catch and wrap the exception
+            with pytest.raises(Exception, match="Failed to start reconciliation thread"):
+                start_reconciliation_thread()
+    finally:
+        # Restore original state
+        gitops.reconciliation_thread = original_thread
+
+def test_reconcile_from_git_lock_acquisition_error():
+    """Test reconcile_from_git handling of lock acquisition errors (lines 470-474)"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original lock
+    original_lock = gitops.reconciliation_lock
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Create a mock lock that raises RuntimeError on __enter__
+        mock_lock = MagicMock()
+        mock_lock.__enter__.side_effect = RuntimeError("Failed to acquire lock")
+        gitops.reconciliation_lock = mock_lock
+        gitops.is_reconciling = False
+        
+        # Call the function - this should hit the exception handler for lock acquisition
+        reconcile_from_git()
+        
+        # Verify the function properly logs the error and returns
+        mock_lock.__enter__.assert_called_once()
+        # No need for assertions on is_reconciling since it should still be False
+    finally:
+        # Restore original state
+        gitops.reconciliation_lock = original_lock
+        gitops.is_reconciling = original_is_reconciling
