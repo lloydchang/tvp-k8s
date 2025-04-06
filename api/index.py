@@ -64,10 +64,9 @@ app.add_middleware(
 # Create a single router for GitOps operations
 gitops_api_router = APIRouter()
 
-# Include the gitops router with GitOps tag
+# Include the gitops router (no need to specify tags again as they're already in the router)
 gitops_api_router.include_router(
-    gitops_router,
-    tags=["GitOps"]
+    gitops_router  # Removed redundant tags=["GitOps"]
 )
 
 # Include the routers with their respective prefixes
