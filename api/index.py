@@ -46,11 +46,9 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=[
         {"name": "Health", "description": "Health"},
-        {"name": "Deploy", "description": "Application deployment operations"},
-        {"name": "Reconcile", "description": "GitOps reconciliation operations"},
+        {"name": "GitOps", "description": "GitOps operations for deployments and reconciliation"},
         {"name": "Argo CD", "description": "Argo CD"},
-        {"name": "Kubernetes", "description": "Kubernetes"},
-        {"name": "GitOps", "description": "GitOps operations"}
+        {"name": "Kubernetes", "description": "Kubernetes"}
     ]
 )
 
@@ -63,35 +61,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create separate routers for deployment and reconciliation operations
-deploy_router = APIRouter()
-reconcile_router = APIRouter()
+# Create a single router for GitOps operations
 gitops_api_router = APIRouter()
 
-# Include the gitops router in both deploy and reconcile routers
-# but tag the endpoints differently to categorize them in the API docs
-deploy_router.include_router(
-    gitops_router,
-    tags=["Deploy"],
-    prefix=""
-)
-
-reconcile_router.include_router(
-    gitops_router,
-    tags=["Reconcile"],
-    prefix=""
-)
-
-# Also include the gitops router with a dedicated path for direct access
+# Include the gitops router with GitOps tag
 gitops_api_router.include_router(
     gitops_router,
-    tags=["GitOps"],
-    prefix=""
+    tags=["GitOps"]
 )
 
 # Include the routers with their respective prefixes
-app.include_router(deploy_router, prefix="/deploy")
-app.include_router(reconcile_router, prefix="/reconcile")
 app.include_router(gitops_api_router, prefix="/gitops")
 app.include_router(argo_cd_proxy, prefix="/argo/cd", tags=["Argo CD"])
 app.include_router(kubernetes_proxy, prefix="/kubernetes", tags=["Kubernetes"])
@@ -111,8 +90,6 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
-            {"prefix": "/deploy", "description": "Application Deployments"},
-            {"prefix": "/reconcile", "description": "GitOps Reconciliation"},
             {"prefix": "/gitops", "description": "GitOps Operations"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},

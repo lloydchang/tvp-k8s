@@ -59,8 +59,7 @@ def test_app_structure():
             router_prefixes.append(route.path.split("/")[1] if route.path != "/" else "root")
     
     # Ensure all expected router prefixes are included
-    assert "deploy" in router_prefixes, "Deploy router should be mounted"
-    assert "reconcile" in router_prefixes, "Reconcile router should be mounted"
+    assert "gitops" in router_prefixes, "GitOps router should be mounted"
     assert "argo" in router_prefixes, "Argo CD router should be mounted"
     assert "kubernetes" in router_prefixes, "Kubernetes router should be mounted"
     assert "health" in router_prefixes, "Health endpoint should exist"
@@ -238,14 +237,12 @@ def test_routers_included():
     routes = [route.path for route in app.routes]
     
     # Check for expected route prefixes
-    deploy_routes = [r for r in routes if r.startswith("/deploy")]
-    reconcile_routes = [r for r in routes if r.startswith("/reconcile")]
+    gitops_routes = [r for r in routes if r.startswith("/gitops")]
     argo_routes = [r for r in routes if r.startswith("/argo/cd")]
     kubernetes_routes = [r for r in routes if r.startswith("/kubernetes")]
     
     # Assert we have routes for each prefix
-    assert len(deploy_routes) > 0, "No deploy routes found"
-    assert len(reconcile_routes) > 0, "No reconcile routes found"
+    assert len(gitops_routes) > 0, "No GitOps routes found"
     assert len(argo_routes) > 0, "No Argo CD routes found"
     assert len(kubernetes_routes) > 0, "No Kubernetes routes found"
     
