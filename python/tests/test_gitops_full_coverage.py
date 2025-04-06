@@ -39,60 +39,32 @@ def test_deploy_application_nothing_to_commit_exact_path():
     # Mock all required functions
     with patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.mkdir"), \
-         patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
          patch("builtins.open", mock_open()), \
          patch("yaml.safe_load", return_value={"image": "old-image:v1"}), \
          patch("yaml.safe_dump"), \
-         patch("python.app.gitops._update_repository") as mock_update, \
          patch("subprocess.run") as mock_run, \
          patch("python.app.gitops.reconcile_from_git"), \
-         patch("python.app.gitops.logger.error"), \
-         patch("python.app.gitops.logger.exception"), \
-         patch("python.app.gitops.logger.info"), \
-         patch("python.app.gitops.get_settings") as mock_get_settings, \
-         patch("python.app.gitops.CalledProcessError", CalledProcessError):
-    
-        # Make sure _update_repository doesn't raise an exception
-        mock_update.return_value = None
-        
-        # Mock settings
-        mock_settings_value = MagicMock()
-        mock_settings_value.gitops_repo_path = "/tmp/kubernetes-apps"
-        mock_get_settings.return_value = mock_settings_value
+         patch("python.app.gitops._update_repository") as mock_update_repo:
         
         # Configure mock_run to raise our error on the second call (commit)
         mock_run.side_effect = [
             MagicMock(),  # git add succeeds
             commit_error,  # git commit fails with "nothing to commit"
-            MagicMock()   # git push would succeed but may not be called
+            MagicMock()   # git push succeeds
         ]
-    
-        # Call the function and handle both possible successful outcomes
+        
+        # Call the function
         async def test():
-            try:
-                # Case 1: Function returns successful response
-                result = await deploy_application(
-                    "test-namespace",
-                    "test-app",
-                    deployment,
-                    background_tasks
-                )
-                
-                # Verify the result
-                assert result["status"] == "deployment_triggered"
-                
-                # Verify reconciliation was triggered
-                background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
-                
-            except HTTPException as e:
-                # Case 2: Function raises HTTP exception but with "nothing to commit" message
-                error_detail = str(e.detail)
-                if "nothing to commit" in error_detail:
-                    # This is also a valid outcome
-                    pass
-                else:
-                    # Unexpected error
-                    raise
+            result = await deploy_application(
+                "test-namespace",
+                "test-app",
+                deployment,
+                background_tasks
+            )
+            
+            # Verify the result - specifically check the status since we're
+            # expecting success despite the git commit error
+            assert result["status"] == "deployment_triggered"
         
         # Run the test
         asyncio.run(test())
