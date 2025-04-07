@@ -193,7 +193,7 @@ async def deploy_microservice(namespace: str, microservices_name: str, deploymen
         logger.exception(f"Unexpected error during deployment: {e}")
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
-@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger reconciliation", status_code=200)
+@proxy.post("/reconcile", tags=["GitOps"], summary="Reconcile Microservices", status_code=200)
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
