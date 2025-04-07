@@ -1,5 +1,5 @@
 stateDiagram-v2
-    title: Application Deployment Workflow
+    title: Microservices Deployment Workflow
     [*] --> GitRepoUpdate: Developer commits changes
     
     GitRepoUpdate --> Reconciliation: GitOps periodic reconciliation
@@ -10,16 +10,16 @@ stateDiagram-v2
     DirectDeployment --> GitRepoUpdate: Update values.yaml
     
     Reconciliation --> ConfigReading: Read values.yaml
-    ConfigReading --> ApplicationDeployment: Prepare deployment
-    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
+    ConfigReading --> MicroservicesDeployment: Prepare deployment
+    MicroservicesDeployment --> ArgoCD: Create/Update Argo CD Microservices
     
-    ArgoCD --> ApplicationSync: Auto-sync
+    ArgoCD --> MicroservicesSync: Auto-sync
     ArgoCD --> ManualSync: Manual sync
     
-    ApplicationSync --> KubernetesDeployment
+    MicroservicesSync --> KubernetesDeployment
     ManualSync --> KubernetesDeployment
     
-    KubernetesDeployment --> [*]: Application deployed
+    KubernetesDeployment --> [*]: Microservices deployed
     KubernetesDeployment --> FailedDeployment: Deployment errors
     FailedDeployment --> Reconciliation: Retry
     

@@ -386,8 +386,8 @@ sequenceDiagram
     
     Thread->>Thread: Update last_reconciliation timestamp
     
-    Eng->>API: GET /gitops/status
-    API-->>Eng: Application status information
+    Eng->>API: GET /gitops/status/reconcile
+    API-->>Eng: Status: Reconcile
 ```
 
 **Leverage Point:** The GitOps workflow provides leverage by enabling a declarative approach to infrastructure. This means that one engineer's work can affect multiple environments consistently, and the source of truth remains in version control rather than in manual configurations.
@@ -897,7 +897,7 @@ All these components and interactions culminate in the application deployment wo
 
 ```mermaid
 stateDiagram-v2
-    title: Application Deployment Workflow
+    title: Microservices Deployment Workflow
     [*] --> GitRepoUpdate: Developer commits changes
     
     GitRepoUpdate --> Reconciliation: GitOps periodic reconciliation
@@ -908,16 +908,16 @@ stateDiagram-v2
     DirectDeployment --> GitRepoUpdate: Update values.yaml
     
     Reconciliation --> ConfigReading: Read values.yaml
-    ConfigReading --> ApplicationDeployment: Prepare deployment
-    ApplicationDeployment --> ArgoCD: Create/Update Argo CD application
+    ConfigReading --> MicroservicesDeployment: Prepare deployment
+    MicroservicesDeployment --> ArgoCD: Create/Update Argo CD Microservices
     
-    ArgoCD --> ApplicationSync: Auto-sync
+    ArgoCD --> MicroservicesSync: Auto-sync
     ArgoCD --> ManualSync: Manual sync
     
-    ApplicationSync --> KubernetesDeployment
+    MicroservicesSync --> KubernetesDeployment
     ManualSync --> KubernetesDeployment
     
-    KubernetesDeployment --> [*]: Application deployed
+    KubernetesDeployment --> [*]: Microservices deployed
     KubernetesDeployment --> FailedDeployment: Deployment errors
     FailedDeployment --> Reconciliation: Retry
     

@@ -60,7 +60,7 @@ def test_get_gitops_status(test_client) -> None:
         assert "is_reconciling" in data
         assert "microservices" in data
         assert len(data["microservices"]) == 1
-        assert data["microservices"][0]["app_name"] == "test-app"
+        assert data["microservices"][0]["microservices_name"] == "test-app"
         assert data["microservices"][0]["namespace"] == "test-namespace"
         assert data["microservices"][0]["image"] == "test-image"
         assert data["microservices"][0]["tag"] == "v1.0.0"

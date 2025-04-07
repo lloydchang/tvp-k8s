@@ -88,60 +88,8 @@ class DeploymentStatus(BaseModel):
     tag: Optional[str] = None
     last_reconciliation: Optional[str] = None
 
-# Deployment operations - now first in order
-@proxy.get("/status/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
-async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
-    """
-    Gets the status of a specific application deployment.
-    
-    Args:
-        namespace (str): Kubernetes namespace of the application.
-        app_name (str): Name of the application.
-        
-    Returns:
-        DeploymentStatus: Application deployment information including image, tag, and status.
-        
-    Raises:
-        HTTPException: If the application is not found in the repository (404).
-        HTTPException: If there's an error reading the application's values file (500).
-    """
-    settings = get_settings()
-    repo_path = Path(settings.gitops_repo_path)
-    app_path = repo_path / namespace / app_name
-    
-    if not app_path.exists():
-        raise HTTPException(status_code=404, detail=f"Application {app_name} not found in repository")
-    
-    values_file = app_path / "values.yaml"
-    app_info = DeploymentStatus(
-        microservice=app_name,
-        namespace=namespace,
-        repository=settings.gitops_repo_url,
-        status="unknown"
-    )
-    
-    if values_file.exists():
-        try:
-            with open(values_file, 'r') as f:
-                values = yaml.safe_load(f)
-                app_info.image = values.get("image", "unknown")
-                app_info.tag = values.get("tag", "unknown")
-                app_info.last_reconciliation = get_last_reconciliation_time()
-                
-                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
-                # For now, we'll just assume it's deployed if it's in the repo
-                app_info.status = "deployed"
-        except yaml.YAMLError as e:
-            logger.error(f"YAML parsing error in {values_file}: {e}")
-            raise HTTPException(status_code=500, detail=f"Invalid YAML in application configuration")
-        except OSError as e:
-            logger.error(f"Error reading values file: {e}")
-            raise HTTPException(status_code=500, detail=f"Error reading application configuration")
-    
-    return app_info
-
-@proxy.post("/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
-async def deploy_microservice(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+@proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
+async def deploy_microservice(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
     Deploys or updates a microservice using GitOps.
     
@@ -150,7 +98,7 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
     
     Args:
         namespace (str): Kubernetes namespace for the microservice.
-        app_name (str): Name of the microservice to deploy.
+        microservices_name (str): Name of the microservice to deploy.
         deployment (DeploymentRequest): Deployment configuration including image and tag.
         background_tasks (BackgroundTasks): FastAPI background tasks runner.
         
@@ -162,7 +110,7 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
-    app_path = repo_path / namespace / app_name
+    app_path = repo_path / namespace / microservices_name
     
     # Ensure the repository is up to date
     try:
@@ -206,7 +154,7 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
                 check=True, capture_output=True, text=True, timeout=30
             )
             
-            commit_message = f"Update {namespace}/{app_name} deployment"
+            commit_message = f"Update {namespace}/{microservices_name} deployment"
             subprocess.run(
                 ["git", "-C", str(repo_path), "commit", "-m", commit_message],
                 check=True, capture_output=True, text=True, timeout=30
@@ -227,10 +175,10 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
         
         return {
             "status": "deployment_triggered",
-            "message": f"Deployment of {app_name} to {namespace} has been triggered",
+            "message": f"Deployment of {microservices_name} to {namespace} has been triggered",
             "details": {
                 "namespace": namespace,
-                "microservice": app_name,
+                "microservice": microservices_name,
                 "image": deployment.image,
                 "replicas": deployment.replicas
             }
@@ -245,7 +193,81 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
         logger.exception(f"Unexpected error during deployment: {e}")
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
-# Reconciliation operations - renamed from GitOps status operations
+@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger reconciliation", status_code=200)
+async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
+    """
+    Triggers a GitOps reconciliation process.
+    
+    The reconciliation will pull the latest configuration from Git and apply it.
+    This operation runs in the background to avoid blocking the API request.
+    
+    Args:
+        background_tasks (BackgroundTasks): FastAPI background tasks runner.
+        
+    Returns:
+        dict: Status message indicating whether reconciliation was started or already running.
+    """
+    global is_reconciling
+    
+    with reconciliation_lock:
+        if is_reconciling:
+            return {"status": "already_running", "message": "Reconciliation already in progress"}
+        
+        background_tasks.add_task(reconcile_from_git)
+    
+    return {"status": "started", "message": "Reconciliation process started"}
+
+@proxy.get("/status/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
+async def get_deployment_status(namespace: str, microservices_name: str) -> DeploymentStatus:
+    """
+    Gets the status of a specific microservices deployment.
+    
+    Args:
+        namespace (str): Kubernetes namespace of microservices.
+        microservices_name (str): Name of microservices.
+        
+    Returns:
+        DeploymentStatus: microservices deployment information including image, tag, and status.
+        
+    Raises:
+        HTTPException: If microservices is not found in the repository (404).
+        HTTPException: If there's an error reading microservices's values file (500).
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / microservices_name
+    
+    if not app_path.exists():
+        raise HTTPException(status_code=404, detail=f"microservices {microservices_name} not found in repository")
+    
+    values_file = app_path / "values.yaml"
+    app_info = DeploymentStatus(
+        microservice=microservices_name,
+        namespace=namespace,
+        repository=settings.gitops_repo_url,
+        status="unknown"
+    )
+    
+    if values_file.exists():
+        try:
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f)
+                app_info.image = values.get("image", "unknown")
+                app_info.tag = values.get("tag", "unknown")
+                app_info.last_reconciliation = get_last_reconciliation_time()
+                
+                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
+                # For now, we'll just assume it's deployed if it's in the repo
+                app_info.status = "deployed"
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in {values_file}: {e}")
+            raise HTTPException(status_code=500, detail=f"Invalid YAML in microservices configuration")
+        except OSError as e:
+            logger.error(f"Error reading values file: {e}")
+            raise HTTPException(status_code=500, detail=f"Error reading microservices configuration")
+    
+    return app_info
+
 @proxy.get("/status/reconcile", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
@@ -272,7 +294,7 @@ async def get_gitops_status() -> GitOpsStatus:
                             try:
                                 values = yaml.safe_load(f)
                                 microservices.append({
-                                    "app_name": app_dir.name,
+                                    "microservices_name": app_dir.name,
                                     "namespace": namespace_dir.name,
                                     "image": values.get("image", "unknown"),
                                     "tag": values.get("tag", "unknown"),
@@ -294,30 +316,6 @@ async def get_gitops_status() -> GitOpsStatus:
         status=status,
         microservices=microservices
     )
-
-@proxy.post("/reconcile", tags=["GitOps"], summary="Trigger reconciliation", status_code=200)
-async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
-    """
-    Triggers a GitOps reconciliation process.
-    
-    The reconciliation will pull the latest configuration from Git and apply it.
-    This operation runs in the background to avoid blocking the API request.
-    
-    Args:
-        background_tasks (BackgroundTasks): FastAPI background tasks runner.
-        
-    Returns:
-        dict: Status message indicating whether reconciliation was started or already running.
-    """
-    global is_reconciling
-    
-    with reconciliation_lock:
-        if is_reconciling:
-            return {"status": "already_running", "message": "Reconciliation already in progress"}
-        
-        background_tasks.add_task(reconcile_from_git)
-    
-    return {"status": "started", "message": "Reconciliation process started"}
 
 # Helper functions remain mostly unchanged
 def start_reconciliation_thread() -> None:
