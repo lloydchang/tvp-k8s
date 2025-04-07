@@ -174,7 +174,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         error_msg = str(e)
         if hasattr(e, 'stderr') and e.stderr and "nothing to commit" in str(e.stderr).lower():
             # Handle nothing to commit in repository update
-            logger.info("No changes to commit detected in error message - values match existing configuration")
+            logger.info("No changes to commit - values match existing configuration")
             background_tasks.add_task(reconcile_from_git)
             return {
                 "status": "deployment_triggered",
@@ -188,7 +188,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
             }
         elif "nothing to commit" in error_msg.lower():
             # Handle nothing to commit in generic exception
-            logger.info("No changes to commit detected in error message - values match existing configuration")
+            logger.info("No changes to commit - values match existing configuration")
             background_tasks.add_task(reconcile_from_git)
             return {
                 "status": "deployment_triggered",
@@ -255,7 +255,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
             except CalledProcessError as e:
                 if e.stderr and "nothing to commit" in e.stderr.lower():
                     # This log message is exactly what test_line_274_277_error_handler_with_stderr is looking for
-                    logger.info("No changes to commit detected in error message - values match existing configuration")
+                    logger.info("No changes to commit - values match existing configuration")
                     nothing_to_commit = True
                     # Return the specific message format expected by tests
                     background_tasks.add_task(reconcile_from_git)
@@ -285,7 +285,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
                 stderr_str = e.stderr if isinstance(e.stderr, str) else e.stderr.decode('utf-8', errors='replace')
                 if "nothing to commit" in stderr_str.lower():
                     # This specific log message is expected by tests
-                    logger.info("No changes to commit detected in error message - values match existing configuration")
+                    logger.info("No changes to commit - values match existing configuration")
                     nothing_to_commit = True
                     background_tasks.add_task(reconcile_from_git)
                     return {
@@ -331,7 +331,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         # Check for custom exceptions with stderr attribute containing "nothing to commit"
         if hasattr(e, 'stderr') and isinstance(getattr(e, 'stderr', None), str) and "nothing to commit" in getattr(e, 'stderr', '').lower():
             # Use the exact message format expected by the tests
-            logger.info("No changes to commit detected in error message - values match existing configuration")
+            logger.info("No changes to commit - values match existing configuration")
             # Still trigger reconciliation and return success
             background_tasks.add_task(reconcile_from_git)
             return {
@@ -347,7 +347,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         
         # Also handle scenarios where the exception happens at the repository update stage
         if isinstance(e, Exception) and "nothing to commit" in str(e).lower():
-            logger.info("No changes to commit detected in error message - values match existing configuration")
+            logger.info("No changes to commit - values match existing configuration")
             # Still trigger reconciliation and return success
             background_tasks.add_task(reconcile_from_git)
             return {
