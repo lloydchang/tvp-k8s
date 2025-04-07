@@ -848,3 +848,281 @@ def test_gitops_status_response():
         assert "status" in data
         assert "microservices" in data
         assert isinstance(data["microservices"], list)
+
+"""
+Test file for full coverage of the GitOps module.
+These tests are designed to hit specific lines and edge cases
+that are difficult to reach through normal testing.
+"""
+
+import pytest
+from unittest.mock import patch, MagicMock, mock_open
+import yaml
+from subprocess import CalledProcessError
+import asyncio
+import os
+import re
+from pathlib import Path
+
+def test_reconcile_from_git_concurrent_check():
+    """Test the concurrent execution prevention in reconcile_from_git"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original state to restore after test
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Set reconciling flag to True to simulate concurrent execution
+        gitops.is_reconciling = True
+        
+        # Call the function
+        reconcile_from_git()
+        
+        # Verify the function returned early without doing any work
+        # Unfortunately there's no direct way to assert this, but
+        # the fact that we got here without errors is a good sign
+    finally:
+        # Restore original state
+        gitops.is_reconciling = original_is_reconciling
+
+def test_reconcile_from_git_clone_branch():
+    """Test reconcile_from_git when repository needs to be cloned with specific branch"""
+    from python.app.gitops import reconcile_from_git
+    
+    # Mock the required functions and Path existence
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("python.app.gitops._clone_repository") as mock_clone, \
+         patch("python.app.gitops._apply_configurations_from_git"), \
+         patch("python.app.gitops.set_last_reconciliation_time"):
+        
+        # Ensure repo path doesn't exist to trigger clone
+        mock_exists.return_value = False
+        
+        # Call the function
+        reconcile_from_git()
+        
+        # Verify clone was called
+        mock_clone.assert_called_once()
+
+def test_reconcile_from_git_error_handling():
+    """Test comprehensive error handling in reconcile_from_git"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original state
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Test with different types of exceptions
+        with patch("pathlib.Path.exists") as mock_exists, \
+             patch("python.app.gitops._update_repository") as mock_update:
+            
+            # Set up mocks
+            mock_exists.return_value = True
+            
+            # Test case 1: CalledProcessError
+            mock_update.side_effect = CalledProcessError(1, "git pull", stderr="Network error")
+            gitops.is_reconciling = False
+            
+            # Call function, should handle error gracefully
+            reconcile_from_git()
+            
+            # Verify is_reconciling was reset
+            assert gitops.is_reconciling is False
+            
+            # Test case 2: OSError
+            mock_update.side_effect = OSError("Permission denied")
+            gitops.is_reconciling = False
+            
+            # Call function
+            reconcile_from_git()
+            
+            # Verify is_reconciling was reset
+            assert gitops.is_reconciling is False
+            
+            # Test case 3: YAML error
+            mock_update.side_effect = yaml.YAMLError("Invalid YAML")
+            gitops.is_reconciling = False
+            
+            # Call function
+            reconcile_from_git()
+            
+            # Verify is_reconciling was reset
+            assert gitops.is_reconciling is False
+            
+            # Test case 4: Generic exception
+            mock_update.side_effect = Exception("Unknown error")
+            gitops.is_reconciling = False
+            
+            # Call function
+            reconcile_from_git()
+            
+            # Verify is_reconciling was reset
+            assert gitops.is_reconciling is False
+    finally:
+        # Restore original state
+        gitops.is_reconciling = original_is_reconciling
+
+def test_clone_repository_with_invalid_url():
+    """Test _clone_repository with an invalid URL that needs sanitization"""
+    from python.app.gitops import _clone_repository
+    
+    # Mock the dependencies
+    with patch("python.app.gitops.sanitize_git_url") as mock_sanitize_url, \
+         patch("python.app.gitops.sanitize_branch_name") as mock_sanitize_branch, \
+         patch("os.makedirs"):
+        
+        # Configure sanitize_git_url to return a modified URL (indicating potential danger)
+        mock_sanitize_url.return_value = "https://github.com/user/repo.git"  # Sanitized URL
+        mock_sanitize_branch.return_value = "main"
+        
+        # Call the function with a URL that would be modified by sanitization
+        with pytest.raises(ValueError) as excinfo:
+            _clone_repository("https://github.com/user/repo.git; rm -rf /", "/tmp/repo", "main")
+        
+        # Verify error message
+        assert "Invalid repository URL" in str(excinfo.value)
+
+def test_sanitize_branch_name_with_traversal():
+    """Test sanitize_branch_name with path traversal attempts"""
+    from python.app.gitops import sanitize_branch_name
+    
+    # Test with various path traversal patterns
+    assert ".." not in sanitize_branch_name("../../../etc/passwd")
+    assert ".." not in sanitize_branch_name("feature/../../../etc/passwd")
+    assert ".." not in sanitize_branch_name("feature/..\\..\\Windows\\System32")
+    
+    # Test with empty or None input
+    assert sanitize_branch_name("") == "main"
+    assert sanitize_branch_name(None) == "main"
+
+def test_sanitize_branch_name_fallback():
+    """Test sanitize_branch_name fallback when regex module has an issue"""
+    from python.app.gitops import sanitize_branch_name
+    
+    # Mock re.sub to simulate a regex failure
+    with patch("re.sub") as mock_re_sub:
+        mock_re_sub.side_effect = Exception("Regex module error")
+        
+        # Test the function still works with fallback logic
+        result = sanitize_branch_name("feature/branch")
+        
+        # Verify the result is sanitized (fallback removes / and replaces with -)
+        assert "/" not in result
+        assert "feature-branch" == result
+
+def test_sanitize_git_url_with_dangerous_chars():
+    """Test sanitize_git_url with various dangerous characters"""
+    from python.app.gitops import sanitize_git_url
+    
+    # Test with various dangerous patterns
+    dangerous_url = "https://github.com/user/repo.git; rm -rf / #"
+    result = sanitize_git_url(dangerous_url)
+    
+    # Verify dangerous characters are removed
+    assert ";" not in result
+    assert "#" not in result
+    assert "rm" not in result
+    
+    # Test with shell escapes
+    dangerous_url = "https://github.com/user/repo.git`rm -rf /`"
+    result = sanitize_git_url(dangerous_url)
+    
+    assert "`" not in result
+
+def test_apply_configurations_with_nested_dirs():
+    """Test _apply_configurations_from_git with nested manifest directories"""
+    from python.app.gitops import _apply_configurations_from_git
+    import tempfile
+    import os
+    import shutil
+    
+    # Create a temporary directory structure to test with
+    with tempfile.TemporaryDirectory() as temp_dir:
+        repo_path = Path(temp_dir)
+        
+        # Create namespace directory
+        namespace_dir = repo_path / "test-namespace"
+        namespace_dir.mkdir()
+        
+        # Create app directory
+        app_dir = namespace_dir / "test-app"
+        app_dir.mkdir()
+        
+        # Create values.yaml
+        values_file = app_dir / "values.yaml"
+        values_file.write_text('image: "test-image:latest"')
+        
+        # Create manifests directory with nested subdirectories
+        manifests_dir = app_dir / "manifests"
+        manifests_dir.mkdir()
+        
+        # Create subdirectories and test YAML files
+        subdirs = ["base", "templates", "overlays/dev", "overlays/prod"]
+        for subdir in subdirs:
+            subdir_path = manifests_dir / subdir
+            subdir_path.mkdir(parents=True, exist_ok=True)
+            
+            # Create YAML files in each subdir
+            yaml_file = subdir_path / f"{subdir.replace('/', '-')}.yaml"
+            yaml_file.write_text(f'kind: {subdir}\nmetadata:\n  name: test')
+        
+        # Test the function with our directory structure
+        with patch("os.walk") as mock_walk:
+            # Simulate os.walk output for our directory structure
+            walk_results = []
+            for subdir in ["", "base", "templates", "overlays/dev", "overlays/prod"]:
+                subdir_path = str(manifests_dir)
+                if subdir:
+                    subdir_path = os.path.join(subdir_path, subdir)
+                
+                if "overlays" in subdir:
+                    # For overlays/* we have subdirectories
+                    walk_results.append((
+                        subdir_path,
+                        [],  # No subdirs
+                        [f"{subdir.replace('/', '-')}.yaml"]  # Files
+                    ))
+                elif subdir == "":
+                    # Root manifests dir
+                    walk_results.append((
+                        subdir_path,
+                        ["base", "templates", "overlays"],  # Subdirs
+                        []  # No files at root
+                    ))
+                else:
+                    # Regular subdirs
+                    walk_results.append((
+                        subdir_path,
+                        [],  # No subdirs
+                        [f"{subdir}.yaml"]  # Files
+                    ))
+            
+            # Configure os.walk to return our simulated results
+            mock_walk.return_value = walk_results
+            
+            # Run the function
+            _apply_configurations_from_git(repo_path)
+            
+            # No assertions needed, we're just testing that it processes the
+            # nested directory structure without errors
+
+def test_sanitize_branch_name_with_special_chars():
+    """Test sanitize_branch_name with various special characters"""
+    from python.app.gitops import sanitize_branch_name
+    
+    # Test with a variety of special characters
+    special_chars = "!@#$%^&*()_+{}|:\"<>?[]\\;',./"
+    result = sanitize_branch_name(f"feature{special_chars}branch")
+    
+    # Verify the result contains only valid chars
+    valid_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._")
+    assert all(c in valid_chars for c in result)
+    
+    # Check it handles consecutive special chars correctly
+    consecutive = "feature///branch"
+    result = sanitize_branch_name(consecutive)
+    
+    # Should consolidate multiple dashes
+    assert "---" not in result

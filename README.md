@@ -318,7 +318,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 Let's start by understanding the challenge: how can a lean platform team support hundreds of engineers efficiently? Our Thinnest Viable Platform architecture provides the answer. This diagram shows the high-level view of the system components and their interactions, revealing how the platform creates leverage through carefully designed abstractions:
 
 ```mermaid
-flowchart TB
+flowchart TD
     title[TVP GitOps Architecture]
     style title fill:none,stroke:none,font-size:18px,font-weight:bold
     subgraph "TVP"
