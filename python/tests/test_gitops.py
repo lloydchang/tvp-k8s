@@ -589,7 +589,7 @@ def test_reconcile_from_git_error_handling():
         assert not gitops.is_reconciling  # Should be reset to False
 
 def test_deploy_microservice_with_environment_vars(test_client, mock_settings):
-    """Test deploying an microservice with environment variables"""
+    """Test deploying a microservice with environment variables"""
     # Mock necessary functions to avoid actual file/git operations
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
@@ -990,7 +990,7 @@ def test_reconcile_from_git_general_exception():
         assert gitops.is_reconciling is False  # Should be reset to False
 
 def test_deploy_microservice_with_environment_and_resources():
-    """Test deploying an microservice with environment variables and resources"""
+    """Test deploying a microservice with environment variables and resources"""
     from python.app.gitops import DeploymentRequest, deploy_microservice
     from unittest.mock import mock_open, patch
     import asyncio

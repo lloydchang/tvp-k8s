@@ -89,7 +89,7 @@ class DeploymentStatus(BaseModel):
     last_reconciliation: Optional[str] = None
 
 # Deployment operations - now first in order
-@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy Status", response_model=DeploymentStatus)
+@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
 async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
     """
     Gets the status of a specific microservice deployment.
@@ -143,7 +143,7 @@ async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStat
 @proxy.post("/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
 async def deploy_microservice(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
-    Deploys or updates an microservice using GitOps.
+    Deploys or updates a microservice using GitOps.
     
     This endpoint updates the microservice's configuration in the Git repository
     and then triggers a reconciliation to apply the changes.
@@ -246,7 +246,7 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
-@proxy.get("/reconcile/status", tags=["GitOps"], summary="Reconcile Status", response_model=GitOpsStatus)
+@proxy.get("/reconcile/status", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
