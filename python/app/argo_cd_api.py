@@ -10,14 +10,13 @@ from pydantic import BaseModel
 from typing import Any
 import httpx
 from .config import get_settings, get_kubernetes_client
-import os
-import logging
-import requests
-from typing import Dict, Any, List, Optional
-import json
-import yaml
 
 proxy = APIRouter()
+
+try:
+    import yaml
+except ImportError:
+    raise ImportError("PyYAML is required. Install it with 'pip install pyyaml'")
 
 # Models
 class ArgoCDApplicationRequest(BaseModel):
