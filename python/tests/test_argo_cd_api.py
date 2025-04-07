@@ -248,16 +248,55 @@ async def test_argo_cd_token_missing_password():
 @pytest.mark.asyncio
 async def test_auth_token_service_unavailable():
     """Test getting auth token when service is unavailable"""
-    with patch("httpx.AsyncClient.post", side_effect=httpx.RequestError("Connection error")):
-        with pytest.raises(Exception) as excinfo:
-            await get_argo_cd_token()
-        assert "service unavailable" in str(excinfo.value)
+    # Mock settings with valid password
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings:
+        settings = MagicMock()
+        settings.argo_cd_url = "https://argocd.example.com"
+        settings.argo_cd_username = "admin"
+        settings.argo_cd_password = "password"  # Ensure password is set
+        settings.verify_ssl = True
+        mock_get_settings.return_value = settings
+        
+        # Mock httpx.AsyncClient.post to raise RequestError
+        with patch("httpx.AsyncClient.post", side_effect=httpx.RequestError("Connection error")):
+            with pytest.raises(HTTPException) as excinfo:
+                await get_argo_cd_token()
+            assert excinfo.value.status_code == 503
+            assert "service unavailable" in str(excinfo.value.detail).lower()
 
 @pytest.mark.asyncio
 async def test_argo_cd_proxy_error(test_client):
     """Test the Argo CD proxy with HTTP errors"""
-    with patch("httpx.AsyncClient.request", side_effect=httpx.HTTPError("HTTP error")):
-        with patch("python.app.argo_cd_api.get_argo_cd_auth_token", return_value="fake-token"):
-            response = await test_client.app.app.state.client.get("/argo-cd/applications")
-            assert response.status_code == 503
-            assert "API unavailable" in response.json()["detail"]
+    from python.app.argo_cd_api import argo_cd_proxy
+    
+    # Create mock request
+    mock_request = MagicMock()
+    mock_request.method = "GET"
+    mock_request.headers = {}
+    mock_request.body = AsyncMock(return_value=None)
+    
+    # Mock settings and auth token
+    with patch("python.app.argo_cd_api.get_settings") as mock_get_settings, \
+         patch("python.app.argo_cd_api.get_argo_cd_auth_token") as mock_get_token:
+        
+        # Configure settings mock
+        settings = MagicMock()
+        settings.argo_cd_url = "https://argocd.example.com"
+        settings.verify_ssl = True
+        mock_get_settings.return_value = settings
+        
+        # Configure token mock
+        mock_get_token.return_value = "fake-token"
+        
+        # Mock httpx client to raise HTTP error
+        with patch("httpx.AsyncClient") as mock_client:
+            mock_client_instance = MagicMock()
+            mock_client_instance.__aenter__.return_value.request.side_effect = httpx.HTTPError("HTTP error")
+            mock_client.return_value = mock_client_instance
+            
+            # Call function and check for correct exception
+            with pytest.raises(HTTPException) as excinfo:
+                await argo_cd_proxy("applications", mock_request)
+            
+            assert excinfo.value.status_code == 503
+            assert "API unavailable" in excinfo.value.detail
