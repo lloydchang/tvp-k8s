@@ -160,24 +160,6 @@ async def test_get_argo_cd_token_request_error(test_client, mock_settings):
             assert "Argo CD service unavailable" in str(excinfo.value.detail)
 
 
-def test_yaml_import_error_handler():
-    """Test that the code properly catches YAML import errors"""
-    # This test verifies that the error handling code exists, 
-    # but we can't easily test the actual import error since 
-    # the module has already been imported
-    
-    # We're just checking line coverage here, not actual behavior
-    # Let's simulate a scenario where yaml is imported but has missing functions
-    with patch("yaml.safe_load", side_effect=AttributeError("'module' object has no attribute 'safe_load'")):
-        try:
-            # Attempt to use a YAML function that will now raise an AttributeError
-            import yaml
-            yaml.safe_load("{}")
-        except (ImportError, AttributeError) as e:
-            # This is a success if we caught the error
-            assert "safe_load" in str(e)
-
-
 @pytest.mark.asyncio
 async def test_get_argo_cd_token_connection_error():
     """Test the get_argo_cd_token function with a connection error"""
@@ -262,3 +244,20 @@ async def test_argo_cd_token_missing_password():
         # Verify correct error
         assert excinfo.value.status_code == 500
         assert "password not configured" in excinfo.value.detail.lower()
+
+@pytest.mark.asyncio
+async def test_auth_token_service_unavailable():
+    """Test getting auth token when service is unavailable"""
+    with patch("httpx.AsyncClient.post", side_effect=httpx.RequestError("Connection error")):
+        with pytest.raises(Exception) as excinfo:
+            await get_argo_cd_token()
+        assert "service unavailable" in str(excinfo.value)
+
+@pytest.mark.asyncio
+async def test_argo_cd_proxy_error(test_client):
+    """Test the Argo CD proxy with HTTP errors"""
+    with patch("httpx.AsyncClient.request", side_effect=httpx.HTTPError("HTTP error")):
+        with patch("python.app.argo_cd_api.get_argo_cd_auth_token", return_value="fake-token"):
+            response = await test_client.app.app.state.client.get("/argo-cd/applications")
+            assert response.status_code == 503
+            assert "API unavailable" in response.json()["detail"]
