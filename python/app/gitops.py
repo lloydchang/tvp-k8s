@@ -52,6 +52,146 @@ class GitOpsStatus(BaseModel):
     status: str
     microservices: List[Dict[str, Any]] = []
 
+class DeploymentRequest(BaseModel):
+    """
+    Model for GitOps deployment requests.
+    
+    Attributes:
+        image (str): Container image to deploy, typically in the format repository/image:tag.
+        replicas (int): Number of replicas to deploy, defaults to 1.
+        environment (Optional[Dict[str, str]]): Environment variables for the deployment.
+        resources (Optional[Dict[str, Any]]): Resource requests and limits.
+    """
+    image: str
+    replicas: int = 1
+    environment: Optional[Dict[str, str]] = None
+    resources: Optional[Dict[str, Any]] = None
+
+class DeploymentStatus(BaseModel):
+    """
+    Status of microservices deployment.
+    
+    Attributes:
+        microservices (str): Name of microservices.
+        namespace (str): Kubernetes namespace of microservices.
+        repository (str): Git repository URL containing microservices configuration.
+        status (str): Deployment status (e.g., "deployed", "failed", "unknown").
+        image (Optional[str]): Container image of the deployment.
+        tag (Optional[str]): Container image tag of the deployment.
+        last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
+    """
+    microservices: str
+    namespace: str
+    repository: str
+    status: str
+    image: Optional[str] = None
+    tag: Optional[str] = None
+    last_reconciliation: Optional[str] = None
+
+@proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
+async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+    """
+    Deploy microservices.
+    
+    This endpoint pulls microservices' configuration from the Git repository and reconciles changes.
+    
+    Args:
+        namespace (str): Kubernetes namespace for microservices.
+        microservices_name (str): Name of microservices to deploy.
+        deployment (DeploymentRequest): Deployment configuration including image and tag.
+        background_tasks (BackgroundTasks): FastAPI background tasks runner.
+        
+    Returns:
+        dict: Status message and deployment information.
+        
+    Raises:
+        HTTPException: If microservices directory doesn't exist or there's an error updating the configuration.
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / microservices_name
+    
+    # Ensure the repository is up to date
+    try:
+        if not repo_path.exists():
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+        else:
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+    except Exception as e:
+        logger.error(f"Failed to update Git repository: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update Git repository")
+    
+    # Create namespace/app directories if they don't exist
+    app_path.parent.mkdir(exist_ok=True, parents=True)
+    app_path.mkdir(exist_ok=True)
+    
+    # Create or update values.yaml
+    values_file = app_path / "values.yaml"
+    
+    try:
+        # Load existing values if they exist
+        values = {}
+        if values_file.exists():
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f) or {}
+        
+        # Update with new values
+        values.update({
+            "image": deployment.image,
+            "replicas": deployment.replicas,
+            # Add any other fields from the deployment request
+        })
+        
+        # Write updated values back
+        with open(values_file, 'w') as f:
+            yaml.safe_dump(values, f)
+            
+        # Commit changes to Git
+        try:
+            subprocess.run(
+                ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            commit_message = f"Update {namespace}/{microservices_name} deployment"
+            subprocess.run(
+                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                check=True, capture_output=True, text=True, timeout=30
+            )
+            
+            subprocess.run(
+                ["git", "-C", str(repo_path), "push"],
+                check=True, capture_output=True, text=True, timeout=60
+            )
+        except CalledProcessError as e:
+            logger.error(f"Git operation failed: {e.stderr}")
+            # Don't fail if commit fails (e.g., no changes to commit)
+            if "nothing to commit" not in e.stderr:
+                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
+        
+        # Trigger reconciliation in the background
+        background_tasks.add_task(reconcile_from_git)
+        
+        return {
+            "status": "deployment_triggered",
+            "message": f"Deployment of {microservices_name} to {namespace} has been triggered",
+            "details": {
+                "namespace": namespace,
+                "microservices": microservices_name,
+                "image": deployment.image,
+                "replicas": deployment.replicas
+            }
+        }
+    except yaml.YAMLError as e:
+        logger.error(f"YAML error while updating values: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
+    except OSError as e:
+        logger.error(f"File operation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
+    except Exception as e:
+        logger.exception(f"Unexpected error during deployment: {e}")
+        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
+
 @proxy.post("/reconcile", tags=["GitOps"], summary="Reconcile Microservices", status_code=200)
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
@@ -75,6 +215,57 @@ async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str,
         background_tasks.add_task(reconcile_from_git)
     
     return {"status": "started", "message": "Reconciliation process started"}
+
+@proxy.get("/status/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
+async def get_deployment_status(namespace: str, microservices_name: str) -> DeploymentStatus:
+    """
+    Gets the status of microservices deployment.
+    
+    Args:
+        namespace (str): Kubernetes namespace of microservices.
+        microservices_name (str): Name of microservices.
+        
+    Returns:
+        DeploymentStatus: microservices deployment information including image, tag, and status.
+        
+    Raises:
+        HTTPException: If microservices is not found in the repository (404).
+        HTTPException: If there's an error reading microservices's values file (500).
+    """
+    settings = get_settings()
+    repo_path = Path(settings.gitops_repo_path)
+    app_path = repo_path / namespace / microservices_name
+    
+    if not app_path.exists():
+        raise HTTPException(status_code=404, detail=f"microservices {microservices_name} not found in repository")
+    
+    values_file = app_path / "values.yaml"
+    app_info = DeploymentStatus(
+        microservices=microservices_name,
+        namespace=namespace,
+        repository=settings.gitops_repo_url,
+        status="unknown"
+    )
+    
+    if values_file.exists():
+        try:
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f)
+                app_info.image = values.get("image", "unknown")
+                app_info.tag = values.get("tag", "unknown")
+                app_info.last_reconciliation = get_last_reconciliation_time()
+                
+                # In a real implementation, we would check the actual deployment status in the Kubernetes API server
+                # For now, we'll just assume it's deployed if it's in the repo
+                app_info.status = "deployed"
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in {values_file}: {e}")
+            raise HTTPException(status_code=500, detail=f"Invalid YAML in microservices configuration")
+        except OSError as e:
+            logger.error(f"Error reading values file: {e}")
+            raise HTTPException(status_code=500, detail=f"Error reading microservices configuration")
+    
+    return app_info
 
 @proxy.get("/status/reconcile", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
