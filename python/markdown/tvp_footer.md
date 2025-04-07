@@ -283,3 +283,9 @@ categories, made possible by large-scale behavioral data.
 • We are building a TVP, a declarative automation product, to accelerate application software engineering by providing composable building blocks
 
 • The core value of platform engineering is leverage, enabling a lean platform team to reduce effort and improve effectiveness across the broader organization significantly
+
+---
+
+## For more information:
+
+https://lloydchang-tvp.vercel.app/redoc
