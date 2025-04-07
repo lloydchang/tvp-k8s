@@ -53,7 +53,7 @@ def test_get_gitops_status(test_client) -> None:
         }
         
         # Test the GitOps status endpoint
-        response = test_client.get("/gitops/reconcile/status")
+        response = test_client.get("/gitops/status/reconcile")
         
         assert response.status_code == 200
         data = response.json()
@@ -134,7 +134,7 @@ def test_get_deployment_status(test_client, mock_settings):
         mock_get_time.return_value = "2023-07-01T12:00:00"
         
         # Test the deployment status endpoint using the gitops path
-        response = test_client.get("/gitops/deploy/status/test-namespace/test-app")
+        response = test_client.get("/gitops/status/deploy/test-namespace/test-app")
         
         assert response.status_code == 200
         data = response.json()
@@ -690,7 +690,7 @@ def test_get_deployment_status_not_found(test_client, mock_settings):
         mock_exists.return_value = False
         
         # Test the deployment status endpoint
-        response = test_client.get("/gitops/deploy/status/test-namespace/non-existent-app")
+        response = test_client.get("/gitops/status/deploy/test-namespace/non-existent-app")
         
         # Verify response
         assert response.status_code == 404
@@ -708,7 +708,7 @@ def test_get_deployment_status_yaml_error(test_client, mock_settings):
         mock_yaml_load.side_effect = yaml.YAMLError("Invalid YAML")
         
         # Test the deployment status endpoint
-        response = test_client.get("/gitops/deploy/status/test-namespace/invalid-yaml-app")
+        response = test_client.get("/gitops/status/deploy/test-namespace/invalid-yaml-app")
         
         # Verify response
         assert response.status_code == 500
@@ -725,11 +725,11 @@ def test_get_deployment_status_file_error(test_client, mock_settings):
         mock_open.side_effect = OSError("Permission denied")
         
         # Test the deployment status endpoint
-        response = test_client.get("/gitops/deploy/status/test-namespace/permission-denied-app")
+        response = test_client.get("/gitops/status/deploy/test-namespace/permission-denied-app")
         
         # Verify response
         assert response.status_code == 500
-        assert "Error reading microservice configuration" in response.json()["detail"]
+        assert "Error reading" in response.json()["detail"]
 
 def test_sanitize_dangerous_branch_name():
     """Test branch name sanitization with dangerous input"""

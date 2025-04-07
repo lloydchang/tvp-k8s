@@ -835,7 +835,7 @@ def test_gitops_status_response():
          patch("python.app.gitops.get_last_reconciliation_time", return_value="2023-07-01T12:00:00"):
         
         # Test the new endpoint
-        response = client.get("/gitops/reconcile/status")
+        response = client.get("/gitops/status/reconcile")
         
         # Check response
         assert response.status_code == 200

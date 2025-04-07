@@ -89,28 +89,28 @@ class DeploymentStatus(BaseModel):
     last_reconciliation: Optional[str] = None
 
 # Deployment operations - now first in order
-@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
+@proxy.get("/status/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
 async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
     """
-    Gets the status of a specific microservice deployment.
+    Gets the status of a specific application deployment.
     
     Args:
-        namespace (str): Kubernetes namespace of the microservice.
-        app_name (str): Name of the microservice.
+        namespace (str): Kubernetes namespace of the application.
+        app_name (str): Name of the application.
         
     Returns:
-        DeploymentStatus: microservice deployment information including image, tag, and status.
+        DeploymentStatus: Application deployment information including image, tag, and status.
         
     Raises:
-        HTTPException: If the microservice is not found in the repository (404).
-        HTTPException: If there's an error reading the microservice's values file (500).
+        HTTPException: If the application is not found in the repository (404).
+        HTTPException: If there's an error reading the application's values file (500).
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
     app_path = repo_path / namespace / app_name
     
     if not app_path.exists():
-        raise HTTPException(status_code=404, detail=f"microservice {app_name} not found in repository")
+        raise HTTPException(status_code=404, detail=f"Application {app_name} not found in repository")
     
     values_file = app_path / "values.yaml"
     app_info = DeploymentStatus(
@@ -133,10 +133,10 @@ async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStat
                 app_info.status = "deployed"
         except yaml.YAMLError as e:
             logger.error(f"YAML parsing error in {values_file}: {e}")
-            raise HTTPException(status_code=500, detail=f"Invalid YAML in microservice configuration")
+            raise HTTPException(status_code=500, detail=f"Invalid YAML in application configuration")
         except OSError as e:
             logger.error(f"Error reading values file: {e}")
-            raise HTTPException(status_code=500, detail=f"Error reading microservice configuration")
+            raise HTTPException(status_code=500, detail=f"Error reading application configuration")
     
     return app_info
 
@@ -246,7 +246,7 @@ async def deploy_microservice(namespace: str, app_name: str, deployment: Deploym
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
-@proxy.get("/reconcile/status", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
+@proxy.get("/status/reconcile", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
