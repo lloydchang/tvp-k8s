@@ -15,67 +15,62 @@ import importlib
 
 def test_deploy_application_git_commit_nothing_to_commit():
     """Test deploy_application when git commit returns 'nothing to commit'"""
-    from python.app.gitops import deploy_application, DeploymentRequest
+    from python.app.gitops import deploy_application
     import python.app.gitops as gitops
     
-    # Create test deployment
-    deployment = DeploymentRequest(
-        image="test-image:v1.0",
-        replicas=2
-    )
-    
-    # Mock for background_tasks
+    # Mock for the background_tasks
     background_tasks = MagicMock()
     
-    # Mock CalledProcessError for git commit with 'nothing to commit' message
-    commit_error = CalledProcessError(
-        returncode=1,
-        cmd=["git", "-C", "/tmp/kubernetes-apps", "commit", "-m", "Update test-namespace/test-app deployment"]
-    )
-    commit_error.stderr = "nothing to commit, working tree clean"
-    
-    # Set up all necessary mocks with patch.object to properly handle the try/except
-    with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.mkdir"), \
-         patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
+    # Mock necessary functions
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
          patch("builtins.open", mock_open()), \
-         patch("yaml.safe_load", return_value={}), \
-         patch("yaml.safe_dump"), \
-         patch("python.app.gitops._update_repository"), \
-         patch("python.app.gitops.reconcile_from_git"), \
-         patch("python.app.gitops.get_settings") as mock_get_settings, \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
          patch("subprocess.run") as mock_run:
         
-        # Mock settings
-        mock_settings_value = MagicMock()
-        mock_settings_value.gitops_repo_path = "/tmp/kubernetes-apps"
-        mock_get_settings.return_value = mock_settings_value
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {"image": "old-image:v1"}
         
-        # Configure mock_run to succeed for git add, fail with 'nothing to commit' for git commit
-        # but allow git push to be called without error
-        mock_run.side_effect = [
-            MagicMock(),      # git add succeeds
-            commit_error,     # git commit fails with 'nothing to commit'
-            MagicMock()       # git push succeeds
-        ]
+        # Make the git commit command raise CalledProcessError with 'nothing to commit'
+        # This simulates line 219-223 where git commit fails but with 'nothing to commit'
+        def side_effect(*args, **kwargs):
+            cmd = args[0]
+            if cmd[0] == "git" and cmd[2] == "commit":
+                error = CalledProcessError(1, cmd, stderr="nothing to commit, working tree clean")
+                error.stderr = "nothing to commit, working tree clean"
+                raise error
+            return MagicMock()
         
-        # Execute the function
+        mock_run.side_effect = side_effect
+        
+        # Test the deployment with our setup
+        deployment_request = {
+            "image": "test-image:v2", 
+            "replicas": 3
+        }
+        
+        # Create a DeploymentRequest object
+        from python.app.gitops import DeploymentRequest
+        deployment = DeploymentRequest(**deployment_request)
+        
+        # Execute the function asynchronously
         async def test():
             result = await deploy_application(
-                "test-namespace",
-                "test-app",
-                deployment,
+                "test-namespace", 
+                "test-app", 
+                deployment, 
                 background_tasks
             )
-            
-            # Verify reconciliation was still triggered
-            background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
-            
-            # Verify successful result despite git error
+            # Verify the result - should succeed despite the git commit error
             assert result["status"] == "deployment_triggered"
-            assert result["details"]["image"] == "test-image:v1.0"
+            assert result["details"]["image"] == "test-image:v2"
+            assert result["details"]["replicas"] == 3
             
-        # Run the test with a clean event loop
+            # Verify reconciliation was triggered
+            background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
+        
         asyncio.run(test())
 
 def test_deploy_application_git_error():
@@ -645,78 +640,3 @@ def test_complete_coverage_remaining_lines():
         # Verify dangerous characters were removed
         assert ";" not in result
         assert " " not in result
-
-def deploy_application_nothing_to_commit_test():
-    """Test deploy_application with 'nothing to commit' in stderr"""
-    from python.app.gitops import deploy_application, DeploymentRequest
-    import python.app.gitops as gitops
-    
-    # Create deployment request
-    deployment = DeploymentRequest(
-        image="test-image:v1.0",
-        replicas=2
-    )
-    
-    # Mock for background_tasks
-    background_tasks = MagicMock()
-    
-    # Create a CalledProcessError with nothing to commit message
-    commit_error = CalledProcessError(
-        returncode=1,
-        cmd=["git", "-C", "/tmp/kubernetes-apps", "commit", "-m", "Update test-namespace/test-app deployment"]
-    )
-    commit_error.stderr = "nothing to commit, working tree clean"
-    
-    # Mock all necessary components
-    with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.mkdir"), \
-         patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
-         patch("builtins.open", mock_open()), \
-         patch("yaml.safe_load", return_value={}), \
-         patch("yaml.safe_dump"), \
-         patch("python.app.gitops.get_settings") as mock_get_settings, \
-         patch("python.app.gitops.logger.error"), \
-         patch("python.app.gitops.logger.exception"), \
-         patch("python.app.gitops._update_repository"), \
-         patch("python.app.gitops.reconcile_from_git"), \
-         patch("subprocess.run") as mock_run:
-        
-        # Mock settings
-        mock_settings_value = MagicMock()
-        mock_settings_value.gitops_repo_path = "/tmp/kubernetes-apps"
-        mock_get_settings.return_value = mock_settings_value
-        
-        # Configure mock_run to have the expected behavior
-        # First call (git add) succeeds
-        # Second call (git commit) fails with "nothing to commit"
-        # Third call (git push) is skipped due to commit error
-        mock_run.side_effect = [
-            MagicMock(),  # git add succeeds
-            commit_error  # git commit fails with "nothing to commit"
-        ]
-        
-        # Test the function
-        async def test():
-            try:
-                result = await deploy_application(
-                    "test-namespace",
-                    "test-app",
-                    deployment,
-                    background_tasks
-                )
-                
-                # Verify function completes despite git commit error
-                assert result["status"] == "deployment_triggered"
-                background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
-            except HTTPException as e:
-                if "nothing to commit" in str(e.detail):
-                    # If "nothing to commit" is in the error, this is acceptable too
-                    # Some implementations may choose to continue, others may report as 500
-                    # Both are valid approaches for this test
-                    pass
-                else:
-                    # If exception is for a different reason, re-raise
-                    raise
-        
-        # Run test
-        asyncio.run(test())
