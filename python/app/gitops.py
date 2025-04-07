@@ -91,7 +91,7 @@ class DeploymentStatus(BaseModel):
 @proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
 async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
-    Deploys microservices.
+    Deploy microservices.
     
     This endpoint updates microservices' configuration in the Git repository
     and then triggers a reconciliation to apply the changes.
