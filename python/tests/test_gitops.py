@@ -1,14 +1,24 @@
-from unittest.mock import patch, MagicMock, mock_open, AsyncMock
+from unittest.mock import patch, MagicMock, mock_open, AsyncMock, PropertyMock
 import pytest
 import threading
 import subprocess
 import yaml
 import os
 import re
+import asyncio
 from pathlib import Path
 from datetime import datetime, timezone
+from subprocess import CalledProcessError, TimeoutExpired
+from fastapi import HTTPException, BackgroundTasks
 import time  # Add missing time import
 
+"""
+Consolidated test file for gitops.py
+This file includes tests from all previous test_gitops_*.py files
+to achieve 100% code coverage of the gitops module.
+"""
+
+# Basic functionality tests
 def test_get_gitops_status(test_client) -> None:
     """Test the GitOps status endpoint"""
     # Mock Path.exists and Path.iterdir
@@ -1403,3 +1413,468 @@ def test_apply_configurations_permission_error():
     # The function should raise the PermissionError (which is specifically handled)
     with pytest.raises(PermissionError):
         _apply_configurations_from_git(mock_repo_path)
+
+# Additional tests from other test files to improve coverage
+
+def test_deploy_application_nothing_to_commit():
+    """Test deploy_application handling 'nothing to commit' in stderr"""
+    from python.app.gitops import deploy_application
+    import python.app.gitops as gitops
+    
+    # Create a deployment request
+    from python.app.gitops import DeploymentRequest
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=2
+    )
+    
+    # Mock all required dependencies
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
+         patch("builtins.open", mock_open()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump, \
+         patch("subprocess.run") as mock_run:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {"image": "old-image:v1"}
+        
+        # Make subprocess.run raise an error with "nothing to commit" in stderr
+        mock_run.side_effect = [
+            MagicMock(),  # First call succeeds (git add)
+            CalledProcessError(  # Second call fails (git commit)
+                returncode=1,
+                cmd=["git", "commit"],
+                stderr="nothing to commit, working tree clean"
+            )
+        ]
+        
+        # Call the function
+        background_tasks = MagicMock()
+        
+        async def test():
+            result = await deploy_application(
+                "test-namespace", 
+                "test-app", 
+                deployment, 
+                background_tasks
+            )
+            
+            # Verify the result is success despite the "nothing to commit" message
+            assert result["status"] == "deployment_triggered"
+            assert "nothing to commit" in result["message"].lower()
+            # Verify reconciliation was still triggered
+            background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
+            
+        asyncio.run(test())
+
+def test_deploy_application_failed_to_write():
+    """Test deploy_application handling of file writing failures"""
+    from python.app.gitops import deploy_application
+    
+    # Create a deployment request
+    from python.app.gitops import DeploymentRequest
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=2
+    )
+    
+    # Mock Path.exists but make yaml.safe_dump raise an error
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir, \
+         patch("builtins.open", mock_open()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("yaml.safe_dump") as mock_yaml_dump:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        mock_yaml_load.return_value = {"image": "old-image:v1"}
+        mock_yaml_dump.side_effect = OSError("Failed to write file")
+        
+        # Call the function
+        background_tasks = MagicMock()
+        
+        async def test():
+            with pytest.raises(HTTPException) as excinfo:
+                await deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                )
+            
+            # Verify the error details
+            assert excinfo.value.status_code == 500
+            assert "Failed to write deployment configuration" in excinfo.value.detail
+            
+        asyncio.run(test())
+
+def test_thread_start_error_handling():
+    """Test error handling when starting reconciliation thread fails"""
+    from python.app.gitops import start_reconciliation_thread
+    import python.app.gitops as gitops
+    
+    # Store original thread
+    original_thread = gitops.reconciliation_thread
+    
+    try:
+        # Reset thread to simulate new thread creation
+        gitops.reconciliation_thread = None
+        
+        # Create a mock thread that raises on start
+        mock_thread = MagicMock()
+        mock_thread_instance = MagicMock()
+        mock_thread.return_value = mock_thread_instance
+        mock_thread_instance.start.side_effect = RuntimeError("Thread start error")
+        
+        # Mock thread creation
+        with patch("threading.Thread", mock_thread), \
+             patch("python.app.gitops.logger.error") as mock_logger:
+            
+            # Call the function - should handle the exception
+            with pytest.raises(RuntimeError) as excinfo:
+                start_reconciliation_thread()
+                
+            assert "Failed to start reconciliation thread" in str(excinfo.value)
+            mock_thread_instance.start.assert_called_once()
+            mock_logger.assert_called()
+    finally:
+        # Restore original thread
+        gitops.reconciliation_thread = original_thread
+
+def test_sanitize_branch_name_empty_result():
+    """Test sanitize_branch_name when sanitization would result in empty string"""
+    from python.app.gitops import sanitize_branch_name
+    
+    # Use inputs that would be sanitized to an empty string
+    for input_branch in ["../../../", "...", "///", "..."]:
+        result = sanitize_branch_name(input_branch)
+        # Should return "main" as fallback
+        assert result == "main"
+        
+    # Test with regex error resulting in empty string
+    with patch("re.sub") as mock_re_sub:
+        mock_re_sub.side_effect = ["", "", ""]  # All replacement operations return empty string
+        
+        result = sanitize_branch_name("../")
+        # Should return "main" as fallback
+        assert result == "main"
+
+def test_git_url_sanitization_regex_failure():
+    """Test the URL sanitization fallback path when regex fails"""
+    from python.app.gitops import sanitize_git_url
+    
+    # Create a URL with special characters and spaces
+    dangerous_url = "https://github.com/user/repo.git; rm -rf / #command"
+    
+    # Test with regex module failing
+    with patch("re.sub") as mock_re_sub, \
+         patch("python.app.gitops.logger.warning") as mock_logger:
+        
+        # Make re.sub raise an exception
+        mock_re_sub.side_effect = Exception("Regex failure")
+        
+        # Call sanitize_git_url
+        result = sanitize_git_url(dangerous_url)
+        
+        # Verify logger was called
+        mock_logger.assert_called_once()
+        
+        # Verify dangerous characters are removed in the fallback path
+        assert ";" not in result
+        assert "#" not in result
+        assert " " not in result
+        assert "github.com" in result  # Basic URL components should be preserved
+        
+        # Verify only allowed characters are present
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:@")
+        for char in result:
+            assert char in allowed_chars
+
+def test_apply_configurations_empty_repo():
+    """Test _apply_configurations_from_git with an empty repository"""
+    from python.app.gitops import _apply_configurations_from_git
+    
+    # Create a mock repository path with no directories
+    mock_repo_path = MagicMock()
+    mock_repo_path.iterdir.return_value = []
+    
+    # Call the function
+    _apply_configurations_from_git(mock_repo_path)
+    
+    # Verify iterdir was called
+    mock_repo_path.iterdir.assert_called_once()
+    
+    # Test with only hidden directories
+    mock_repo_path = MagicMock()
+    hidden_dir = MagicMock()
+    hidden_dir.name = ".git"
+    hidden_dir.is_dir.return_value = True
+    mock_repo_path.iterdir.return_value = [hidden_dir]
+    
+    # Call the function
+    _apply_configurations_from_git(mock_repo_path)
+    
+    # Function should skip the .git directory
+    mock_repo_path.iterdir.assert_called_once()
+
+def test_apply_configurations_nested_directories():
+    """Test _apply_configurations_from_git with nested directory structure"""
+    from python.app.gitops import _apply_configurations_from_git
+    
+    # Create mock repo path
+    repo_path = MagicMock()
+    
+    # Create namespace directory
+    namespace_dir = MagicMock()
+    namespace_dir.name = "test-namespace"
+    namespace_dir.is_dir.return_value = True
+    
+    # Create app directory
+    app_dir = MagicMock()
+    app_dir.name = "test-app"
+    app_dir.is_dir.return_value = True
+    
+    # Create values file
+    values_file = MagicMock()
+    values_file.exists.return_value = True
+    
+    # Create manifests directory
+    manifests_dir = MagicMock()
+    manifests_dir.exists.return_value = True
+    manifests_dir.is_dir.return_value = True
+    
+    # Setup directory structure
+    repo_path.iterdir.return_value = [namespace_dir]
+    namespace_dir.iterdir.return_value = [app_dir]
+    
+    # Define a truediv method to handle path joining
+    def mock_truediv(self, other):
+        if other == "values.yaml":
+            return values_file
+        elif other == "manifests":
+            return manifests_dir
+        return MagicMock()
+    
+    app_dir.__truediv__ = mock_truediv
+    
+    # Create a complex nested directory structure for os.walk
+    walk_results = [
+        (str(manifests_dir), ["subdir"], ["deployment.yaml", "service.yaml"]),
+        (str(manifests_dir) + "/subdir", [], ["configmap.yaml"])
+    ]
+    
+    # Mock file operations
+    with patch("builtins.open", mock_open(read_data="{}")), \
+         patch("yaml.safe_load", return_value={"image": "test:latest"}), \
+         patch("os.walk", return_value=walk_results), \
+         patch("os.path.join", lambda *args: "/".join(args)), \
+         patch("python.app.gitops.logger.info"), \
+         patch("python.app.gitops.logger.debug"), \
+         patch("python.app.gitops.logger.error"):
+        
+        # Call the function being tested
+        _apply_configurations_from_git(repo_path)
+
+def test_reconcile_from_git_called_process_error():
+    """Test reconcile_from_git handling of CalledProcessError with stderr"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original state
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Set up test state
+        gitops.is_reconciling = False
+        
+        # Create mocks
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("python.app.gitops._update_repository") as mock_update, \
+             patch("python.app.gitops._apply_configurations_from_git"), \
+             patch("python.app.gitops.set_last_reconciliation_time"), \
+             patch("python.app.gitops.logger.error") as mock_logger:
+            
+            # Create a CalledProcessError with stderr
+            cmd_error = CalledProcessError(1, ["git", "pull"])
+            cmd_error.stderr = "error: could not pull because..."
+            mock_update.side_effect = cmd_error
+            
+            # Call the function
+            reconcile_from_git()
+            
+            # Verify error was logged with proper message
+            mock_logger.assert_called()
+            assert "Git operation failed" in mock_logger.call_args[0][0]
+            
+            # Verify state was reset
+            assert gitops.is_reconciling is False
+    finally:
+        # Restore original state
+        gitops.is_reconciling = original_is_reconciling
+
+def test_reconcile_from_git_timeout_expired():
+    """Test reconcile_from_git handling of TimeoutExpired error"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original state
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Set up test state
+        gitops.is_reconciling = False
+        
+        # Create mocks
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("python.app.gitops._update_repository") as mock_update, \
+             patch("python.app.gitops._apply_configurations_from_git"), \
+             patch("python.app.gitops.set_last_reconciliation_time"), \
+             patch("python.app.gitops.logger.error") as mock_logger:
+            
+            # Create a TimeoutExpired error
+            timeout_error = TimeoutExpired(["git", "pull"], 30)
+            mock_update.side_effect = timeout_error
+            
+            # Call the function
+            reconcile_from_git()
+            
+            # Verify error was logged with proper message
+            mock_logger.assert_called()
+            assert "timed out" in mock_logger.call_args[0][0].lower()
+            
+            # Verify state was reset
+            assert gitops.is_reconciling is False
+    finally:
+        # Restore original state
+        gitops.is_reconciling = original_is_reconciling
+
+def test_get_gitops_status_yaml_error_handling():
+    """Test get_gitops_status handling of YAML errors"""
+    from python.app.gitops import get_gitops_status
+    
+    # Mock necessary dependencies
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.iterdir") as mock_iterdir, \
+         patch("builtins.open", mock_open()), \
+         patch("yaml.safe_load") as mock_yaml_load, \
+         patch("python.app.gitops.logger.error") as mock_logger:
+        
+        # Setup mocks
+        mock_exists.return_value = True
+        
+        # Create directory structure
+        namespace_dir = MagicMock()
+        namespace_dir.name = "test-namespace"
+        namespace_dir.is_dir.return_value = True
+        
+        app_dir = MagicMock()
+        app_dir.name = "test-app"
+        app_dir.is_dir.return_value = True
+        
+        values_file = MagicMock()
+        values_file.exists.return_value = True
+        
+        # Setup directory structure
+        namespace_dir.iterdir.return_value = [app_dir]
+        mock_iterdir.return_value = [namespace_dir]
+        
+        # Setup truediv to handle path joining
+        def mock_truediv(self, other):
+            if other == "values.yaml":
+                return values_file
+            return MagicMock()
+        
+        MagicMock.__truediv__ = mock_truediv
+        
+        # Make yaml.safe_load raise YAMLError
+        mock_yaml_load.side_effect = yaml.YAMLError("Invalid YAML")
+        
+        # Test the function
+        async def test():
+            result = await get_gitops_status()
+            # Function should continue and return applications list without the error app
+            assert result.applications == []
+            # Verify error was logged
+            mock_logger.assert_called()
+        
+        asyncio.run(test())
+
+def test_deploy_application_os_error():
+    """Test deploy_application handling of OS errors"""
+    from python.app.gitops import deploy_application
+    
+    # Create deployment request
+    from python.app.gitops import DeploymentRequest
+    deployment = DeploymentRequest(
+        image="test-image:v1",
+        replicas=2
+    )
+    
+    # Setup basic mocks
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("pathlib.Path.mkdir") as mock_mkdir:
+        
+        # Make Path.mkdir raise OSError
+        mock_exists.return_value = True
+        mock_mkdir.side_effect = OSError("Permission denied")
+        
+        # Call the function
+        background_tasks = MagicMock()
+        
+        async def test():
+            with pytest.raises(HTTPException) as excinfo:
+                await deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                )
+            
+            # Verify the error details
+            assert excinfo.value.status_code == 500
+            assert "Failed to write deployment configuration" in excinfo.value.detail
+        
+        asyncio.run(test())
+
+def test_reconcile_lock_final_reset_error():
+    """Test reconcile_from_git handling of errors in the final lock reset"""
+    from python.app.gitops import reconcile_from_git
+    import python.app.gitops as gitops
+    
+    # Store original lock and reconciliation flag
+    original_lock = gitops.reconciliation_lock
+    original_is_reconciling = gitops.is_reconciling
+    
+    try:
+        # Create a mock lock that raises on __enter__ in the finally block
+        mock_lock = MagicMock()
+        mock_lock.__enter__.side_effect = [None, RuntimeError("Lock acquisition failed in finally")]
+        mock_lock.__exit__.return_value = None
+        
+        # Set reconciliation flag and replace lock
+        gitops.reconciliation_lock = mock_lock
+        gitops.is_reconciling = True
+        
+        # Mock logger to verify error handling
+        with patch("python.app.gitops.logger.error") as mock_logger, \
+             patch("pathlib.Path.exists") as mock_exists, \
+             patch("python.app.gitops._update_repository") as mock_update:
+            
+            # Make _update_repository raise an exception to reach the finally block
+            mock_exists.return_value = True
+            mock_update.side_effect = Exception("Test exception")
+            
+            # Call reconcile_from_git
+            reconcile_from_git()
+            
+            # Verify error in finally block was logged
+            mock_logger.assert_any_call("Failed to acquire lock when resetting reconciliation flag")
+            
+            # Verify is_reconciling was reset despite the lock error
+            assert gitops.is_reconciling is False
+    finally:
+        # Restore original state
+        gitops.reconciliation_lock = original_lock
+        gitops.is_reconciling = original_is_reconciling
