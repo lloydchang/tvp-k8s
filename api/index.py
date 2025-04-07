@@ -46,7 +46,7 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=[
         {"name": "Health", "description": "Health"},
-        {"name": "GitOps", "description": "GitOps to Deploy and Reconcile"},
+        {"name": "GitOps", "description": "GitOps to Deploy and Reconcile Microservices"},
         {"name": "Argo CD", "description": "Argo CD"},
         {"name": "Kubernetes", "description": "Kubernetes"}
     ]
@@ -61,7 +61,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create a single router for GitOps operations
+# Create a single router for GitOps
 gitops_api_router = APIRouter()
 
 # Include the gitops router (no need to specify tags again as they're already in the router)
@@ -89,7 +89,7 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "endpoints": [
-            {"prefix": "/gitops", "description": "GitOps Operations"},
+            {"prefix": "/gitops", "description": "GitOps to Deploy and Reconcile Microservices"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
         ]
