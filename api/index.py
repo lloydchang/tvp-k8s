@@ -6,7 +6,7 @@ and Argo CD, supporting both direct operations and pass-through proxy capabiliti
 
 The application provides:
 - Health checking for dependent services 
-- GitOps reconciliation functionality 
+- GitOps to Deploy and Reconcile 
 - Argo CD API pass-through and operations 
 - Kubernetes API pass-through and operations 
 """
@@ -46,7 +46,7 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=[
         {"name": "Health", "description": "Health"},
-        {"name": "GitOps", "description": "GitOps operations for deployments and reconciliation"},
+        {"name": "GitOps", "description": "GitOps to Deploy and Reconcile"},
         {"name": "Argo CD", "description": "Argo CD"},
         {"name": "Kubernetes", "description": "Kubernetes"}
     ]

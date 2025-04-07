@@ -45,12 +45,12 @@ class GitOpsStatus(BaseModel):
         is_reconciling (bool): Whether reconciliation is currently in progress.
         last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
         status (str): Current status of the GitOps service ("active" or "inactive").
-        applications (List[Dict[str, Any]]): List of applications managed by GitOps.
+        microservices (List[Dict[str, Any]]): List of microservices managed by GitOps.
     """
     is_reconciling: bool
     last_reconciliation: Optional[str] = None
     status: str
-    applications: List[Dict[str, Any]] = []
+    microservices: List[Dict[str, Any]] = []
 
 class DeploymentRequest(BaseModel):
     """
@@ -69,18 +69,18 @@ class DeploymentRequest(BaseModel):
 
 class DeploymentStatus(BaseModel):
     """
-    Status of a specific application deployment.
+    Status of a specific microservice deployment.
     
     Attributes:
-        application (str): Name of the application.
-        namespace (str): Kubernetes namespace of the application.
-        repository (str): Git repository URL containing the application configuration.
+        microservice (str): Name of the microservice.
+        namespace (str): Kubernetes namespace of the microservice.
+        repository (str): Git repository URL containing the microservice configuration.
         status (str): Deployment status (e.g., "deployed", "failed", "unknown").
         image (Optional[str]): Container image of the deployment.
         tag (Optional[str]): Container image tag of the deployment.
         last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
     """
-    application: str
+    microservice: str
     namespace: str
     repository: str
     status: str
@@ -89,32 +89,32 @@ class DeploymentStatus(BaseModel):
     last_reconciliation: Optional[str] = None
 
 # Deployment operations - now first in order
-@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Get deployment status", response_model=DeploymentStatus)
+@proxy.get("/deploy/status/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy Status", response_model=DeploymentStatus)
 async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStatus:
     """
-    Gets the status of a specific application deployment.
+    Gets the status of a specific microservice deployment.
     
     Args:
-        namespace (str): Kubernetes namespace of the application.
-        app_name (str): Name of the application.
+        namespace (str): Kubernetes namespace of the microservice.
+        app_name (str): Name of the microservice.
         
     Returns:
-        DeploymentStatus: Application deployment information including image, tag, and status.
+        DeploymentStatus: microservice deployment information including image, tag, and status.
         
     Raises:
-        HTTPException: If the application is not found in the repository (404).
-        HTTPException: If there's an error reading the application's values file (500).
+        HTTPException: If the microservice is not found in the repository (404).
+        HTTPException: If there's an error reading the microservice's values file (500).
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
     app_path = repo_path / namespace / app_name
     
     if not app_path.exists():
-        raise HTTPException(status_code=404, detail=f"Application {app_name} not found in repository")
+        raise HTTPException(status_code=404, detail=f"microservice {app_name} not found in repository")
     
     values_file = app_path / "values.yaml"
     app_info = DeploymentStatus(
-        application=app_name,
+        microservice=app_name,
         namespace=namespace,
         repository=settings.gitops_repo_url,
         status="unknown"
@@ -133,24 +133,24 @@ async def get_deployment_status(namespace: str, app_name: str) -> DeploymentStat
                 app_info.status = "deployed"
         except yaml.YAMLError as e:
             logger.error(f"YAML parsing error in {values_file}: {e}")
-            raise HTTPException(status_code=500, detail=f"Invalid YAML in application configuration")
+            raise HTTPException(status_code=500, detail=f"Invalid YAML in microservice configuration")
         except OSError as e:
             logger.error(f"Error reading values file: {e}")
-            raise HTTPException(status_code=500, detail=f"Error reading application configuration")
+            raise HTTPException(status_code=500, detail=f"Error reading microservice configuration")
     
     return app_info
 
-@proxy.post("/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy an application", status_code=200)
-async def deploy_application(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+@proxy.post("/deploy/{namespace}/{app_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
+async def deploy_microservice(namespace: str, app_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
-    Deploys or updates an application using GitOps.
+    Deploys or updates an microservice using GitOps.
     
-    This endpoint updates the application's configuration in the Git repository
+    This endpoint updates the microservice's configuration in the Git repository
     and then triggers a reconciliation to apply the changes.
     
     Args:
-        namespace (str): Kubernetes namespace for the application.
-        app_name (str): Name of the application to deploy.
+        namespace (str): Kubernetes namespace for the microservice.
+        app_name (str): Name of the microservice to deploy.
         deployment (DeploymentRequest): Deployment configuration including image and tag.
         background_tasks (BackgroundTasks): FastAPI background tasks runner.
         
@@ -158,7 +158,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         dict: Status message and deployment information.
         
     Raises:
-        HTTPException: If the application directory doesn't exist or there's an error updating the configuration.
+        HTTPException: If the microservice directory doesn't exist or there's an error updating the configuration.
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
@@ -230,7 +230,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
             "message": f"Deployment of {app_name} to {namespace} has been triggered",
             "details": {
                 "namespace": namespace,
-                "application": app_name,
+                "microservice": app_name,
                 "image": deployment.image,
                 "replicas": deployment.replicas
             }
@@ -246,20 +246,20 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
-@proxy.get("/reconcile/status", tags=["GitOps"], summary="Get reconciliation status", response_model=GitOpsStatus)
+@proxy.get("/reconcile/status", tags=["GitOps"], summary="Reconcile Status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
     
     Returns:
-        GitOpsStatus: Object containing reconciliation status, applications list, and timestamps.
+        GitOpsStatus: Object containing reconciliation status, microservices list, and timestamps.
     """
     settings = get_settings()
     
     # Get status about the Git repository
     repo_path = Path(settings.gitops_repo_path)
     
-    applications = []
+    microservices = []
     
     if repo_path.exists():
         # List all namespaces directories
@@ -271,7 +271,7 @@ async def get_gitops_status() -> GitOpsStatus:
                         with open(values_file, 'r') as f:
                             try:
                                 values = yaml.safe_load(f)
-                                applications.append({
+                                microservices.append({
                                     "app_name": app_dir.name,
                                     "namespace": namespace_dir.name,
                                     "image": values.get("image", "unknown"),
@@ -281,9 +281,9 @@ async def get_gitops_status() -> GitOpsStatus:
                                 # Log specific YAML parsing error
                                 logger.error(f"Error parsing YAML in {values_file}: {yaml_err}")
         except OSError as err:
-            logger.exception("Error reading applications directory", exc_info=err)
+            logger.exception("Error reading microservices directory", exc_info=err)
         except Exception as err:
-            logger.exception("Error reading applications", exc_info=err)
+            logger.exception("Error reading microservices", exc_info=err)
     
     with reconciliation_lock:
         status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
@@ -292,7 +292,7 @@ async def get_gitops_status() -> GitOpsStatus:
         is_reconciling=is_reconciling,
         last_reconciliation=get_last_reconciliation_time(),
         status=status,
-        applications=applications
+        microservices=microservices
     )
 
 @proxy.post("/reconcile", tags=["GitOps"], summary="Trigger reconciliation", status_code=200)
@@ -555,7 +555,7 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
         PermissionError: If access to required directories is denied
     """
     try:
-        # Scan repository for application configurations
+        # Scan repository for microservice configurations
         for namespace_dir in [d for d in repo_path.iterdir() if d.is_dir() and not d.name.startswith('.')]:
             for app_dir in [d for d in namespace_dir.iterdir() if d.is_dir()]:
                 values_file = app_dir / "values.yaml"

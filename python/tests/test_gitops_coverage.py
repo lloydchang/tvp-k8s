@@ -13,9 +13,9 @@ from pathlib import Path
 import asyncio
 import importlib
 
-def test_deploy_application_git_commit_nothing_to_commit():
-    """Test deploy_application when git commit returns 'nothing to commit'"""
-    from python.app.gitops import deploy_application
+def test_deploy_microservice_git_commit_nothing_to_commit():
+    """Test deploy_microservice when git commit returns 'nothing to commit'"""
+    from python.app.gitops import deploy_microservice
     import python.app.gitops as gitops
     
     # Mock for the background_tasks
@@ -57,7 +57,7 @@ def test_deploy_application_git_commit_nothing_to_commit():
         
         # Execute the function asynchronously
         async def test():
-            result = await deploy_application(
+            result = await deploy_microservice(
                 "test-namespace", 
                 "test-app", 
                 deployment, 
@@ -73,11 +73,11 @@ def test_deploy_application_git_commit_nothing_to_commit():
         
         asyncio.run(test())
 
-def test_deploy_application_git_error():
-    """Test deploy_application when git operation raises an error that's not 'nothing to commit'"""
+def test_deploy_microservice_git_error():
+    """Test deploy_microservice when git operation raises an error that's not 'nothing to commit'"""
     # Import directly from the module to avoid any caching issues
     importlib.reload(subprocess)
-    from python.app.gitops import deploy_application, DeploymentRequest
+    from python.app.gitops import deploy_microservice, DeploymentRequest
     
     # Create the test deployment request
     deployment = DeploymentRequest(
@@ -113,7 +113,7 @@ def test_deploy_application_git_error():
         
         async def test():
             with pytest.raises(HTTPException) as excinfo:
-                await deploy_application(
+                await deploy_microservice(
                     "test-namespace",
                     "test-app",
                     deployment,
@@ -129,9 +129,9 @@ def test_deploy_application_git_error():
         # Run the test
         asyncio.run(test())
 
-def test_deploy_application_general_exception():
-    """Test deploy_application with unexpected general exception"""
-    from python.app.gitops import deploy_application, DeploymentRequest
+def test_deploy_microservice_general_exception():
+    """Test deploy_microservice with unexpected general exception"""
+    from python.app.gitops import deploy_microservice, DeploymentRequest
     
     # Create a deployment request
     deployment = DeploymentRequest(
@@ -154,7 +154,7 @@ def test_deploy_application_general_exception():
         # Call the function and check it properly wraps the exception
         async def test():
             with pytest.raises(HTTPException) as excinfo:
-                await deploy_application(
+                await deploy_microservice(
                     "test-namespace",
                     "test-app",
                     deployment,
@@ -167,9 +167,9 @@ def test_deploy_application_general_exception():
         
         asyncio.run(test())
 
-def test_deploy_application_yaml_error():
-    """Test deploy_application handling of YAML errors (lines 242-243)"""
-    from python.app.gitops import deploy_application, DeploymentRequest
+def test_deploy_microservice_yaml_error():
+    """Test deploy_microservice handling of YAML errors (lines 242-243)"""
+    from python.app.gitops import deploy_microservice, DeploymentRequest
     
     # Create a deployment request
     deployment = DeploymentRequest(
@@ -197,7 +197,7 @@ def test_deploy_application_yaml_error():
         # Call the function and verify exception is properly handled
         async def test():
             with pytest.raises(HTTPException) as excinfo:
-                await deploy_application(
+                await deploy_microservice(
                     "test-namespace",
                     "test-app",
                     deployment,
@@ -210,9 +210,9 @@ def test_deploy_application_yaml_error():
         
         asyncio.run(test())
 
-def test_deploy_application_os_error():
-    """Test deploy_application handling of OS errors (lines 239-240)"""
-    from python.app.gitops import deploy_application, DeploymentRequest
+def test_deploy_microservice_os_error():
+    """Test deploy_microservice handling of OS errors (lines 239-240)"""
+    from python.app.gitops import deploy_microservice, DeploymentRequest
     
     # Create a deployment request
     deployment = DeploymentRequest(
@@ -241,7 +241,7 @@ def test_deploy_application_os_error():
         # Call the function and verify exception is properly handled
         async def test():
             with pytest.raises(HTTPException) as excinfo:
-                await deploy_application(
+                await deploy_microservice(
                     "test-namespace",
                     "test-app",
                     deployment,
@@ -316,9 +316,9 @@ def test_gitops_status_yaml_error():
             async def test():
                 result = await get_gitops_status()
                 
-                # Verify the result - should have empty applications list despite YAML error
+                # Verify the result - should have empty microservices list despite YAML error
                 assert result.is_reconciling is False  # Default value
-                assert len(result.applications) == 0  # Should be empty due to YAML error
+                assert len(result.microservices) == 0  # Should be empty due to YAML error
                 assert result.status == "active"  # Because thread.is_alive() returned True
             
             asyncio.run(test())
@@ -343,10 +343,10 @@ def test_get_gitops_status_general_exception():
         async def test():
             result = await get_gitops_status()
             
-            # Even with exception, we should get a valid response with empty applications
-            assert hasattr(result, "applications")
-            assert isinstance(result.applications, list)
-            assert len(result.applications) == 0
+            # Even with exception, we should get a valid response with empty microservices
+            assert hasattr(result, "microservices")
+            assert isinstance(result.microservices, list)
+            assert len(result.microservices) == 0
         
         asyncio.run(test())
 
@@ -367,10 +367,10 @@ def test_get_gitops_status_os_error():
         async def test():
             result = await get_gitops_status()
             
-            # Even with exception, we should get a valid response with empty applications
-            assert hasattr(result, "applications")
-            assert isinstance(result.applications, list)
-            assert len(result.applications) == 0
+            # Even with exception, we should get a valid response with empty microservices
+            assert hasattr(result, "microservices")
+            assert isinstance(result.microservices, list)
+            assert len(result.microservices) == 0
         
         asyncio.run(test())
 
