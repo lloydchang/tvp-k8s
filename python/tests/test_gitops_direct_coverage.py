@@ -241,8 +241,6 @@ def test_line_526_530_nested_directories():
     
     # Create a mock directory structure
     repo_path = MagicMock()
-    
-    # Setup nested mock directories and files
     namespace_dir = MagicMock()
     app_dir = MagicMock()
     values_file = MagicMock()
@@ -257,11 +255,20 @@ def test_line_526_530_nested_directories():
     manifests_dir.exists.return_value = True
     manifests_dir.is_dir.return_value = True
     
+    # Fix the __truediv__ implementation to handle multiple parameters correctly
+    def mock_truediv(self, other):
+        if other == "values.yaml":
+            return values_file
+        else:
+            return manifests_dir
+    
     # Configure directory structure
     repo_path.iterdir.return_value = [namespace_dir]
     namespace_dir.iterdir.return_value = [app_dir]
-    app_dir.__truediv__ = lambda x: values_file if x == "values.yaml" else manifests_dir
-    manifests_dir.__str__ = lambda x: "/mock/path/to/manifests"
+    
+    # Attach the truediv method to the app_dir mock
+    app_dir.__truediv__ = mock_truediv
+    manifests_dir.__str__ = lambda self: "/mock/path/to/manifests"
     
     # Define file structure for os.walk to return
     walk_result = [

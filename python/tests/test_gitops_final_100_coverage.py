@@ -82,16 +82,17 @@ def test_deploy_application_nothing_to_commit_stderr():
         # Execute the test
         asyncio.run(test())
 
-def test_deploy_application_yaml_error_precise():
+async def test_deploy_application_yaml_error_precise():
     """Test lines 245-246: YAML error handling in deploy_application"""
     from python.app.gitops import deploy_application, DeploymentRequest
+    import asyncio
     
-    # Create deployment request with complex structure to increase chance of YAML error
+    # Create deployment request with complex structure
     deployment = DeploymentRequest(
         image="test-image:v1.0",
         replicas=2,
         environment={
-            "COMPLEX": {"nested": "value"} # YAML may have issues with this
+            "COMPLEX": "{'nested': 'value'}" # String representation of nested structure
         }
     )
     
@@ -106,34 +107,51 @@ def test_deploy_application_yaml_error_precise():
          patch("python.app.gitops._update_repository"), \
          patch("python.app.gitops.get_settings") as mock_get_settings, \
          patch("python.app.gitops.logger.error") as mock_logger:
-        
+    
         # Configure settings
         mock_settings_value = MagicMock()
-        mock_settings_value.gitops_repo_path = "/tmp/kubernetes-apps"
+        mock_settings_value.gitops_repo_path = "/tmp/repo"
         mock_get_settings.return_value = mock_settings_value
-        
-        # Force yaml.safe_dump to raise a specific YAMLError
-        mock_yaml_dump.side_effect = yaml.YAMLError("Invalid tag or something")
-        
-        # Run the test and expect HTTPException
-        async def test():
-            with pytest.raises(HTTPException) as excinfo:
-                await deploy_application(
+    
+        # Make yaml.safe_dump raise a YAMLError
+        mock_yaml_dump.side_effect = yaml.YAMLError("Invalid YAML format")
+    
+        # Test the function directly without asyncio.run
+        # Use pytest-asyncio instead
+        with pytest.raises(HTTPException) as excinfo:
+            # Create a new event loop instead of using the running one
+            try:
+                # Try to get a new event loop
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(deploy_application(
                     "test-namespace",
                     "test-app",
                     deployment,
                     background_tasks
-                )
-            
-            # Verify the error was properly logged
-            mock_logger.assert_called()
-            
-            # Verify the exception contains the expected message
-            assert excinfo.value.status_code == 500
-            assert "Failed to update deployment configuration" in excinfo.value.detail
-        
-        # Execute the test
-        asyncio.run(test())
+                ))
+            except RuntimeError:
+                # If that fails, just run the coroutine synchronously
+                import nest_asyncio
+                nest_asyncio.apply()
+                result = asyncio.run(deploy_application(
+                    "test-namespace",
+                    "test-app",
+                    deployment,
+                    background_tasks
+                ))
+            finally:
+                if 'loop' in locals() and loop is not None:
+                    loop.close()
+    
+    # Verify the status code is 500
+    assert excinfo.value.status_code == 500
+    # Verify the error detail contains information about the YAML error
+    assert "Failed to update deployment configuration" in excinfo.value.detail
+    
+    # Verify the error was logged
+    mock_logger.assert_called_once()
+    assert "YAML error" in mock_logger.call_args[0][0]
 
 def test_deploy_application_complex_stderr():
     """Test lines 269, 274-277: Complex stderr handling in deploy_application"""
