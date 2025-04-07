@@ -94,7 +94,7 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
     Deploy microservices.
     
     This endpoint updates microservices' configuration in the Git repository
-    and then triggers a reconciliation to apply the changes.
+    and then triggers reconciliation to apply the changes.
     
     Args:
         namespace (str): Kubernetes namespace for microservices.
