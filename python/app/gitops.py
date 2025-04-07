@@ -69,18 +69,18 @@ class DeploymentRequest(BaseModel):
 
 class DeploymentStatus(BaseModel):
     """
-    Status of a specific microservice deployment.
+    Status of microservices deployment.
     
     Attributes:
-        microservice (str): Name of the microservice.
-        namespace (str): Kubernetes namespace of the microservice.
-        repository (str): Git repository URL containing the microservice configuration.
+        microservices (str): Name of microservices.
+        namespace (str): Kubernetes namespace of microservices.
+        repository (str): Git repository URL containing microservices configuration.
         status (str): Deployment status (e.g., "deployed", "failed", "unknown").
         image (Optional[str]): Container image of the deployment.
         tag (Optional[str]): Container image tag of the deployment.
         last_reconciliation (Optional[str]): ISO formatted timestamp of the last reconciliation.
     """
-    microservice: str
+    microservices: str
     namespace: str
     repository: str
     status: str
@@ -89,16 +89,16 @@ class DeploymentStatus(BaseModel):
     last_reconciliation: Optional[str] = None
 
 @proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
-async def deploy_microservice(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
-    Deploys or updates a microservice using GitOps.
+    Deploys microservices.
     
-    This endpoint updates the microservice's configuration in the Git repository
+    This endpoint updates microservices' configuration in the Git repository
     and then triggers a reconciliation to apply the changes.
     
     Args:
-        namespace (str): Kubernetes namespace for the microservice.
-        microservices_name (str): Name of the microservice to deploy.
+        namespace (str): Kubernetes namespace for microservices.
+        microservices_name (str): Name of microservices to deploy.
         deployment (DeploymentRequest): Deployment configuration including image and tag.
         background_tasks (BackgroundTasks): FastAPI background tasks runner.
         
@@ -106,7 +106,7 @@ async def deploy_microservice(namespace: str, microservices_name: str, deploymen
         dict: Status message and deployment information.
         
     Raises:
-        HTTPException: If the microservice directory doesn't exist or there's an error updating the configuration.
+        HTTPException: If microservices directory doesn't exist or there's an error updating the configuration.
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
@@ -178,7 +178,7 @@ async def deploy_microservice(namespace: str, microservices_name: str, deploymen
             "message": f"Deployment of {microservices_name} to {namespace} has been triggered",
             "details": {
                 "namespace": namespace,
-                "microservice": microservices_name,
+                "microservices": microservices_name,
                 "image": deployment.image,
                 "replicas": deployment.replicas
             }
@@ -220,7 +220,7 @@ async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str,
 @proxy.get("/status/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Status: Deploy", response_model=DeploymentStatus)
 async def get_deployment_status(namespace: str, microservices_name: str) -> DeploymentStatus:
     """
-    Gets the status of a specific microservices deployment.
+    Gets the status of microservices deployment.
     
     Args:
         namespace (str): Kubernetes namespace of microservices.
@@ -242,7 +242,7 @@ async def get_deployment_status(namespace: str, microservices_name: str) -> Depl
     
     values_file = app_path / "values.yaml"
     app_info = DeploymentStatus(
-        microservice=microservices_name,
+        microservices=microservices_name,
         namespace=namespace,
         repository=settings.gitops_repo_url,
         status="unknown"
@@ -553,7 +553,7 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
         PermissionError: If access to required directories is denied
     """
     try:
-        # Scan repository for microservice configurations
+        # Scan repository for microservices configurations
         for namespace_dir in [d for d in repo_path.iterdir() if d.is_dir() and not d.name.startswith('.')]:
             for app_dir in [d for d in namespace_dir.iterdir() if d.is_dir()]:
                 values_file = app_dir / "values.yaml"

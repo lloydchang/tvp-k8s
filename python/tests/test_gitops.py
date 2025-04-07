@@ -138,15 +138,15 @@ def test_get_deployment_status(test_client, mock_settings):
         
         assert response.status_code == 200
         data = response.json()
-        assert data["microservice"] == "test-app"
+        assert data["microservices"] == "test-app"
         assert data["namespace"] == "test-namespace"
         assert data["image"] == "test-image"
         assert data["tag"] == "v1.0.0"
         assert data["status"] == "deployed"
         assert data["last_reconciliation"] == "2023-07-01T12:00:00"
 
-def test_deploy_microservice(test_client, mock_settings):
-    """Test deploying a specific microservice"""
+def test_deploy_microservices(test_client, mock_settings):
+    """Test deploying a specific microservices"""
     # Mock necessary functions to avoid actual file/git operations
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
@@ -183,7 +183,7 @@ def test_deploy_microservice(test_client, mock_settings):
         data = response.json()
         assert data["status"] == "deployment_triggered"
         assert data["details"]["namespace"] == "test-namespace"
-        assert data["details"]["microservice"] == "test-app"
+        assert data["details"]["microservices"] == "test-app"
         assert data["details"]["image"] == "test-registry/new-image:v2"
         assert data["details"]["replicas"] == 3
         
@@ -193,7 +193,7 @@ def test_deploy_microservice(test_client, mock_settings):
         # Verify reconciliation was triggered
         mock_reconcile.assert_called_once()
 
-def test_deploy_microservice_repo_error(test_client, mock_settings):
+def test_deploy_microservices_repo_error(test_client, mock_settings):
     """Test deployment when repository update fails"""
     # Mock to simulate repository error
     with patch("python.app.gitops._update_repository") as mock_update_repo, \
@@ -588,8 +588,8 @@ def test_reconcile_from_git_error_handling():
         mock_set_time.assert_not_called()  # Should not update timestamp
         assert not gitops.is_reconciling  # Should be reset to False
 
-def test_deploy_microservice_with_environment_vars(test_client, mock_settings):
-    """Test deploying a microservice with environment variables"""
+def test_deploy_microservices_with_environment_vars(test_client, mock_settings):
+    """Test deploying a microservices with environment variables"""
     # Mock necessary functions to avoid actual file/git operations
     with patch("pathlib.Path.exists") as mock_exists, \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
@@ -644,7 +644,7 @@ def test_deploy_microservice_with_environment_vars(test_client, mock_settings):
         assert yaml_values["image"] == "test-registry/new-image:v2"
         assert yaml_values["replicas"] == 3
 
-def test_deploy_microservice_nonexistent_directory(test_client, mock_settings):
+def test_deploy_microservices_nonexistent_directory(test_client, mock_settings):
     """Test deploying to a non-existent directory that needs to be created"""
     # Mock necessary functions to simulate folder creation
     with patch("pathlib.Path.exists") as mock_exists, \
@@ -989,9 +989,9 @@ def test_reconcile_from_git_general_exception():
         # Verify proper error handling
         assert gitops.is_reconciling is False  # Should be reset to False
 
-def test_deploy_microservice_with_environment_and_resources():
-    """Test deploying a microservice with environment variables and resources"""
-    from python.app.gitops import DeploymentRequest, deploy_microservice
+def test_deploy_microservices_with_environment_and_resources():
+    """Test deploying a microservices with environment variables and resources"""
+    from python.app.gitops import DeploymentRequest, deploy_microservices
     from unittest.mock import mock_open, patch
     import asyncio
     
@@ -1034,7 +1034,7 @@ def test_deploy_microservice_with_environment_and_resources():
         background_tasks = MagicMock()
         
         # Call the function - properly await the coroutine
-        result = asyncio.run(deploy_microservice(
+        result = asyncio.run(deploy_microservices(
             "test-namespace", 
             "test-app", 
             deployment, 
@@ -1151,8 +1151,8 @@ def test_sanitize_branch_name_special_character_handling():
     assert not any(c in result for c in "!@#$%^&*(){}|:<>?[]\\;',~`")
     assert "-" in result  # Special chars should be replaced with hyphens
 
-def test_deploy_microservice_complex_structures():
-    """Test microservice deployment with complex nested data structures"""
+def test_deploy_microservices_complex_structures():
+    """Test microservices deployment with complex nested data structures"""
     # Create a test client with mocks
     import python.app.gitops as gitops
     from unittest.mock import patch, MagicMock, mock_open
@@ -1206,9 +1206,9 @@ def test_deploy_microservice_complex_structures():
             request = DeploymentRequest(**deployment_data)
             
             # Call the function directly
-            from python.app.gitops import deploy_microservice
+            from python.app.gitops import deploy_microservices
             import asyncio
-            result = asyncio.run(deploy_microservice(
+            result = asyncio.run(deploy_microservices(
                 "test-namespace", 
                 "test-app", 
                 request, 
@@ -1225,7 +1225,7 @@ def test_deploy_microservice_complex_structures():
             background_tasks.add_task.assert_called_once_with(gitops.reconcile_from_git)
 
 def test_apply_configurations_skip_hidden_files():
-    """Test how microservice configurations handle hidden files"""
+    """Test how microservices configurations handle hidden files"""
     from python.app.gitops import _apply_configurations_from_git
     import tempfile
     from pathlib import Path

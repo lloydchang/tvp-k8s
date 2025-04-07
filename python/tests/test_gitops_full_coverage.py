@@ -15,9 +15,9 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 from fastapi import HTTPException
 
-def test_deploy_microservice_nothing_to_commit_exact_path():
-    """Test the exact path in deploy_microservice when git commit returns 'nothing to commit'"""
-    from python.app.gitops import deploy_microservice, DeploymentRequest
+def test_deploy_microservices_nothing_to_commit_exact_path():
+    """Test the exact path in deploy_microservices when git commit returns 'nothing to commit'"""
+    from python.app.gitops import deploy_microservices, DeploymentRequest
     import python.app.gitops as gitops
     
     # Create a deployment request
@@ -55,7 +55,7 @@ def test_deploy_microservice_nothing_to_commit_exact_path():
         
         # Call the function
         async def test():
-            result = await deploy_microservice(
+            result = await deploy_microservices(
                 "test-namespace",
                 "test-app",
                 deployment,
@@ -69,9 +69,9 @@ def test_deploy_microservice_nothing_to_commit_exact_path():
         # Run the test
         asyncio.run(test())
 
-def test_deploy_microservice_commit_nothing_to_commit_line_223():
-    """Test deploy_microservice specifically targeting line 223"""
-    from python.app.gitops import deploy_microservice, DeploymentRequest
+def test_deploy_microservices_commit_nothing_to_commit_line_223():
+    """Test deploy_microservices specifically targeting line 223"""
+    from python.app.gitops import deploy_microservices, DeploymentRequest
     import python.app.gitops as gitops
     
     # Create a deployment request with specific test data
@@ -111,7 +111,7 @@ def test_deploy_microservice_commit_nothing_to_commit_line_223():
         
         # Execute the function
         async def test():
-            result = await deploy_microservice(
+            result = await deploy_microservices(
                 "test-namespace",
                 "test-app",
                 deployment,
@@ -537,9 +537,9 @@ def test_file_header_imports_coverage():
     assert hasattr(python.app.gitops, 'reconcile_from_git')
     assert hasattr(python.app.gitops, 'logger')
 
-def test_deploy_microservice_env_and_resources_paths():
-    """Test deploy_microservice specifically with environment and resources (lines 361-364)"""
-    from python.app.gitops import deploy_microservice, DeploymentRequest
+def test_deploy_microservices_env_and_resources_paths():
+    """Test deploy_microservices specifically with environment and resources (lines 361-364)"""
+    from python.app.gitops import deploy_microservices, DeploymentRequest
     import python.app.gitops as gitops
     
     # Create a deployment request with both environment and resources
@@ -577,7 +577,7 @@ def test_deploy_microservice_env_and_resources_paths():
     assert deployment.resources["limits"]["cpu"] == "100m"
     assert deployment.resources["limits"]["memory"] == "128Mi"
     
-    # Now do a minimal mock setup to run deploy_microservice
+    # Now do a minimal mock setup to run deploy_microservices
     with patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.mkdir"), \
          patch("builtins.open", mock_open()), \
@@ -589,7 +589,7 @@ def test_deploy_microservice_env_and_resources_paths():
         
         # Execute the function with minimal test
         async def test():
-            result = await deploy_microservice(
+            result = await deploy_microservices(
                 "test-namespace",
                 "test-app",
                 deployment,
