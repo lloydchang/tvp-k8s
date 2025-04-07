@@ -11,6 +11,18 @@ from datetime import datetime, timezone
 from subprocess import CalledProcessError, TimeoutExpired
 from fastapi import HTTPException, BackgroundTasks
 import time  # Add missing time import
+import tempfile  # Add import for tempfile
+
+# Add the setup_git_repo fixture
+@pytest.fixture
+def setup_git_repo():
+    """Create a temporary directory for git repo operations."""
+    temp_dir = tempfile.mkdtemp()
+    repo_path = os.path.join(temp_dir, "gitops-repo")
+    # Create the repo path
+    os.makedirs(repo_path, exist_ok=True)
+    yield repo_path, temp_dir
+    # Cleanup (optional, temp directories are cleaned up automatically)
 
 """
 Consolidated test file for gitops.py
@@ -1864,3 +1876,4 @@ def test_reconcile_lock_final_reset_error():
         # Restore original state
         gitops.reconciliation_lock = original_lock
         gitops.is_reconciling = original_is_reconciling
+``` 

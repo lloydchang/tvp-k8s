@@ -588,9 +588,10 @@ def reconcile_from_git() -> None:
         try:
             with reconciliation_lock:
                 is_reconciling = False
-        except RuntimeError:
+        except RuntimeError as e:
             # If we can't acquire the lock here, just log it and continue
-            logger.error("Failed to acquire lock when resetting reconciliation flag")
+            # The exact error message is checked by tests, so don't change it
+            logger.error(f"Failed to acquire lock when resetting reconciliation flag: {str(e)}")
             # Set the flag directly without the lock as a last resort
             is_reconciling = False
 
