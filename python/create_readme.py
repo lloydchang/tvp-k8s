@@ -27,7 +27,7 @@ mermaid_files = [
     "mermaid/health-check-sequence.mermaid",
     "mermaid/kubernetes-proxy-sequence.mermaid",
     "mermaid/argo-cd-proxy-sequence.mermaid",
-    "mermaid/app-deployment-workflow.mermaid",
+    "mermaid/microservices-deployment-workflow.mermaid",
     "mermaid/test-coverage-diagram.mermaid",
 ]
 
@@ -42,7 +42,7 @@ titles = [
     "Health Check Sequence",
     "Kubernetes Proxy Sequence",
     "Argo CD Proxy Sequence",
-    "Application Deployment Workflow",
+    "Microservices Deployment Workflow",
     "Test Coverage Structure",
 ]
 
@@ -71,7 +71,7 @@ section_intros = [
     "Similarly critical is our Argo CD integration, which extends the platform's reach to GitOps deployment workflows. The proxy flow shown here creates a seamless experience for engineers while maintaining security boundaries:",
     
     # Falling action - Showing resolution of complexity
-    "All these components and interactions culminate in the application deployment workflow. This state diagram shows how the various parts work in harmony to deliver applications from code to production, resolving the complexity we've built up throughout our journey:",
+    "All these components and interactions culminate in the microservices deployment workflow. This state diagram shows how the various parts work in harmony to deliver applications from code to production, resolving the complexity we've built up throughout our journey:",
     
     # Resolution - Demonstrating stability and sustainability
     "To ensure this system remains stable and can evolve over time, comprehensive testing underpins everything. This final diagram shows how test coverage validates each component, creating confidence that the platform will continue to deliver leverage:"
@@ -95,7 +95,7 @@ section_transitions = [
     
     "With Kubernetes access solved, we complete our core capabilities by providing similar abstraction for GitOps workflows through the Argo CD proxy.",
     
-    "With all these elements in place, we can now see how they combine to create a complete application deployment workflow - the ultimate value proposition of our platform.",
+    "With all these elements in place, we can now see how they combine to create a complete microservices deployment workflow - the ultimate value proposition of our platform.",
     
     "Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.",
     
@@ -122,7 +122,7 @@ leverage_points = [
     
     "**Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows engineering teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.",
     
-    "**Leverage Point:** This Application Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Engineering teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.",
+    "**Leverage Point:** This Microservices Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Engineering teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.",
     
     "**Leverage Point:** Comprehensive test coverage creates leverage by ensuring that platform updates don't introduce regressions. This provides confidence to both the platform team and application engineers, enabling faster iteration and more frequent releases.",
 ]

@@ -308,7 +308,7 @@ The diagrams below tell a story - one of complexity tamed through deliberate des
 - [7. Health Check Sequence](#7-health-check-sequence)
 - [8. Kubernetes Proxy Sequence](#8-kubernetes-proxy-sequence)
 - [9. Argo CD Proxy Sequence](#9-argo-cd-proxy-sequence)
-- [10. Application Deployment Workflow](#10-application-deployment-workflow)
+- [10. Microservices Deployment Workflow](#10-microservices-deployment-workflow)
 - [11. Test Coverage Structure](#11-test-coverage-structure)
 - [12. Measuring Platform Leverage](#12-measuring-platform-leverage)
 - [13. Conclusion: The Multiplication of Force](#13-conclusion-the-multiplication-of-force)
@@ -889,11 +889,11 @@ sequenceDiagram
 
 **Leverage Point:** The Argo CD proxy creates leverage by abstracting away the complexities of GitOps tooling. This allows engineering teams to benefit from GitOps workflows without needing to become Argo CD experts, multiplying the impact of the platform team's expertise.
 
-With all these elements in place, we can now see how they combine to create a complete application deployment workflow - the ultimate value proposition of our platform.
+With all these elements in place, we can now see how they combine to create a complete microservices deployment workflow - the ultimate value proposition of our platform.
 
-## 10. Application Deployment Workflow
+## 10. Microservices Deployment Workflow
 
-All these components and interactions culminate in the application deployment workflow. This state diagram shows how the various parts work in harmony to deliver applications from code to production, resolving the complexity we've built up throughout our journey:
+All these components and interactions culminate in the microservices deployment workflow. This state diagram shows how the various parts work in harmony to deliver applications from code to production, resolving the complexity we've built up throughout our journey:
 
 ```mermaid
 stateDiagram-v2
@@ -939,7 +939,7 @@ stateDiagram-v2
     }
 ```
 
-**Leverage Point:** This Application Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Engineering teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
+**Leverage Point:** This Microservices Deployment Workflow demonstrates how TVP creates leverage through standardization and automation. Engineering teams follow a consistent path to production, benefiting from platform capabilities that would be prohibitively expensive for each team to build independently.
 
 Underpinning this entire system is a comprehensive testing strategy that ensures reliability and sustainability.
 
