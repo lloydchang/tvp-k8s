@@ -818,3 +818,33 @@ def test_url_regex_failure_line_640():
         # Verify dangerous characters were removed
         assert ";" not in result
         assert " " not in result
+
+def test_gitops_status_response():
+    """Test the GitOps status response model attributes"""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from python.app.gitops import proxy
+    
+    # Create a test app with the gitops router
+    app = FastAPI()
+    app.include_router(proxy, prefix="/gitops")
+    client = TestClient(app)
+    
+    with patch("pathlib.Path.exists", return_value=True), \
+         patch("pathlib.Path.iterdir", return_value=[]), \
+         patch("python.app.gitops.get_last_reconciliation_time", return_value="2023-07-01T12:00:00"):
+        
+        # Test the new endpoint
+        response = client.get("/gitops/reconcile/status")
+        
+        # Check response
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Verify all expected properties are present
+        assert "is_reconciling" in data
+        assert "last_reconciliation" in data
+        assert data["last_reconciliation"] == "2023-07-01T12:00:00"
+        assert "status" in data
+        assert "applications" in data
+        assert isinstance(data["applications"], list)

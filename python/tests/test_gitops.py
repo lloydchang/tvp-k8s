@@ -44,7 +44,6 @@ def test_get_gitops_status(test_client) -> None:
             elif other == "test-namespace":
                 return namespace_dir
             return MagicMock()
-        
         MagicMock.__truediv__ = mock_truediv
         
         # Configure YAML load mock
@@ -54,7 +53,7 @@ def test_get_gitops_status(test_client) -> None:
         }
         
         # Test the GitOps status endpoint
-        response = test_client.get("/gitops/status")
+        response = test_client.get("/gitops/reconcile/status")
         
         assert response.status_code == 200
         data = response.json()

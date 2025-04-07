@@ -246,7 +246,7 @@ async def deploy_application(namespace: str, app_name: str, deployment: Deployme
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 # Reconciliation operations - renamed from GitOps status operations
-@proxy.get("/status", tags=["GitOps"], summary="Get reconciliation status", response_model=GitOpsStatus)
+@proxy.get("/reconcile/status", tags=["GitOps"], summary="Get reconciliation status", response_model=GitOpsStatus)
 async def get_gitops_status() -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
