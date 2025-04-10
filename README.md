@@ -1245,28 +1245,6 @@ categories, made possible by large-scale behavioral data.
 
 ---
 
-# Analogies:
-
----
-
-## Levers: What Makes Things Move?
-
----
-
-> A [lever](https://en.wikipedia.org/wiki/Lever) amplifies an input force to provide a greater output force, which is said to provide [**_leverage_**](https://en.wikipedia.org/wiki/Leverage), which is [mechanical advantage](https://en.wikipedia.org/wiki/Mechanical_advantage) gained in the system, equal to the ratio of the output force to the input force.
-
-> A [lever](https://www.oocities.org/rjwarren_stm/College_Physics/Mechanical_Systems.html) consists of a rigid bar that can rotate about a fixed point called a fulcrum.
-
-> [Depending](https://teachersinstitute.yale.edu/curriculum/units/2014/4/14.04.04/2) on the positions of fulcrum, input force and applied force, one can define three types of levers: first class, second class and third class.
-
-![First Class Lever](https://github.com/user-attachments/assets/32435cde-aac8-4cf9-a902-2146977d2d8b)
-
-![Second Class Lever](https://github.com/user-attachments/assets/e425a6a8-49f9-4fd9-b7fb-34944ab9cfa5)
-
-![Third Class Lever](https://github.com/user-attachments/assets/cb60a23f-d5dc-44a7-a099-6b16e482f4e0)
-
----
-
 # Recap:
 
 ---
