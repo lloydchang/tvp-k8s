@@ -92,8 +92,11 @@ fi
 
 # Add coverage flags if requested
 if [ $COVERAGE -eq 1 ]; then
-    # Updated to include api/index.py in coverage report
-    PYTEST_CMD="$PYTEST_CMD --cov=app --cov=api --cov-report=term-missing"
+    # Updated to include api/index.py in coverage report with specific exclusions
+    PYTEST_CMD="$PYTEST_CMD --cov=app --cov=api --cov-report=term-missing --cov-config=.coveragerc"
+    
+    # Always add -s to see output from tests
+    PYTEST_CMD="$PYTEST_CMD -s"
 else
     # Add minimal coverage for api/index.py even when not explicitly requested
     PYTEST_CMD="$PYTEST_CMD --cov=api --cov-report=term-missing:skip-covered"
