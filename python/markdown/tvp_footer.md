@@ -266,4 +266,4 @@ categories, made possible by large-scale behavioral data.
 
 ## For more information:
 
-https://lloydchang-tvp.vercel.app/redoc
+https://lloydchang-tvp.vercel.app/ui
