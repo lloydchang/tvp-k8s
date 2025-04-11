@@ -133,6 +133,11 @@ async def ui_root():
     ui_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ui", "index.html")
     with open(ui_path, "r") as file:
         html_content = file.read()
+    
+    # Update the references to static files to use the /static/ path
+    html_content = html_content.replace('href="styles.css"', 'href="/static/styles.css"')
+    html_content = html_content.replace('src="script.js"', 'src="/static/script.js"')
+    
     return HTMLResponse(content=html_content)
 
 @app.get("/health", tags=["Health"])
