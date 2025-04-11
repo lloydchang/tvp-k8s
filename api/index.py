@@ -64,7 +64,7 @@ app.add_middleware(
 )
 
 # Add static file mounting for UI
-app.mount("/static", StaticFiles(directory="ui"), name="ui_static")
+app.mount("/static", StaticFiles(directory="./ui"), name="ui_static")
 
 # Create a single router for GitOps
 gitops_api_router = APIRouter()
@@ -97,7 +97,7 @@ async def root():
             {"prefix": "/gitops", "description": "GitOps to Deploy and Reconcile Microservices"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
-            {"name": "UI", "description": "User Interface"},
+            {"prefix": "/ui", "description": "User Interface"},
         ]
     }
 
