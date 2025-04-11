@@ -20,8 +20,6 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
 import httpx
 import contextlib
 
@@ -63,9 +61,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add static file mounting for UI
-app.mount("/static", StaticFiles(directory="../ui"), name="ui_static")
-
 # Create a single router for GitOps
 gitops_api_router = APIRouter()
 
@@ -97,17 +92,8 @@ async def root():
             {"prefix": "/gitops", "description": "GitOps to Deploy and Reconcile Microservices"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
-            {"name": "UI", "description": "User Interface"},
         ]
     }
-
-@app.get("/ui", response_class=HTMLResponse, tags=["UI"])
-async def ui_root():
-    """Serve the UI homepage."""
-    # Read the content of the UI HTML file
-    with open("ui/index.html", "r") as file:
-        html_content = file.read()
-    return HTMLResponse(content=html_content)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
