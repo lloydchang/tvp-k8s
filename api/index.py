@@ -121,7 +121,7 @@ async def root():
             {"prefix": "/gitops", "description": "GitOps to Deploy and Reconcile Microservices"},
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
-            {"name": "UI", "description": "User Interface"},
+            {"prefix": "/ui", "description": "User Interface"},
         ]
     }
 
