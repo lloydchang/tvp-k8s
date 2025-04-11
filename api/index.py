@@ -105,7 +105,9 @@ async def root():
 async def ui_root():
     """Serve the UI homepage."""
     # Read the content of the UI HTML file
-    with open("ui/index.html", "r") as file:
+    import os
+    ui_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ui", "index.html")
+    with open(ui_path, "r") as file:
         html_content = file.read()
     return HTMLResponse(content=html_content)
 
