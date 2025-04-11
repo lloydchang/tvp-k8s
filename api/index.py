@@ -64,7 +64,31 @@ app.add_middleware(
 )
 
 # Add static file mounting for UI
-app.mount("/static", StaticFiles(directory="../ui"), name="ui_static")
+import os
+from pathlib import Path
+
+# Try to handle both local development and serverless environments
+static_dir = os.environ.get("STATIC_FILES_DIR", None)
+if not static_dir:
+    # Attempt to find the UI directory relative to this file
+    # For local development
+    local_ui = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ui")
+    # For Vercel deployment
+    vercel_ui = os.path.join(os.path.dirname(__file__), "static")
+    
+    if os.path.isdir(local_ui):
+        static_dir = local_ui
+    elif os.path.isdir(vercel_ui):
+        static_dir = vercel_ui
+    else:
+        # Fallback to a UI directory next to the code
+        static_dir = os.path.join(os.path.dirname(__file__), "ui")
+
+# Only mount if the directory exists
+if os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="ui_static")
+else:
+    print(f"Warning: Static files directory not found at {static_dir}")
 
 # Create a single router for GitOps
 gitops_api_router = APIRouter()
