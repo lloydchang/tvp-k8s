@@ -63,8 +63,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount UI files at /ui path
-app.mount("/ui", StaticFiles(directory="ui", html=True), name="ui_static")
+# Add static file mounting for UI
+app.mount("/static", StaticFiles(directory="../ui"), name="ui_static")
 
 # Create a single router for GitOps
 gitops_api_router = APIRouter()
