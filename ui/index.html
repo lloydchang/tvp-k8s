@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVP - Thinnest Viable Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TVP</h1>
+            <p class="tagline">Thinnest Viable Platform</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <h2>Platform as a Product</h2>
+                <p>Curated APIs that create leverage for your engineering teams</p>
+            </section>
+
+            <section class="core-offerings">
+                <h3>Core Offerings</h3>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>GitOps Integration</h4>
+                        <p>Declarative automation for infrastructure management</p>
+                        <a href="/gitops" class="api-link">/gitops</a>
+                    </div>
+                    <div class="card">
+                        <h4>Kubernetes Proxy</h4>
+                        <p>Simplified access to Kubernetes resources</p>
+                        <a href="/kubernetes" class="api-link">/kubernetes</a>
+                    </div>
+                    <div class="card">
+                        <h4>Argo CD Proxy</h4>
+                        <p>Streamlined deployment workflows</p>
+                        <a href="/argo/cd" class="api-link">/argo/cd</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="metrics">
+                <h3>Platform Leverage</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-number">20x</span>
+                        <span class="metric-label">Engineer Time Multiplication</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-number">4x</span>
+                        <span class="metric-label">Deployment Frequency</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-number">70%</span>
+                        <span class="metric-label">Reduction in Audit Time</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="documentation">
+                <h3>Documentation</h3>
+                <div class="doc-links">
+                    <a href="/redoc" class="doc-button">API Reference</a>
+                    <a href="https://github.com/lloydchang/tvp" class="doc-button">GitHub Repository</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>TVP - Maximizing value while minimizing cognitive load</p>
+            <p class="health-status">
+                <span class="status-indicator" id="status-indicator"></span>
+                <span id="status-text">Checking platform health...</span>
+            </p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

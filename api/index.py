@@ -18,16 +18,22 @@ from pathlib import Path
 # Add the project root to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import FastAPI, HTTPException, APIRouter, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, RedirectResponse
 import httpx
 import contextlib
+import logging
 
 # Fix imports to use python.app modules instead of app modules
-from python.app.gitops import proxy as gitops_router, start_reconciliation_thread
+from python.app.gitops import proxy as gitops_router, start_reconciliation_thread, get_gitops_status, deploy_application, trigger_reconciliation, gitops_api_router
 from python.app.argo_cd_api import proxy as argo_cd_proxy, get_argo_cd_token
 from python.app.kubernetes_api import proxy as kubernetes_proxy
 from python.app.config import get_settings, get_kubernetes_client
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,15 +46,16 @@ async def lifespan(app: FastAPI):
     # Cleanup if needed at shutdown
 
 app = FastAPI(
-    title="TVP API",
-    description="Thinnest Viable Platform API",
-    version="1.0.0",
+    title="Thinnest Viable Platform (TVP) API",
+    description="A platform with minimum necessary components that creates maximum value.",
+    version="0.1.0",
     lifespan=lifespan,
     openapi_tags=[
         {"name": "Health", "description": "Health"},
         {"name": "GitOps", "description": "GitOps to Deploy and Reconcile Microservices"},
         {"name": "Argo CD", "description": "Argo CD"},
-        {"name": "Kubernetes", "description": "Kubernetes"}
+        {"name": "Kubernetes", "description": "Kubernetes"},
+        {"name": "UI", "description": "User Interface"}
     ]
 )
 
@@ -60,6 +67,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add static file mounting for UI
+app.mount("/static", StaticFiles(directory="ui"), name="ui_static")
 
 # Create a single router for GitOps
 gitops_api_router = APIRouter()
@@ -83,6 +93,7 @@ async def root():
         dict: Information about the platform API including name, version,
               status, and available endpoints.
     """
+
     return {
         "name": "TVP API",
         "description": "Thinnest Viable Platform API",
@@ -93,7 +104,14 @@ async def root():
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
         ]
-    }
+
+@app.get("/ui", response_class=HTMLResponse, tags=["UI"])
+async def ui_root():
+    """Serve the UI homepage."""
+    # Read the content of the UI HTML file
+    with open("ui/index.html", "r") as file:
+        html_content = file.read()
+    return HTMLResponse(content=html_content)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
