@@ -104,6 +104,7 @@ async def root():
             {"prefix": "/argo/cd", "description": "Argo CD"},
             {"prefix": "/kubernetes", "description": "Kubernetes"},
         ]
+    }
 
 @app.get("/ui", response_class=HTMLResponse, tags=["UI"])
 async def ui_root():
