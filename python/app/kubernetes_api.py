@@ -80,16 +80,18 @@ async def kubernetes_proxy(path: str, request: Request):
         async with aiofiles.open(settings.kubernetes_token_path, "r") as f:
             kubernetes_token = (await f.read()).strip()
         headers["Authorization"] = f"Bearer {kubernetes_token}"
-    except (FileNotFoundError, PermissionError):
+    except (FileNotFoundError, PermissionError) as file_error:
         # Method 2: Try the synchronous method from config
         try:
             kubernetes_token = get_kubernetes_token()
             if kubernetes_token:
                 headers["Authorization"] = f"Bearer {kubernetes_token}"
         except Exception as e:
-            # In development, we'll continue without auth header
-            if settings.environment != "development":
+            # Only raise exception in production - in test or development, continue without auth
+            if settings.environment == "production":
                 raise HTTPException(status_code=401, detail=f"Kubernetes authentication failed: {str(e)}")
+            else:
+                print(f"Warning: Continuing without authentication: {str(e)}")
     
     # Forward all headers from the original request
     for header_key, header_value in request.headers.items():
