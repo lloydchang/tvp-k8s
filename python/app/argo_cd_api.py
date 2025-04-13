@@ -33,6 +33,11 @@ async def get_argo_cd_token():
     """Helper function to get Argo CD authentication token."""
     settings = get_settings()
     
+    # For development mode, return a mock token if environment is set to development
+    if settings.environment == "development":
+        print(f"[DEV MODE] Returning mock Argo CD token for {settings.argo_cd_username}")
+        return "dev-mode-mock-token-for-testing-purposes-only"
+    
     if not settings.argo_cd_password:
         raise HTTPException(status_code=500, detail="Argo CD password not configured")
     
@@ -72,6 +77,60 @@ async def argo_cd_proxy(path: str, request: Request):
     Provides a true pass-through proxy to the Argo CD API.
     """
     settings = get_settings()
+    
+    # For development mode, return mock data
+    if settings.environment == "development":
+        print(f"[DEV MODE] Returning mock data for Argo CD path: {path}")
+        
+        # Handle different paths with appropriate mock data
+        if path == "applications":
+            return {
+                "items": [
+                    {
+                        "metadata": {
+                            "name": "example-app",
+                            "namespace": "argocd"
+                        },
+                        "spec": {
+                            "source": {
+                                "repoURL": "https://github.com/example/example-app.git",
+                                "path": ".",
+                                "targetRevision": "HEAD"
+                            },
+                            "destination": {
+                                "server": "https://kubernetes.default.svc",
+                                "namespace": "default"
+                            }
+                        },
+                        "status": {
+                            "health": {"status": "Healthy"},
+                            "sync": {"status": "Synced"}
+                        }
+                    }
+                ]
+            }
+        # Mock response for projects endpoint
+        elif path == "projects":
+            return {
+                "items": [
+                    {
+                        "metadata": {
+                            "name": "default"
+                        },
+                        "spec": {
+                            "description": "Default project"
+                        }
+                    }
+                ]
+            }
+        # Generic mock response for other endpoints
+        else:
+            return {
+                "path": path,
+                "message": "Mock response in development mode",
+                "status": "success"
+            }
+    
     token = await get_argo_cd_auth_token()
 
     # Create base headers with authentication

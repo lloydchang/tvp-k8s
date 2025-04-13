@@ -72,27 +72,46 @@ async def kubernetes_proxy(path: str, request: Request):
     """
     settings = get_settings()
     
-    # Determine headers
+    # Determine headers - Try multiple methods to get auth token
+    headers = {}
+    
+    # Method 1: Try async file read
     try:
         async with aiofiles.open(settings.kubernetes_token_path, "r") as f:
             kubernetes_token = (await f.read()).strip()
-        headers = {
-            "Authorization": f"Bearer {kubernetes_token}",
-        }
+        headers["Authorization"] = f"Bearer {kubernetes_token}"
     except (FileNotFoundError, PermissionError):
-        # For local development using kubeconfig
-        headers = {}
+        # Method 2: Try the synchronous method from config
+        try:
+            kubernetes_token = get_kubernetes_token()
+            if kubernetes_token:
+                headers["Authorization"] = f"Bearer {kubernetes_token}"
+        except Exception as e:
+            # In development, we'll continue without auth header
+            if settings.environment != "development":
+                raise HTTPException(status_code=401, detail=f"Kubernetes authentication failed: {str(e)}")
     
     # Forward all headers from the original request
     for header_key, header_value in request.headers.items():
-        if header_key.lower() not in ["host", "connection", "content-length"]:
+        if header_key.lower() not in ["host", "connection", "content-length", "authorization"]:
             headers[header_key] = header_value
     
     # Create the target URL - use the kubernetes_api_url from settings
-    target_url = f"{settings.kubernetes_api_url}/api/v1/{path}"
+    api_base = settings.kubernetes_api_url.rstrip('/')
     
-    # Pass through the request without modification
-    async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
+    # Check if path already includes api/v1 or apis prefix
+    if path.startswith("api/") or path.startswith("apis/"):
+        target_url = f"{api_base}/{path}"
+    else:
+        # Default to api/v1 for backward compatibility
+        target_url = f"{api_base}/api/v1/{path}"
+    
+    # Debug logging (removed in production)
+    if settings.environment == "development":
+        print(f"Proxying {request.method} request to: {target_url}")
+        
+    # Pass through the request with appropriate timeout and error handling
+    async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=30.0) as client:
         try:
             body = await request.body() if request.method in ["POST", "PUT", "PATCH"] else None
             response = await client.request(
@@ -103,7 +122,16 @@ async def kubernetes_proxy(path: str, request: Request):
                 follow_redirects=True,
             )
             
-            # Return the raw response
-            return response.json()
+            # Check if the response is JSON
+            try:
+                return response.json()
+            except ValueError:
+                # Return text for non-JSON responses
+                return {"raw_response": response.text, "status_code": response.status_code}
+                
+        except httpx.TimeoutException as e:
+            raise HTTPException(status_code=504, detail=f"Kubernetes API timeout: {str(e)}")
         except httpx.HTTPError as e:
             raise HTTPException(status_code=503, detail=f"Kubernetes API unavailable: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error connecting to Kubernetes API: {str(e)}")

@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argo-cd
+resources:
+  - namespace.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+patches:
+  # Configure the Argo CD server to be accessible without TLS
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/command
+        value: ["argocd-server", "--insecure"]
+  # Configure admin initial password (hashed: "password")
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          accounts.admin: login
+          timeout.reconciliation: 180s
+          application.instanceLabelKey: argocd.argoproj.io/instance
+  # Configure admin password
+  - target:
+      kind: Secret
+      name: argocd-secret
+    patch: |-
+      - op: add
+        path: /data
+        value:
+          admin.password: "$2a$10$rRyBsGSHK6.uc8fntPwVIuLVHgsAhAX7TcdrqW/RADU0uh7CaChLa"
+          admin.passwordMtime: "2023-01-01T00:00:00Z"

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tvp-config
+  namespace: default
+data:
+  KUBERNETES_API_URL: "https://kubernetes.default.svc"
+  ARGO_CD_URL: "http://argocd-server.argo-cd.svc:80"
+  ARGO_CD_USERNAME: "admin"
+  GITOPS_REPO_URL: "https://github.com/lloydchang/tvp.git"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tvp-secrets
+  namespace: default
+type: Opaque
+stringData:
+  ARGO_CD_PASSWORD: "password"

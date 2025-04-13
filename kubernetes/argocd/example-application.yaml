@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: example-app
+  namespace: argo-cd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/lloydchang/tvp.git
+    targetRevision: HEAD
+    path: kubernetes/example-app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

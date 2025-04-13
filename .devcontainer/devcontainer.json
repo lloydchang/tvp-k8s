@@ -1,0 +1,25 @@
+{
+  "name": "TVP Development Environment",
+  "dockerComposeFile": "../docker-compose.yaml",
+  "service": "tvp-api",
+  "workspaceFolder": "/app",
+  "forwardPorts": [8000, 6453, 30090],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "remoteUser": "root"
+}
