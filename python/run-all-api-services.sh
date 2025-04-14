@@ -16,6 +16,12 @@ pkill -f "kubectl proxy" || echo "No kubectl proxy processes found"
 echo "Cleaning up any zombie kubectl processes..."
 ps -ef | grep defunct | grep kubectl | awk '{print $2}' | xargs -r kill -9
 
+# Install curl if not available
+if ! command -v curl &> /dev/null; then
+    echo "Installing curl..."
+    apt-get update && apt-get install -y curl
+fi
+
 # Start kubectl proxy on port 8001
 echo "Starting kubectl proxy on port 8001..."
 kubectl proxy --address='0.0.0.0' --port=8001 --accept-hosts='.*' &
@@ -23,19 +29,35 @@ KUBECTL_PID=$!
 echo "kubectl proxy started with PID: $KUBECTL_PID"
 
 # Make sure kubectl proxy is running
-sleep 2
-if ! ps -p $KUBECTL_PID > /dev/null; then
-    echo "Error: kubectl proxy failed to start"
-    exit 1
-fi
+echo "Waiting for kubectl proxy to start..."
+MAX_RETRIES=10
+RETRY_COUNT=0
+PROXY_READY=false
 
-# Verify kubectl proxy is responding
-echo "Verifying kubectl proxy is accessible..."
-if ! curl -s http://localhost:8001/api/ > /dev/null; then
-    echo "Error: kubectl proxy is not responding at http://localhost:8001/api/"
-    exit 1
-else
-    echo "✓ kubectl proxy is working properly"
+while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$PROXY_READY" = false ]; do
+    if ps -p $KUBECTL_PID > /dev/null 2>&1; then
+        # Process is still running, check if it's responding
+        if curl -s http://localhost:8001/api/ > /dev/null 2>&1; then
+            PROXY_READY=true
+            echo "✓ kubectl proxy is working properly"
+        else
+            echo "Attempt $((RETRY_COUNT+1))/$MAX_RETRIES: Waiting for proxy to respond..."
+            sleep 2
+            RETRY_COUNT=$((RETRY_COUNT+1))
+        fi
+    else
+        echo "kubectl proxy process died. Restarting..."
+        kubectl proxy --address='0.0.0.0' --port=8001 --accept-hosts='.*' &
+        KUBECTL_PID=$!
+        sleep 2
+        RETRY_COUNT=$((RETRY_COUNT+1))
+    fi
+done
+
+if [ "$PROXY_READY" = false ]; then
+    echo "WARNING: kubectl proxy is not responding after multiple attempts."
+    echo "Kubernetes API access may not work correctly, but continuing anyway."
+    echo "Check your Kubernetes configuration with 'kubectl cluster-info'"
 fi
 
 # Kill any existing uvicorn processes

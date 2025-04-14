@@ -45,9 +45,12 @@ class Settings(BaseSettings):
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Enforce SSL verification in all environments
-        if not self.verify_ssl:
-            raise ValueError("SSL verification must remain enabled")
+        # Ensure environment is properly read before checking verify_ssl
+        self.environment = os.getenv("ENVIRONMENT", self.environment).lower()
+        
+        # Enforce SSL verification except in development
+        if not self.verify_ssl and self.environment != "development":
+            raise ValueError("SSL verification must remain enabled in non-development environments")
 
 @lru_cache()
 def get_settings():
