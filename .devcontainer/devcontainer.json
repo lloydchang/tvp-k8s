@@ -1,6 +1,6 @@
 {
   "name": "TVP Development Environment",
-  "dockerComposeFile": "../docker-compose.yaml",
+  "dockerComposeFile": "../compose.yaml",
   "service": "tvp-api",
   "workspaceFolder": "/app",
   "forwardPorts": [8000, 6453, 30090],

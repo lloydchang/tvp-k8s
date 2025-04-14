@@ -2,7 +2,7 @@ services:
   tvp-api:
     build:
       context: .
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
