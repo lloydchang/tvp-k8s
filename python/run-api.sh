@@ -51,10 +51,16 @@ else
     exit 1
 fi
 
+# Explicitly install uvicorn if not already installed
+if ! pip show uvicorn > /dev/null 2>&1; then
+    echo 'Installing uvicorn...'
+    pip install uvicorn
+fi
+
 # Set PYTHONPATH
 export PYTHONPATH="${PYTHONPATH:-$(pwd)/..}"
 export PYTHONPATH="$BASE_DIR:$PYTHONPATH"
 
 # Start Uvicorn server on the available port
-echo "Running Uvicorn server on localhost:$AVAILABLE_PORT..."
-uvicorn api.index:app --host localhost --port $AVAILABLE_PORT --reload
+echo "Running Uvicorn server on 0.0.0.0:$AVAILABLE_PORT..."
+uvicorn api.index:app --host 0.0.0.0 --port $AVAILABLE_PORT --reload

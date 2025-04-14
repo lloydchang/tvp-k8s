@@ -30,7 +30,7 @@ services:
       # This is just for demo, not secure for production
       - ./.kube:/output
     ports:
-      - "6443:6443"
+      - "6444:6443"
       - "30080:30080"
 
   k3s-api:
