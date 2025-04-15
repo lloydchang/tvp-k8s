@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     kubernetes_config_path: str = os.getenv("KUBERNETES_CONFIG_PATH", os.path.expanduser("~/.kube/config"))
     
     # Argo CD settings
-    argo_cd_url: str = os.getenv("ARGO_CD_URL", "http://argocd-server:8080")
+    argo_cd_url: str = os.getenv("ARGO_CD_URL", "http://localhost:8080" if os.getenv("ENVIRONMENT", "").lower() == "development" else "http://argocd-server:8080")
     argo_cd_username: str = os.getenv("ARGO_CD_USERNAME", "admin")
     argo_cd_password: str = os.getenv("ARGO_CD_PASSWORD", "password")  # Default from deploy-argocd.sh
     
