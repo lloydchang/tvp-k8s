@@ -1,4 +1,4 @@
-{
+rror{
   "name": "TVP Development Environment",
   "dockerComposeFile": "../compose.yaml",
   "service": "tvp-api",

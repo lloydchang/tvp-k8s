@@ -142,32 +142,55 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
             # Add any other fields from the deployment request
         })
         
+        # Add environment variables if provided
+        if deployment.environment:
+            values["environment"] = deployment.environment
+            
+        # Add resource specifications if provided
+        if deployment.resources:
+            values["resources"] = deployment.resources
+        
         # Write updated values back
         with open(values_file, 'w') as f:
             yaml.safe_dump(values, f)
             
-        # Commit changes to Git
-        try:
-            subprocess.run(
-                ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
-                check=True, capture_output=True, text=True, timeout=30
-            )
-            
-            commit_message = f"Update {namespace}/{microservices_name} deployment"
-            subprocess.run(
-                ["git", "-C", str(repo_path), "commit", "-m", commit_message],
-                check=True, capture_output=True, text=True, timeout=30
-            )
-            
-            subprocess.run(
-                ["git", "-C", str(repo_path), "push"],
-                check=True, capture_output=True, text=True, timeout=60
-            )
-        except CalledProcessError as e:
-            logger.error(f"Git operation failed: {e.stderr}")
-            # Don't fail if commit fails (e.g., no changes to commit)
-            if "nothing to commit" not in e.stderr:
-                raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")  # pragma: no cover
+        # In development mode, skip all git operations and return success
+        if settings.environment == "development":
+            logger.info(f"Development mode: Skipping Git operations for {namespace}/{microservices_name}")
+            background_tasks.add_task(reconcile_from_git)
+            return {
+                "status": "deployment_triggered",
+                "message": f"Development mode: Deployment of {microservices_name} to {namespace} has been simulated",
+                "details": {
+                    "namespace": namespace,
+                    "microservices": microservices_name,
+                    "image": deployment.image,
+                    "replicas": deployment.replicas,
+                    "dev_mode": True
+                }
+            }
+        else:
+            # Commit changes to Git
+            try:
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
+                    check=True, capture_output=True, text=True, timeout=30
+                )
+                
+                commit_message = f"Update {namespace}/{microservices_name} deployment"
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                    check=True, capture_output=True, text=True, timeout=30
+                )
+                
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "push"],
+                    check=True, capture_output=True, text=True, timeout=60
+                )
+            except CalledProcessError as e:
+                logger.error(f"Git operation failed: {e.stderr}")
+                if "nothing to commit" not in (e.stderr or ""):
+                    raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
         
         # Trigger reconciliation in the background
         background_tasks.add_task(reconcile_from_git)

@@ -20,8 +20,8 @@ ARGOCD_PORT=$(kubectl -n argo-cd get svc argocd-server -o jsonpath='{.spec.ports
 
 if [ -z "$ARGOCD_PORT" ]; then
   echo "Making Argo CD server accessible via NodePort..."
-  kubectl patch svc argocd-server -n argo-cd -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 8080, "nodePort": 30080}]}}'
-  ARGOCD_PORT=30080
+  kubectl patch svc argocd-server -n argo-cd -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 8080, "nodePort": 30081}]}}'
+  ARGOCD_PORT=30081
 fi
 
 echo ""

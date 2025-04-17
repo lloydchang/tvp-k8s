@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from typing import Dict, Any
 import socket
+import uvicorn
 
 from .config import get_settings
 from .kubernetes_api import proxy as kubernetes_router
@@ -121,80 +122,37 @@ async def health_check():
         # Only mark as degraded in production
         if settings.environment != "development":
             overall_status = "degraded"
-            
         services_status["kubernetes"] = {
             "status": "unhealthy",
             "error": str(e)
         }
-                        capture_output=True,
-                        text=True,
-                        timeout=3
-                    )
-                    if kubectl_proc.returncode == 0:
-                        services_status["kubernetes"] = {
-                            "status": "unhealthy",
-                            "error": "Kubernetes client available but no server connection. In development mode, this is optional.",
-                            "dev_mode": True
-                        }
-                    else:
-                        services_status["kubernetes"] = {
-                            "status": "unhealthy",
-                            "error": "Kubernetes tools not properly configured. In development mode, this is optional.",
-                            "dev_mode": True
-                        }
-                except (subprocess.SubprocessError, FileNotFoundError):
+        # For development mode, try to get more specific diagnostic information
+        if settings.environment == "development":
+            try:
+                kubectl_proc = subprocess.run(
+                    ["kubectl", "version", "--client=true"],
+                    capture_output=True,
+                    text=True,
+                    timeout=3
+                )
+                if kubectl_proc.returncode == 0:
                     services_status["kubernetes"] = {
                         "status": "unhealthy",
-                        "error": "Kubernetes tools not found. In development mode, this is optional.",
+                        "error": "Kubernetes client available but no server connection. In development mode, this is optional.",
                         "dev_mode": True
                     }
-            
-            # In development mode, don't mark overall status as degraded
-        else:
-            # In production, we use the standard HTTP client approach
-            async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=5.0) as client:
-                # In production, only try the configured URL
-                response = await client.get(f"{settings.kubernetes_api_url}/api/v1/namespaces")
-                if response.status_code != 200:
+                else:
                     services_status["kubernetes"] = {
                         "status": "unhealthy",
-                        "error": f"HTTP {response.status_code}: {response.text}"
+                        "error": "Kubernetes tools not properly configured. In development mode, this is optional.",
+                        "dev_mode": True
                     }
-                    overall_status = "degraded"
-    except Exception as e:
-        # Only mark as degraded in production
-        if settings.environment != "development":
-            overall_status = "degraded"
-            
-        services_status["kubernetes"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
-            # In production, we use the standard HTTP client approach
-            async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=5.0) as client:
-                # In production, only try the configured URL
-                response = await client.get(f"{settings.kubernetes_api_url}/api/v1/namespaces")
-                if response.status_code != 200:
-                    services_status["kubernetes"] = {
-                        "status": "unhealthy",
-                        "error": f"HTTP {response.status_code}: {response.text}"
-                    }
-                    overall_status = "degraded"
-    except Exception as e:
-        # Only mark as degraded in production
-        if settings.environment != "development":
-            overall_status = "degraded"
-            
-        services_status["kubernetes"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
-    except Exception as e:
-        services_status["kubernetes"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
-        overall_status = "degraded"
+            except (subprocess.SubprocessError, FileNotFoundError):
+                services_status["kubernetes"] = {
+                    "status": "unhealthy",
+                    "error": "Kubernetes tools not found. In development mode, this is optional.",
+                    "dev_mode": True
+                }
     
     # Check Argo CD connection
     services_status["argo_cd"] = {"status": "healthy"}

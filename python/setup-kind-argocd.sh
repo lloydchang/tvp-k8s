@@ -152,7 +152,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -
 echo -e "\n${YELLOW}Configuring Argo CD access...${NC}"
 
 # Patch the argocd-server service to use NodePort for access
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"name": "http", "port": 80, "targetPort": 8080, "nodePort": 30080}, {"name": "https", "port": 443, "targetPort": 8080, "nodePort": 30443}]}}'
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"name": "http", "port": 80, "targetPort": 8080, "nodePort": 30081}, {"name": "https", "port": 443, "targetPort": 8080, "nodePort": 30443}]}}'
 
 # Get the initial admin password
 echo -e "\n${YELLOW}Retrieving Argo CD admin password...${NC}"
