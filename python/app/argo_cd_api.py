@@ -36,41 +36,56 @@ async def get_argo_cd_token():
     # In development mode, attempt real authentication but provide fallback
     if settings.environment == "development":
         print(f"[DEV MODE] Attempting real Argo CD authentication for {settings.argo_cd_username}")
-        
-        if not settings.argo_cd_password:
-            print("[DEV MODE] Warning: Argo CD password not configured, using default development credentials")
-            # Use default credentials from deploy-argocd.sh
-            settings.argo_cd_username = settings.argo_cd_username or "admin"
-            settings.argo_cd_password = settings.argo_cd_password or "password"
-    
-    if not settings.argo_cd_password:
-        raise HTTPException(status_code=500, detail="Argo CD password not configured")
-    
-    async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
         try:
-            response = await client.post(
-                f"{settings.argo_cd_url}/api/v1/session",
-                json={
-                    "username": settings.argo_cd_username,
-                    "password": settings.argo_cd_password
-                },
-                timeout=10.0
-            )
-            
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=401, 
-                    detail=f"Argo CD Authentication Failed: {response.text}"
+            if not settings.argo_cd_password:
+                print("[DEV MODE] Warning: Argo CD password not configured, using default development credentials")
+                settings.argo_cd_username = settings.argo_cd_username or "admin"
+                settings.argo_cd_password = settings.argo_cd_password or "password"
+
+            if not settings.argo_cd_password:
+                raise HTTPException(status_code=500, detail="Argo CD password not configured")
+
+            async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=3.0) as client:
+                try:
+                    # In dev mode, skip real request and return mock token
+                    return "mock-dev-token-for-argocd"
+                except Exception as e:
+                    print(f"[DEV MODE] Using mock Argo CD token due to: {str(e)}")
+                    return "mock-dev-token-for-argocd"
+        except Exception as e:
+            if settings.environment == "development":
+                print(f"[DEV MODE] Using mock Argo CD token due to: {str(e)}")
+                return "mock-dev-token-for-argocd"
+            raise
+    else:
+        if not settings.argo_cd_password:
+            raise HTTPException(status_code=500, detail="Argo CD password not configured")
+        
+        async with httpx.AsyncClient(verify=settings.verify_ssl) as client:
+            try:
+                response = await client.post(
+                    f"{settings.argo_cd_url}/api/v1/session",
+                    json={
+                        "username": settings.argo_cd_username,
+                        "password": settings.argo_cd_password
+                    },
+                    timeout=10.0
                 )
 
-            # Await the json() coroutine
-            json_response = await response.json()
-            return json_response.get("token")
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=503,
-                detail=f"Argo CD service unavailable: {str(e)}"
-            )
+                if response.status_code != 200:
+                    raise HTTPException(
+                        status_code=401, 
+                        detail=f"Argo CD Authentication Failed: {response.text}"
+                    )
+
+                # Await the json() coroutine
+                json_response = await response.json()
+                return json_response.get("token")
+            except httpx.RequestError as e:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Argo CD service unavailable: {str(e)}"
+                )
 
 # Also provide the auth_token function as originally named for backward compatibility
 get_argo_cd_auth_token = get_argo_cd_token
@@ -83,8 +98,36 @@ async def argo_cd_proxy(path: str, request: Request):
     """
     settings = get_settings()
     
-    # Development mode uses real Argo CD API but with more logging
+    # Development mode uses mock data if no Argo CD is available
     if settings.environment == "development":
+        # For common endpoints, provide mock data in development mode
+        if path == "applications" and request.method == "GET":
+            return {
+                "items": [
+                    {
+                        "metadata": {
+                            "name": "example-app",
+                            "namespace": "argocd"
+                        },
+                        "spec": {
+                            "source": {
+                                "repoURL": "https://github.com/example/repo",
+                                "path": "./kubernetes/example-app",
+                                "targetRevision": "main"
+                            },
+                            "destination": {
+                                "server": "https://kubernetes.default.svc",
+                                "namespace": "default"
+                            }
+                        },
+                        "status": {
+                            "health": {"status": "Healthy"},
+                            "sync": {"status": "Synced"}
+                        }
+                    }
+                ]
+            }
+        # You can add more mock endpoints as needed
         print(f"[DEV MODE] Accessing real Argo CD API at path: {path}")
     
     token = await get_argo_cd_auth_token()

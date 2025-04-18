@@ -339,6 +339,24 @@ async def get_gitops_status() -> GitOpsStatus:
         microservices=microservices
     )
 
+@proxy.get("/", tags=["GitOps"], summary="GitOps API Information")
+async def gitops_root():
+    """
+    Root endpoint for GitOps API providing information about available operations.
+    
+    Returns:
+        dict: Information about available GitOps endpoints.
+    """
+    return {
+        "service": "TVP GitOps API",
+        "description": "GitOps operations for continuous delivery",
+        "available_endpoints": {
+            "deploy": "/api/gitops/deploy/{namespace}/{microservices_name}",
+            "reconcile": "/api/gitops/reconcile",
+            "status": "/api/gitops/status/deploy/{namespace}/{microservices_name}"
+        }
+    }
+
 # Helper functions remain mostly unchanged
 def start_reconciliation_thread() -> None:
     """
