@@ -98,11 +98,18 @@ def test_deploy_microservices_git_error():
     # Set up all our mocks
     with patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.mkdir"), \
+         patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
          patch("builtins.open", mock_open()), \
          patch("yaml.safe_load", return_value={"image": "old-image:v1"}), \
          patch("yaml.safe_dump"), \
          patch("subprocess.run") as mock_run, \
-         patch("python.app.gitops._update_repository"):
+         patch("python.app.gitops._update_repository"), \
+         patch("python.app.gitops.get_settings") as mock_settings:
+        
+        # Mock settings to ensure we're not in development mode
+        settings_mock = MagicMock()
+        settings_mock.environment = "production"
+        mock_settings.return_value = settings_mock
         
         # Setup the subprocess.run to succeed for first call (git add)
         # but fail on second call (git commit) with the specific error
@@ -122,9 +129,8 @@ def test_deploy_microservices_git_error():
             
             # Verify the error details
             assert excinfo.value.status_code == 500
-            # The actual error message is different than what we expected - update the assertion
             assert "Deployment failed" in excinfo.value.detail
-            assert "returned non-zero exit status" in excinfo.value.detail
+            assert "fatal: could not read Username for 'https://github.com'" in excinfo.value.detail
         
         # Run the test
         asyncio.run(test())
