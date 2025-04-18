@@ -156,8 +156,13 @@ async def argo_cd_proxy(path: str, request: Request):
                 content=body,
                 follow_redirects=True
             )
-
-            # Return the awaited json response
-            return await response.json()
+            # Try to parse as JSON, fallback to text
+            try:
+                return await response.json()
+            except Exception:
+                return {
+                    "status_code": response.status_code,
+                    "content": response.text
+                }
         except httpx.HTTPError as e:
             raise HTTPException(status_code=503, detail=f"Argo CD API unavailable: {str(e)}")
