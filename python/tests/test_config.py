@@ -36,12 +36,19 @@ def test_settings_argo_cd_identity_property():
 def test_settings_verify_ssl_validation():
     """Test that verify_ssl cannot be disabled"""
     from python.app.config import Settings
-    
-    # Test initializing with verify_ssl=False should raise ValueError
-    with pytest.raises(ValueError) as excinfo:
-        Settings(verify_ssl=False)
-    
-    assert "SSL verification must remain enabled" in str(excinfo.value)
+    import os
+    # Save and set ENVIRONMENT to non-development
+    old_env = os.environ.get("ENVIRONMENT")
+    os.environ["ENVIRONMENT"] = "production"
+    try:
+        with pytest.raises(ValueError) as excinfo:
+            Settings(verify_ssl=False)
+        assert "SSL verification must remain enabled" in str(excinfo.value)
+    finally:
+        if old_env is not None:
+            os.environ["ENVIRONMENT"] = old_env
+        else:
+            del os.environ["ENVIRONMENT"]
 
 def test_get_settings_cache():
     """Test that get_settings uses lru_cache"""

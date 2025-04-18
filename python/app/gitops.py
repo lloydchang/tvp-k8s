@@ -176,21 +176,20 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
                     ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
                     check=True, capture_output=True, text=True, timeout=30
                 )
-                
                 commit_message = f"Update {namespace}/{microservices_name} deployment"
                 subprocess.run(
                     ["git", "-C", str(repo_path), "commit", "-m", commit_message],
                     check=True, capture_output=True, text=True, timeout=30
                 )
-                
                 subprocess.run(
                     ["git", "-C", str(repo_path), "push"],
                     check=True, capture_output=True, text=True, timeout=60
                 )
-            except CalledProcessError as e:
-                logger.error(f"Git operation failed: {e.stderr}")
-                if "nothing to commit" not in (e.stderr or ""):
-                    raise HTTPException(status_code=500, detail=f"Failed to commit changes: {e.stderr}")
+            except subprocess.CalledProcessError as e:
+                if "nothing to commit" in (e.stderr or ""):
+                    pass  # Not an error, continue
+                else:
+                    raise HTTPException(status_code=500, detail=f"Deployment failed: {e}\n{e.stderr}")
         
         # Trigger reconciliation in the background
         background_tasks.add_task(reconcile_from_git)
