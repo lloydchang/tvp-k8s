@@ -44,18 +44,18 @@ if [ -f "tests/conftest.py" ]; then
 fi
 
 # Parse command line arguments
-COVERAGE=0
-VERBOSE=0
+COVERAGE=1
+VERBOSE=1
 SPECIFIC_TEST=""
 
 for arg in "$@"; do
     case $arg in
-        --cov|--coverage)
-        COVERAGE=1
+        --no-cov|--no-coverage)
+        COVERAGE=0
         shift
         ;;
-        -v|--verbose)
-        VERBOSE=1
+        --quiet|--no-verbose)
+        VERBOSE=0
         shift
         ;;
         -h|--help)
