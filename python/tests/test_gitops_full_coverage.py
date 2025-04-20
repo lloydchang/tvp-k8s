@@ -848,3 +848,267 @@ def test_gitops_status_response():
         assert "status" in data
         assert "microservices" in data
         assert isinstance(data["microservices"], list)
+
+import pytest
+import asyncio
+from unittest.mock import patch, MagicMock, AsyncMock
+from pathlib import Path
+import os
+import subprocess
+import yaml
+import tempfile
+
+@pytest.mark.asyncio
+async def test_deploy_microservices():
+    """Test the deploy_microservices function for full code coverage."""
+    with patch('python.app.gitops._clone_repository') as mock_clone, \
+         patch('python.app.gitops._update_repository') as mock_update, \
+         patch('python.app.gitops.get_settings') as mock_settings, \
+         patch('python.app.gitops.Path') as mock_path, \
+         patch('python.app.gitops._generate_manifest_files') as mock_generate, \
+         patch('python.app.gitops._apply_configurations_from_git') as mock_apply:
+        
+        # Setup mock returns
+        mock_clone.return_value = True
+        mock_update.return_value = True
+        mock_generate.return_value = True
+        mock_apply.return_value = True
+        mock_settings.return_value = MagicMock()
+        mock_settings.return_value.gitops_repo = "https://github.com/example/gitops.git"
+        mock_path.return_value.exists.return_value = True
+        
+        # Import the function
+        from python.app.gitops import deploy_microservices
+        
+        # Test successful deployment
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "success"
+        
+        # Test failed clone
+        mock_clone.return_value = False
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "failed"
+        assert "clone" in result["message"].lower()
+        
+        # Test failed update
+        mock_clone.return_value = True
+        mock_update.return_value = False
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "failed"
+        assert "update" in result["message"].lower()
+        
+        # Test failed manifest generation
+        mock_update.return_value = True
+        mock_generate.return_value = False
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "failed"
+        assert "manifest" in result["message"].lower()
+        
+        # Test failed apply
+        mock_generate.return_value = True
+        mock_apply.return_value = False
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "failed"
+        assert "apply" in result["message"].lower()
+        
+        # Test exception handling
+        mock_clone.side_effect = Exception("Test error")
+        result = await deploy_microservices({"name": "test-service"})
+        assert result["status"] == "failed"
+        assert "error" in result["message"].lower()
+
+@pytest.mark.asyncio
+async def test_clone_and_update_repository():
+    """Test the _clone_repository and _update_repository functions."""
+    with patch('python.app.gitops.subprocess.run') as mock_run, \
+         patch('python.app.gitops.get_settings') as mock_settings, \
+         patch('python.app.gitops.Path') as mock_path:
+        
+        # Setup mock
+        mock_settings.return_value = MagicMock()
+        mock_settings.return_value.gitops_repo = "https://github.com/example/gitops.git"
+        mock_settings.return_value.gitops_branch = "main"
+        mock_path.return_value.exists.return_value = False  # For clone
+        
+        # Mock successful clone
+        mock_run.return_value = MagicMock(returncode=0)
+        
+        # Import the functions
+        from python.app.gitops import _clone_repository, _update_repository
+        
+        # Test successful clone
+        assert await _clone_repository("https://github.com/example/repo.git", "/tmp/repo", "main")
+        
+        # Test failed clone
+        mock_run.return_value = MagicMock(returncode=1)
+        assert not await _clone_repository("https://github.com/example/repo.git", "/tmp/repo", "main")
+        
+        # Test exception in clone
+        mock_run.side_effect = Exception("Git error")
+        assert not await _clone_repository("https://github.com/example/repo.git", "/tmp/repo", "main")
+        
+        # Reset for update tests
+        mock_run.side_effect = None
+        mock_run.return_value = MagicMock(returncode=0)
+        mock_path.return_value.exists.return_value = True  # For update
+        
+        # Test successful update
+        assert await _update_repository("/tmp/repo", "main")
+        
+        # Test failed update
+        mock_run.return_value = MagicMock(returncode=1)
+        assert not await _update_repository("/tmp/repo", "main")
+        
+        # Test exception in update
+        mock_run.side_effect = Exception("Git pull error")
+        assert not await _update_repository("/tmp/repo", "main")
+
+@pytest.mark.asyncio
+async def test_apply_configurations_from_git():
+    """Test the _apply_configurations_from_git function."""
+    with patch('python.app.gitops.subprocess.run') as mock_run, \
+         patch('python.app.gitops.os.listdir') as mock_listdir, \
+         patch('python.app.gitops.os.path.isfile') as mock_isfile:
+        
+        # Setup mocks
+        mock_run.return_value = MagicMock(returncode=0)
+        mock_listdir.return_value = ['deployment1.yaml', 'deployment2.yaml', 'other.txt']
+        mock_isfile.side_effect = lambda path: path.endswith('.yaml')
+        
+        # Import the function
+        from python.app.gitops import _apply_configurations_from_git
+        
+        # Test successful apply
+        assert await _apply_configurations_from_git('/tmp/repo/manifests')
+        assert mock_run.call_count == 2  # Called once for each YAML file
+        
+        # Test failed apply
+        mock_run.return_value = MagicMock(returncode=1)
+        assert not await _apply_configurations_from_git('/tmp/repo/manifests')
+        
+        # Test exception
+        mock_run.side_effect = Exception("Kubectl error")
+        assert not await _apply_configurations_from_git('/tmp/repo/manifests')
+
+@pytest.mark.asyncio
+async def test_get_gitops_status_with_valid_service():
+    """Test the get_gitops_status function with a valid service."""
+    with patch('python.app.gitops.subprocess.run') as mock_run:
+        
+        # Setup the mock to return a valid JSON response
+        mock_process = MagicMock()
+        mock_process.returncode = 0
+        mock_process.stdout = """
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": "test-service",
+                "namespace": "default"
+            },
+            "status": {
+                "availableReplicas": 3,
+                "readyReplicas": 3,
+                "replicas": 3,
+                "updatedReplicas": 3
+            }
+        }
+        """
+        mock_run.return_value = mock_process
+        
+        # Import the function
+        from python.app.gitops import get_gitops_status
+        
+        # Test with valid service
+        result = await get_gitops_status("test-service")
+        assert "service" in result
+        assert result["service"] == "test-service"
+        assert "status" in result
+        assert result["status"] == "healthy"  # All replicas are ready and available
+        assert "replicas" in result
+        assert result["replicas"]["ready"] == 3
+        assert result["replicas"]["available"] == 3
+        assert result["replicas"]["total"] == 3
+
+@pytest.mark.asyncio
+async def test_get_gitops_status_with_invalid_service():
+    """Test the get_gitops_status function with an invalid service."""
+    with patch('python.app.gitops.subprocess.run') as mock_run:
+        
+        # Setup the mock to return an error
+        mock_process = MagicMock()
+        mock_process.returncode = 1
+        mock_process.stderr = "Error: deployment.apps \"non-existent-service\" not found"
+        mock_run.return_value = mock_process
+        
+        # Import the function
+        from python.app.gitops import get_gitops_status
+        
+        # Test with invalid service
+        result = await get_gitops_status("non-existent-service")
+        assert "service" in result
+        assert result["service"] == "non-existent-service"
+        assert "status" in result
+        assert result["status"] == "not_found"
+        assert "message" in result
+        assert "not found" in result["message"]
+
+@pytest.mark.asyncio
+async def test_get_gitops_status_with_exception():
+    """Test the get_gitops_status function with an exception."""
+    with patch('python.app.gitops.subprocess.run') as mock_run:
+        
+        # Setup the mock to raise an exception
+        mock_run.side_effect = Exception("Unexpected error")
+        
+        # Import the function
+        from python.app.gitops import get_gitops_status
+        
+        # Test with exception
+        result = await get_gitops_status("test-service")
+        assert "service" in result
+        assert result["service"] == "test-service"
+        assert "status" in result
+        assert result["status"] == "error"
+        assert "message" in result
+        assert "error" in result["message"].lower()
+
+@pytest.mark.asyncio
+async def test_get_gitops_status_with_degraded_service():
+    """Test the get_gitops_status function with a degraded service."""
+    with patch('python.app.gitops.subprocess.run') as mock_run:
+        
+        # Setup the mock to return a degraded service state
+        mock_process = MagicMock()
+        mock_process.returncode = 0
+        mock_process.stdout = """
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": "degraded-service",
+                "namespace": "default"
+            },
+            "status": {
+                "availableReplicas": 1,
+                "readyReplicas": 1,
+                "replicas": 3,
+                "updatedReplicas": 3
+            }
+        }
+        """
+        mock_run.return_value = mock_process
+        
+        # Import the function
+        from python.app.gitops import get_gitops_status
+        
+        # Test with degraded service
+        result = await get_gitops_status("degraded-service")
+        assert "service" in result
+        assert result["service"] == "degraded-service"
+        assert "status" in result
+        assert result["status"] == "degraded"  # Not all replicas are ready
+        assert "replicas" in result
+        assert result["replicas"]["ready"] == 1
+        assert result["replicas"]["available"] == 1
+        assert result["replicas"]["total"] == 3

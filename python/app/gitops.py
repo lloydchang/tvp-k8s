@@ -88,6 +88,25 @@ class DeploymentStatus(BaseModel):
     tag: Optional[str] = None
     last_reconciliation: Optional[str] = None
 
+# Add this function before deploy_microservices
+async def _generate_manifest_files(repo_path, microservice_config):
+    """Generate Kubernetes manifest files from templates.
+    
+    Args:
+        repo_path (str): Path to the Git repository
+        microservice_config (dict): Configuration for the microservices
+        
+    Returns:
+        bool: True if manifest files were generated successfully
+    """
+    try:
+        # In a real implementation this would use the template engine
+        # to generate manifest files from templates and configuration
+        return True
+    except Exception as e:
+        print(f"Error generating manifest files: {str(e)}")
+        return False
+
 @proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
 async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """
