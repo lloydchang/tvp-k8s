@@ -368,9 +368,13 @@ async def get_gitops_status(service_name: str = None) -> GitOpsStatus:
             }]
             status = "error"
             
+        # Get reconciliation time and ensure it's a valid string or None
+        last_recon_time = get_last_reconciliation_time()
+        reconciliation_time = str(last_recon_time) if last_recon_time is not None else None
+            
         return GitOpsStatus(
             is_reconciling=is_reconciling,
-            last_reconciliation=get_last_reconciliation_time(),
+            last_reconciliation=reconciliation_time,
             status=status,
             microservices=microservices
         )
@@ -403,9 +407,13 @@ async def get_gitops_status(service_name: str = None) -> GitOpsStatus:
     with reconciliation_lock:
         status = "active" if reconciliation_thread and reconciliation_thread.is_alive() else "inactive"
     
+    # Get reconciliation time and ensure it's a valid string or None
+    last_recon_time = get_last_reconciliation_time()
+    reconciliation_time = str(last_recon_time) if last_recon_time is not None else None
+    
     return GitOpsStatus(
         is_reconciling=is_reconciling,
-        last_reconciliation=get_last_reconciliation_time(),
+        last_reconciliation=reconciliation_time,
         status=status,
         microservices=microservices
     )
