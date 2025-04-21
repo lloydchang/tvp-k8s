@@ -603,7 +603,7 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
+def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
     Clone the source repository.
     
@@ -613,7 +613,7 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
         branch (str): Branch to check out.
         
     Returns:
-        bool: True if successful, False otherwise.
+        None: The function does not return any value.
         
     Raises:
         subprocess.CalledProcessError: If Git clone operation fails.
@@ -642,13 +642,12 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
             text=True,
             timeout=120
         )
-        return True
     except CalledProcessError as e:
         logger.error(f"Git clone failed: {e.stderr}")
         raise
     except Exception as e:
         logger.error(f"Clone failed with unexpected error: {str(e)}")
-        return False
+        raise
 
 async def _update_repository(repo_path: str, branch: str) -> bool:
     """
