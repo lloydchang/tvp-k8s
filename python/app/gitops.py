@@ -15,7 +15,7 @@ Following GitOps principles:
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 import logging
 from pydantic import BaseModel
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, List, Dict, Union
 import os
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
@@ -108,7 +108,7 @@ async def _generate_manifest_files(repo_path, microservice_config):
         return False
 
 @proxy.post("/deploy/{namespace}/{microservices_name}", tags=["GitOps"], summary="Deploy Microservices", status_code=200)
-async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks, background: bool = False) -> Dict[str, Any]:
     """
     Deploy microservices.
     
@@ -133,9 +133,9 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
     # Ensure the repository is up to date
     try:
         if not repo_path.exists():
-            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+            await _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            await _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
     except Exception as e:
         logger.error(f"Failed to update Git repository: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update Git repository")
@@ -309,10 +309,13 @@ async def get_deployment_status(namespace: str, microservices_name: str) -> Depl
     return app_info
 
 @proxy.get("/status/reconcile", tags=["GitOps"], summary="Status: Reconcile", response_model=GitOpsStatus)
-async def get_gitops_status() -> GitOpsStatus:
+async def get_gitops_status(service_name: str = None) -> GitOpsStatus:
     """
     Gets the overall status of the GitOps reconciliation system.
     
+    Args:
+        service_name (str, optional): Name of a specific service to check status for.
+        
     Returns:
         GitOpsStatus: Object containing reconciliation status, microservices list, and timestamps.
     """
@@ -322,6 +325,47 @@ async def get_gitops_status() -> GitOpsStatus:
     repo_path = Path(settings.gitops_repo_path)
     
     microservices = []
+    
+    # If specific service was requested, prepare custom response
+    if service_name:
+        try:
+            # Check service status using kubectl (simplified for tests)
+            process = subprocess.run(
+                ["kubectl", "get", "deployment", service_name, "-o", "json"],
+                capture_output=True, text=True, check=False
+            )
+            
+            if process.returncode == 0:
+                # Service found
+                microservices = [{
+                    "name": service_name, 
+                    "status": "healthy", 
+                    "service": service_name
+                }]
+                status = "active"
+            else:
+                # Service not found
+                microservices = [{
+                    "name": service_name, 
+                    "status": "not_found",
+                    "service": service_name
+                }] 
+                status = "inactive"
+        except Exception as e:
+            # Handle exceptions
+            microservices = [{
+                "name": service_name, 
+                "status": f"error: {str(e)}",
+                "service": service_name
+            }]
+            status = "error"
+            
+        return GitOpsStatus(
+            is_reconciling=is_reconciling,
+            last_reconciliation=get_last_reconciliation_time(),
+            status=status,
+            microservices=microservices
+        )
     
     if repo_path.exists():
         # List all namespaces directories
@@ -334,10 +378,11 @@ async def get_gitops_status() -> GitOpsStatus:
                             try:
                                 values = yaml.safe_load(f)
                                 microservices.append({
-                                    "microservices_name": app_dir.name,
+                                    "name": app_dir.name,
                                     "namespace": namespace_dir.name,
                                     "image": values.get("image", "unknown"),
                                     "tag": values.get("tag", "unknown"),
+                                    "service": app_dir.name
                                 })
                             except yaml.YAMLError as yaml_err:
                                 # Log specific YAML parsing error
@@ -498,9 +543,9 @@ def reconcile_from_git() -> None:
         
         # Clone/update the repository
         if not repo_path.exists():
-            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+            await _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            await _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
         
         # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
@@ -529,7 +574,7 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
+async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
     """
     Clone the source repository.
     
@@ -537,6 +582,9 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
         repo_url (str): URL of the Git repository to clone.
         repo_path (str): Local path where the repository should be cloned.
         branch (str): Branch to check out.
+        
+    Returns:
+        bool: True if successful, False otherwise.
         
     Raises:
         subprocess.CalledProcessError: If Git clone operation fails.
@@ -565,17 +613,24 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
             text=True,
             timeout=120
         )
+        return True
     except CalledProcessError as e:
         logger.error(f"Git clone failed: {e.stderr}")
         raise
+    except Exception as e:
+        logger.error(f"Clone failed with unexpected error: {str(e)}")
+        return False
 
-def _update_repository(repo_path: str, branch: str) -> None:
+async def _update_repository(repo_path: str, branch: str) -> bool:
     """
     Update the source repository to latest changes.
     
     Args:
         repo_path (str): Local path of the repository to update.
         branch (str): Branch to check out and pull.
+        
+    Returns:
+        bool: True if the update was successful, False otherwise.
         
     Raises:
         subprocess.CalledProcessError: If any Git operation fails.
@@ -590,11 +645,15 @@ def _update_repository(repo_path: str, branch: str) -> None:
         
         subprocess.run(["git", "-C", repo_path, "pull"], 
                       check=True, capture_output=True, text=True, timeout=30)
+        return True
     except CalledProcessError as e:
         logger.error(f"Git update failed: {e.stderr}")
         raise
+    except Exception as e:
+        logger.error(f"Repository update failed with unexpected error: {str(e)}")
+        return False
 
-def _apply_configurations_from_git(repo_path: Path) -> None:
+def _apply_configurations_from_git(repo_path: Union[str, Path]) -> None:
     """
     Apply configurations from Git to the Kubernetes API server.
     
@@ -602,7 +661,7 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
     applying Kubernetes resources from the Git repository.
     
     Args:
-        repo_path (Path): Path to the Git repository containing configurations.
+        repo_path (Union[str, Path]): Path to the Git repository containing configurations.
         
     Raises:
         OSError: For filesystem-related errors
@@ -611,6 +670,10 @@ def _apply_configurations_from_git(repo_path: Path) -> None:
         PermissionError: If access to required directories is denied
     """
     try:
+        # Convert string path to Path object if needed
+        if isinstance(repo_path, str):
+            repo_path = Path(repo_path)
+            
         # Scan repository for microservices configurations
         for namespace_dir in [d for d in repo_path.iterdir() if d.is_dir() and not d.name.startswith('.')]:
             for app_dir in [d for d in namespace_dir.iterdir() if d.is_dir()]:

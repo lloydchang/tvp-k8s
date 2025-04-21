@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from typing import Dict, Any
 import socket
+import subprocess
+import uvicorn
 
 from .config import get_settings
 from .kubernetes_api import proxy as kubernetes_router
@@ -51,6 +53,63 @@ async def root():
         }
     }
 
+# Main function to run the app directly when the script is executed
+def main():
+    """
+    Run the application directly using uvicorn when this script is executed.
+    """
+    uvicorn.run("app.index:app", host="0.0.0.0", port=8000, reload=True)
+
+# Health check functions
+async def check_kubernetes_health() -> Dict[str, Any]:
+    """Check the health of the Kubernetes API server."""
+    try:
+        # Simple command to check if kubectl can connect to the cluster
+        process = subprocess.run(
+            ["kubectl", "get", "nodes", "-o", "name"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=3
+        )
+        
+        is_healthy = process.returncode == 0
+        return {
+            "status": "healthy" if is_healthy else "unhealthy",
+            "message": process.stdout if is_healthy else process.stderr
+        }
+    except Exception as e:
+        return {"status": "unhealthy", "message": str(e)}
+
+async def check_argo_cd_health() -> Dict[str, Any]:
+    """Check the health of the ArgoCD server."""
+    settings = get_settings()
+    try:
+        # Check if ArgoCD server URL is configured
+        if not settings.argo_cd_server_url:
+            return {"status": "unconfigured", "message": "ArgoCD server URL not configured"}
+        
+        # Parse the URL correctly, handling various formats
+        parsed_url = settings.argo_cd_server_url
+        if "://" in parsed_url:
+            parsed_url = parsed_url.split("://")[1]
+        if ":" in parsed_url:
+            parsed_url = parsed_url.split(":")[0]
+            
+        # Try to connect to ArgoCD server
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)
+        result = sock.connect_ex((parsed_url, 443))
+        sock.close()
+        
+        is_healthy = result == 0
+        return {
+            "status": "healthy" if is_healthy else "unhealthy",
+            "message": f"ArgoCD server at {settings.argo_cd_server_url} is {'reachable' if is_healthy else 'unreachable'}"
+        }
+    except Exception as e:
+        return {"status": "unhealthy", "message": str(e)}
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
@@ -61,128 +120,14 @@ async def health_check():
     overall_status = "healthy"
     
     # Check Kubernetes connection
-    services_status["kubernetes"] = {"status": "healthy"}
-    try:
-        # In development mode, be more tolerant of missing Kubernetes
-        if settings.environment == "development":
-            import subprocess
-            import json
-            import os
-            
-            # Check if kubectl is available
-            try:
-                # Try kubectl get nodes with a short timeout first
-                kubectl_proc = subprocess.run(
-                    ["kubectl", "get", "nodes", "--request-timeout=2s"],
-                    capture_output=True,
-                    text=True,
-                    timeout=3
-                )
-                
-                if kubectl_proc.returncode == 0:
-                    # Successfully connected to Kubernetes
-                    services_status["kubernetes"] = {
-                        "status": "healthy",
-                        "message": "Connected to Kubernetes cluster"
-                    }
-                else:
-                    # Kubernetes is not accessible, show context info
-                    context_proc = subprocess.run(
-                        ["kubectl", "config", "current-context"],
-                        capture_output=True,
-                        text=True,
-                        timeout=2
-                    )
-                    
-                    context = context_proc.stdout.strip() if context_proc.returncode == 0 else "unknown"
-                    
-                    services_status["kubernetes"] = {
-                        "status": "unhealthy",
-                        "error": f"Cannot connect to Kubernetes context '{context}'. In development mode, this is optional.",
-                        "dev_mode": True
-                    }
-            except (subprocess.SubprocessError, FileNotFoundError):
-                services_status["kubernetes"] = {
-                    "status": "unhealthy",
-                    "error": "Kubernetes tools not available or properly configured. In development mode, this is optional.",
-                    "dev_mode": True
-                }
-        else:
-            # In production, we use the standard HTTP client approach
-            async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=5.0) as client:
-                response = await client.get(f"{settings.kubernetes_api_url}/api/v1/namespaces")
-                if response.status_code != 200:
-                    services_status["kubernetes"] = {
-                        "status": "unhealthy",
-                        "error": f"HTTP {response.status_code}: {response.text}"
-                    }
-                    overall_status = "degraded"
-    except Exception as e:
-        # Only mark as degraded in production
-        if settings.environment != "development":
-            overall_status = "degraded"
-            
-        services_status["kubernetes"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+    services_status["kubernetes"] = await check_kubernetes_health()
+    if services_status["kubernetes"]["status"] != "healthy":
+        overall_status = "degraded"
     
     # Check Argo CD connection
-    services_status["argo_cd"] = {"status": "healthy"}
-    try:
-        # Special handling for development environment
-        if settings.environment == "development":
-            # In development, being unable to connect to Argo CD is acceptable
-            # Mark as degraded but with a clear message that it's optional in dev
-            try:
-                # Parse URL - handle both http://hostname:port and hostname formats
-                argo_url = settings.argo_cd_url
-                if "://" in argo_url:
-                    argo_host = argo_url.split("://")[1].split(":")[0]
-                    port_str = argo_url.split(":")[-1]
-                    port = int(port_str) if port_str.isdigit() else 80
-                else:
-                    argo_host = argo_url
-                    port = 80
-                
-                # Try both localhost and configured host in dev mode
-                hosts_to_try = ["localhost", argo_host]
-                for host in hosts_to_try:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.settimeout(2.0)  # Shorter timeout
-                    result = sock.connect_ex((host, port))
-                    sock.close()
-                    if result == 0:  # Connection successful
-                        break
-                else:  # No successful connection
-                    services_status["argo_cd"] = {
-                        "status": "unhealthy",
-                        "error": "Argo CD not available in development environment (optional)"
-                    }
-                    # Don't mark overall as degraded in dev for Argo CD
-            except Exception as e:
-                services_status["argo_cd"] = {
-                    "status": "unhealthy",
-                    "error": f"Argo CD connection check error in development: {str(e)}"
-                }
-                # Don't mark overall as degraded in dev for Argo CD
-        else:
-            # In production, try the actual API
-            async with httpx.AsyncClient(verify=settings.verify_ssl, timeout=5.0) as client:
-                response = await client.get(f"{settings.argo_cd_url}/api/v1/applications")
-                if response.status_code not in (200, 401):  # 401 is fine, just means we need auth
-                    services_status["argo_cd"] = {
-                        "status": "unhealthy",
-                        "error": f"HTTP {response.status_code}: {response.text}"
-                    }
-                    overall_status = "degraded"
-    except Exception as e:
-        if settings.environment != "development":
-            overall_status = "degraded"
-        services_status["argo_cd"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+    services_status["argo_cd"] = await check_argo_cd_health()
+    if services_status["argo_cd"]["status"] != "healthy":
+        overall_status = "degraded"
     
     return {
         "status": overall_status,

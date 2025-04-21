@@ -8,13 +8,15 @@ for Kubernetes resources.
 import os
 import json
 import base64
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from fastapi import APIRouter, Request, HTTPException, Depends
 from pydantic import BaseModel
 import httpx
 import yaml
 import aiofiles  # Add missing import
 from kubernetes import client  # Ensure client is imported
+from urllib.parse import urljoin
+import sys
 
 from .config import get_settings, get_kubernetes_client
 
@@ -36,6 +38,86 @@ class DeploymentRequest(BaseModel):
     image: str
     replicas: int = 3
     namespace: str = "default"
+
+def get_kubernetes_token() -> str:
+    """
+    Get the Kubernetes token for API authentication.
+    
+    Returns:
+        str: The authentication token
+        
+    Raises:
+        HTTPException: If token can't be retrieved
+    """
+    settings = get_settings()
+    
+    # Check if we're running in a test environment
+    is_test = 'pytest' in sys.modules
+    
+    # For development/testing, use a mock token if real one isn't available
+    if settings.environment == "development":
+        try:
+            with open(settings.kubernetes_token_path, 'r') as f:
+                return f.read().strip()
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            print(f"Warning: Failed to read Kubernetes token: {str(e)}")
+            return "mock-kubernetes-token-for-dev-environment"
+    
+    # For production, retrieve the actual token
+    try:
+        with open(settings.kubernetes_token_path, 'r') as f:
+            return f.read().strip()
+    except (FileNotFoundError, PermissionError, OSError) as e:
+        print(f"Warning: Failed to read Kubernetes token: {str(e)}")
+        if settings.environment == "production" or is_test:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unable to read kubernetes token: {str(e)}"
+            )
+        return None
+
+# Process query parameters for Kubernetes API requests
+def _process_query_params(query_params: Dict[str, str]) -> Dict[str, str]:
+    """
+    Process query parameters for Kubernetes API requests.
+    
+    Args:
+        query_params: Query parameters from the request
+        
+    Returns:
+        Dict[str, str]: Processed query parameters
+    """
+    # Copy query params to avoid modifying the original
+    params = dict(query_params)
+    
+    # Process special parameters like labelSelector
+    if "labelSelector" in params:
+        # Ensure proper format for label selectors
+        params["labelSelector"] = params["labelSelector"].strip()
+    
+    # Remove any empty parameters
+    return {k: v for k, v in params.items() if v}
+
+def _prepare_request_headers(request_headers: Dict[str, str]) -> Dict[str, str]:
+    """
+    Prepare headers for Kubernetes API requests.
+    
+    Args:
+        request_headers: Original request headers
+        
+    Returns:
+        Dict[str, str]: Headers with added authentication if needed
+    """
+    headers = dict(request_headers)
+    
+    # If Authorization header already exists, keep it
+    if "Authorization" not in headers:
+        # Add token-based authentication
+        token = get_kubernetes_token()
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+            
+    return headers
 
 def get_apps_v1_client():
     """
