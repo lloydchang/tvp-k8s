@@ -135,15 +135,7 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
         if not repo_path.exists():
             _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            # Use direct subprocess calls instead of async function to avoid issues in tests
-            subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
-                  check=True, capture_output=True, text=True, timeout=30)
-            
-            subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
-                  check=True, capture_output=True, text=True, timeout=30)
-            
-            subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
-                  check=True, capture_output=True, text=True, timeout=30)
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
     except Exception as e:
         logger.error(f"Failed to update Git repository: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update Git repository")
@@ -563,24 +555,10 @@ def reconcile_from_git() -> None:
         # Ensure repo path exists
         repo_path = Path(settings.gitops_repo_path)
         
-        # Clone/update the repository
         if not repo_path.exists():
             _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            # Use subprocess.run directly since this function is not async
-            # This avoids the "coroutine was never awaited" warning
-            try:
-                subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
-                      check=True, capture_output=True, text=True, timeout=30)
-                
-                subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
-                      check=True, capture_output=True, text=True, timeout=30)
-                
-                subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
-                      check=True, capture_output=True, text=True, timeout=30)
-            except Exception as e:
-                logger.error(f"Repository update failed: {str(e)}")
-                raise
+            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
         
         # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
@@ -609,7 +587,7 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
+def _clone_repository(repo_url: str, repo_path: str, branch: str):
     """
     Clone the source repository.
     
@@ -619,7 +597,7 @@ async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
         branch (str): Branch to check out.
         
     Returns:
-        None: The function does not return any value.
+        None
         
     Raises:
         subprocess.CalledProcessError: If Git clone operation fails.
@@ -629,7 +607,7 @@ async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     # First validate repository URL to prevent command injection
     safe_url = sanitize_git_url(repo_url)
     if safe_url != repo_url:
-        # If the URL had to be modified during sanitization, it might be suspicious
+        # If the URL had to be modified during sanitization, it is suspicious and should be rejected
         logger.error(f"Potentially dangerous repository URL rejected: {repo_url}")
         raise ValueError("Invalid repository URL. URLs should only contain alphanumeric characters, hyphens, dots, slashes, colons, and @ symbols.")
         
@@ -655,7 +633,7 @@ async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
         logger.error(f"Clone failed with unexpected error: {str(e)}")
         raise
 
-async def _update_repository(repo_path: str, branch: str) -> bool:
+def _update_repository(repo_path: str, branch: str):
     """
     Update the source repository to latest changes.
     
@@ -664,7 +642,7 @@ async def _update_repository(repo_path: str, branch: str) -> bool:
         branch (str): Branch to check out and pull.
         
     Returns:
-        bool: True if the update was successful, False otherwise.
+        None
         
     Raises:
         subprocess.CalledProcessError: If any Git operation fails.
@@ -679,13 +657,11 @@ async def _update_repository(repo_path: str, branch: str) -> bool:
         
         subprocess.run(["git", "-C", repo_path, "pull"], 
                       check=True, capture_output=True, text=True, timeout=30)
-        return True
     except CalledProcessError as e:
         logger.error(f"Git update failed: {e.stderr}")
         raise
     except Exception as e:
         logger.error(f"Repository update failed with unexpected error: {str(e)}")
-        return False
 
 def _apply_configurations_from_git(repo_path: Union[str, Path]) -> None:
     """
@@ -800,15 +776,29 @@ def sanitize_git_url(url: str) -> str:
         url (str): The URL to sanitize
         
     Returns:
-        str: Sanitized URL
+        str: Sanitized URL that differs from input if dangerous characters were found
+        
+    Raises:
+        ValueError: If regex operations fail
     """
+    # Check for dangerous shell characters that could enable command injection
+    dangerous_chars = [';', '&', '|', '`', '$', '>', '<', '(', ')', '{', '}', '[', ']', '!', '#', '*', '?', '~']
+    
+    for char in dangerous_chars:
+        if char in url:
+            # Log the dangerous character found
+            logger.error(f"Dangerous character '{char}' found in URL: {url}")
+            # Return a modified URL to trigger the validation check in _clone_repository
+            return url.replace(char, '') # This ensures safe_url != url
+    
     try:
         # Only allow valid git URL characters
         sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
+        # If sanitization changed the URL, it means there were invalid characters
+        if sanitized != url:
+            logger.warning(f"URL sanitized from '{url}' to '{sanitized}'")
         return sanitized
     except Exception as e:
-        # If re module is not available or has an issue, use basic sanitization
-        logger.warning(f"Error using regex for URL sanitization: {str(e)}")
-        # Fallback: basic character filtering
-        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:@")
-        return ''.join(c for c in url if c in allowed_chars)
+        # If re module is not available or has an issue, log and re-raise
+        logger.error(f"Error using regex for URL sanitization: {str(e)}")
+        raise ValueError(f"Regex error during URL sanitization: {str(e)}")
