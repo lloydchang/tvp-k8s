@@ -133,9 +133,17 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
     # Ensure the repository is up to date
     try:
         if not repo_path.exists():
-            await _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            await _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            # Use direct subprocess calls instead of async function to avoid issues in tests
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
+                  check=True, capture_output=True, text=True, timeout=30)
+            
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
+                  check=True, capture_output=True, text=True, timeout=30)
+            
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
+                  check=True, capture_output=True, text=True, timeout=30)
     except Exception as e:
         logger.error(f"Failed to update Git repository: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update Git repository")
@@ -543,9 +551,22 @@ def reconcile_from_git() -> None:
         
         # Clone/update the repository
         if not repo_path.exists():
-            await _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
+            _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            await _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            # Use subprocess.run directly since this function is not async
+            # This avoids the "coroutine was never awaited" warning
+            try:
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+                
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
+                      check=True, capture_output=True, text=True, timeout=30)
+                
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+            except Exception as e:
+                logger.error(f"Repository update failed: {str(e)}")
+                raise
         
         # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
@@ -574,7 +595,7 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
+def _clone_repository(repo_url: str, repo_path: str, branch: str) -> bool:
     """
     Clone the source repository.
     

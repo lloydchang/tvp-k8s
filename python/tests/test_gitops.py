@@ -316,11 +316,12 @@ def test_clone_repository_failure():
 def test_update_repository():
     """Test repository update function"""
     from python.app.gitops import _update_repository
+    import asyncio
     
     # Mock subprocess.run to avoid actual git operations
     with patch("subprocess.run") as mock_run:
-        # Call the function
-        _update_repository("/tmp/repo", "main")
+        # Call the function with asyncio to properly await the coroutine
+        asyncio.run(_update_repository("/tmp/repo", "main"))
         
         # Verify git commands were called with the right arguments
         assert mock_run.call_count == 3
@@ -343,6 +344,7 @@ def test_update_repository():
 def test_update_repository_failure():
     """Test repository update failure"""
     from python.app.gitops import _update_repository
+    import asyncio
     
     # Mock subprocess.run to simulate a git error
     with patch("subprocess.run") as mock_run:
@@ -357,9 +359,9 @@ def test_update_repository_failure():
             )
         ]
         
-        # Call the function and expect an exception
+        # Call the function and expect an exception - properly await it
         with pytest.raises(subprocess.CalledProcessError):
-            _update_repository("/tmp/repo", "non-existent-branch")
+            asyncio.run(_update_repository("/tmp/repo", "non-existent-branch"))
 
 def test_apply_configurations_from_git():
     """Test applying configurations from git repository"""

@@ -32,6 +32,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add startup and shutdown event handlers
+@app.on_event("startup")
+async def startup():
+    """Application startup tasks."""
+    try:
+        # Start GitOps reconciliation thread if configured
+        from .gitops import start_reconciliation_thread
+        await start_reconciliation_thread()
+    except Exception as e:
+        print(f"Failed to start reconciliation thread: {e}")
+        # Just log error without failing app startup
+
+@app.on_event("shutdown")
+async def shutdown():
+    """Application shutdown tasks."""
+    # Any cleanup tasks can go here
+    pass
+
 # Include routers
 app.include_router(kubernetes_router, prefix="/api/kubernetes", tags=["Kubernetes"])
 app.include_router(argocd_router, prefix="/api/argocd", tags=["Argo CD"])

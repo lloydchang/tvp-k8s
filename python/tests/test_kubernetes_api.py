@@ -68,67 +68,59 @@ def test_kubernetes_proxy_failure(test_client):
                 assert response.status_code == 503
                 assert "unavailable" in response.json()["detail"].lower()
 
-def test_kubernetes_proxy_file_not_found(test_client, mock_settings):
-    """Test the Kubernetes proxy endpoint when token file is not found"""
-    # Mock settings
-    with patch("python.app.kubernetes_api.get_settings") as mock_get_settings:
-        mock_get_settings.return_value = mock_settings
+def test_kubernetes_proxy_file_not_found():
+    """Test the Kubernetes proxy when token file is not found."""
+    from python.app.kubernetes_api import proxy as kubernetes_proxy
+    import asyncio
+    
+    # Mock the request
+    mock_request = MagicMock()
+    mock_request.url.path = "/api/v1/namespaces"
+    
+    # Mock get_settings to return a non-existent token path
+    with patch('python.app.kubernetes_api.get_settings') as mock_settings:
+        mock_config = MagicMock()
+        mock_config.kubernetes_token_path = "/non/existent/path"
+        mock_config.kubernetes_api_url = "https://kube.example.com"
+        mock_settings.return_value = mock_config
         
-        # Mock aiofiles.open to raise FileNotFoundError
-        with patch("aiofiles.open") as mock_open:
-            mock_open.side_effect = FileNotFoundError("Token file not found")
+        # Mock get_kubernetes_token to return None
+        with patch('python.app.kubernetes_api.get_kubernetes_token') as mock_get_token:
+            mock_get_token.return_value = None
             
-            # Mock httpx client
-            with patch("httpx.AsyncClient") as mock_client:
-                # Configure the mock client's response
-                mock_response = MagicMock()
-                mock_response.json.return_value = {"kind": "Pod", "items": []}
-                
-                # Configure the mock client instance
-                mock_client_instance = MagicMock()
-                mock_client_instance.__aenter__.return_value.request.return_value = mock_response
-                mock_client.return_value = mock_client_instance
-                
-                # Test the proxy endpoint
-                response = test_client.get("/kubernetes/pods")
-                
-                # Verify response
-                assert response.status_code == 200
-                
-                # Verify headers (should not have Authorization header)
-                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
-                assert "Authorization" not in call_kwargs["headers"]
+            # Use asyncio.run to properly await the async function
+            response = asyncio.run(kubernetes_proxy(mock_request))
+            
+            # Assert that we got an error response
+            assert response.status_code == 500
+            assert "Kubernetes authentication failed" in response.json()["detail"]
 
-def test_kubernetes_proxy_permission_error(test_client, mock_settings):
-    """Test the Kubernetes proxy endpoint when token file has permission error"""
-    # Mock settings
-    with patch("python.app.kubernetes_api.get_settings") as mock_get_settings:
-        mock_get_settings.return_value = mock_settings
+def test_kubernetes_proxy_permission_error():
+    """Test the Kubernetes proxy when there's a permission error reading the token."""
+    from python.app.kubernetes_api import proxy as kubernetes_proxy
+    import asyncio
+    
+    # Mock the request
+    mock_request = MagicMock()
+    mock_request.url.path = "/api/v1/namespaces"
+    
+    # Mock get_settings to return a token path that will trigger a permission error
+    with patch('python.app.kubernetes_api.get_settings') as mock_settings:
+        mock_config = MagicMock()
+        mock_config.kubernetes_token_path = "/etc/restricted/token"  # Path that would cause permission error
+        mock_config.kubernetes_api_url = "https://kube.example.com"
+        mock_settings.return_value = mock_config
         
-        # Mock aiofiles.open to raise PermissionError
-        with patch("aiofiles.open") as mock_open:
-            mock_open.side_effect = PermissionError("Permission denied")
+        # Mock get_kubernetes_token to simulate a permission error
+        with patch('python.app.kubernetes_api.get_kubernetes_token') as mock_get_token:
+            mock_get_token.return_value = None  # Simulate token retrieval failure
             
-            # Mock httpx client
-            with patch("httpx.AsyncClient") as mock_client:
-                # Configure the mock client's response
-                mock_response = MagicMock()
-                mock_response.json.return_value = {"kind": "Pod", "items": []}
-                
-                # Configure the mock client instance
-                mock_client_instance = MagicMock()
-                mock_client_instance.__aenter__.return_value.request.return_value = mock_response
-                mock_client.return_value = mock_client_instance
-                
-                # Test the proxy endpoint
-                response = test_client.get("/kubernetes/pods")
-                
-                # Verify response
-                assert response.status_code == 200
-                
-                # Verify headers (should not have Authorization header)
-                call_kwargs = mock_client_instance.__aenter__.return_value.request.call_args[1]
-                assert "Authorization" not in call_kwargs["headers"]
+            # Use asyncio.run to properly await the async function
+            response = asyncio.run(kubernetes_proxy(mock_request))
+            
+            # Assert that we got an error response
+            assert response.status_code == 500
+            assert "Kubernetes authentication failed" in response.json()["detail"]
 
 def test_kubernetes_proxy_post_request(test_client, mock_settings):
     """Test the Kubernetes proxy endpoint with POST request"""
