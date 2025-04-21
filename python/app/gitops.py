@@ -609,7 +609,7 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
+async def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
     Clone the source repository.
     
@@ -655,7 +655,7 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
         logger.error(f"Clone failed with unexpected error: {str(e)}")
         raise
 
-def _update_repository(repo_path: str, branch: str) -> bool:
+async def _update_repository(repo_path: str, branch: str) -> bool:
     """
     Update the source repository to latest changes.
     
