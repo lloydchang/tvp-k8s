@@ -204,19 +204,25 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
                     check=True, capture_output=True, text=True, timeout=30
                 )
                 commit_message = f"Update {namespace}/{microservices_name} deployment"
-                subprocess.run(
-                    ["git", "-C", str(repo_path), "commit", "-m", commit_message],
-                    check=True, capture_output=True, text=True, timeout=30
-                )
-                subprocess.run(
-                    ["git", "-C", str(repo_path), "push"],
-                    check=True, capture_output=True, text=True, timeout=60
-                )
+                try:
+                    subprocess.run(
+                        ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                        check=True, capture_output=True, text=True, timeout=30
+                    )
+                    subprocess.run(
+                        ["git", "-C", str(repo_path), "push"],
+                        check=True, capture_output=True, text=True, timeout=60
+                    )
+                except subprocess.CalledProcessError as commit_err:
+                    # Handle "nothing to commit" case specifically
+                    if "nothing to commit" in (commit_err.stderr or ""):
+                        logger.info("No changes to commit for deployment")
+                        # Continue execution - not an error
+                    else:
+                        # Other git errors should be raised
+                        raise HTTPException(status_code=500, detail=f"Deployment failed: {commit_err}\n{commit_err.stderr}")
             except subprocess.CalledProcessError as e:
-                if "nothing to commit" in (e.stderr or ""):
-                    pass  # Not an error, continue
-                else:
-                    raise HTTPException(status_code=500, detail=f"Deployment failed: {e}\n{e.stderr}")
+                raise HTTPException(status_code=500, detail=f"Deployment failed: {e}\n{e.stderr}")
         
         # Trigger reconciliation in the background
         background_tasks.add_task(reconcile_from_git)
@@ -649,7 +655,7 @@ def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
         logger.error(f"Clone failed with unexpected error: {str(e)}")
         raise
 
-async def _update_repository(repo_path: str, branch: str) -> bool:
+def _update_repository(repo_path: str, branch: str) -> bool:
     """
     Update the source repository to latest changes.
     
