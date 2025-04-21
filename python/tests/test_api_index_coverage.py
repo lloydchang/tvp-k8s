@@ -6,7 +6,7 @@ import socket
 @pytest.mark.asyncio
 async def test_index_main_function_coverage():
     """Test the main function in index.py for coverage of lines 43 and 68-105."""
-    with patch('python.app.index.uvicorn.run') as mock_run, \
+    with patch('app.index.uvicorn.run') as mock_run, \
          patch('python.app.index.sys') as mock_sys:
         
         # Set up the system arguments
