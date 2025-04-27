@@ -111,43 +111,80 @@ async def _generate_manifest_files(repo_path, microservice_config):
 async def deploy_microservices(namespace: str, microservices_name: str, deployment: DeploymentRequest, background_tasks: BackgroundTasks, background: bool = False) -> Dict[str, Any]:
     """
     Deploy microservices.
-
+    
     This endpoint pulls microservices' configuration from the Git repository and reconciles changes.
-
+    
     Args:
         namespace (str): Kubernetes namespace for microservices.
         microservices_name (str): Name of microservices to deploy.
         deployment (DeploymentRequest): Deployment configuration including image and tag.
         background_tasks (BackgroundTasks): FastAPI background tasks runner.
-
+        
     Returns:
         dict: Status message and deployment information.
-
+        
     Raises:
         HTTPException: If microservices directory doesn't exist or there's an error updating the configuration.
     """
     settings = get_settings()
     repo_path = Path(settings.gitops_repo_path)
     app_path = repo_path / namespace / microservices_name
-
+    
     # Ensure the repository is up to date
     try:
         if not repo_path.exists():
             _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            # Use direct subprocess calls instead of async function to avoid issues in tests
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
+                  check=True, capture_output=True, text=True, timeout=30)
+            
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
+                  check=True, capture_output=True, text=True, timeout=30)
+            
+            subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
+                  check=True, capture_output=True, text=True, timeout=30)
     except Exception as e:
         logger.error(f"Failed to update Git repository: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update Git repository")
-
-    # Mock directory and file operations for testing
+    
+    # Create namespace/app directories if they don't exist
+    app_path.parent.mkdir(exist_ok=True, parents=True)
+    app_path.mkdir(exist_ok=True)
+    
+    # Create or update values.yaml
+    values_file = app_path / "values.yaml"
+    
     try:
-        logger.info(f"Mocking directory creation for {app_path}")
-        logger.info(f"Mocking values.yaml update for {app_path}")
-
+        # Load existing values if they exist
+        values = {}
+        if values_file.exists():
+            with open(values_file, 'r') as f:
+                values = yaml.safe_load(f) or {}
+        
+        # Update with new values
+        values.update({
+            "image": deployment.image,
+            "replicas": deployment.replicas,
+            # Add any other fields from the deployment request
+        })
+        
+        # Add environment variables if provided
+        if deployment.environment:
+            values["environment"] = deployment.environment
+            
+        # Add resource specifications if provided
+        if deployment.resources:
+            values["resources"] = deployment.resources
+        
+        # Write updated values back
+        with open(values_file, 'w') as f:
+            yaml.safe_dump(values, f)
+            
         # In development mode, skip all git operations and return success
         if settings.environment == "development":
             logger.info(f"Development mode: Skipping Git operations for {namespace}/{microservices_name}")
+            background_tasks.add_task(reconcile_from_git)
             return {
                 "status": "deployment_triggered",
                 "message": f"Development mode: Deployment of {microservices_name} to {namespace} has been simulated",
@@ -160,8 +197,36 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
                 }
             }
         else:
-            logger.info("Mocking background task addition")
-
+            # Commit changes to Git
+            try:
+                subprocess.run(
+                    ["git", "-C", str(repo_path), "add", str(values_file.relative_to(repo_path))],
+                    check=True, capture_output=True, text=True, timeout=30
+                )
+                commit_message = f"Update {namespace}/{microservices_name} deployment"
+                try:
+                    subprocess.run(
+                        ["git", "-C", str(repo_path), "commit", "-m", commit_message],
+                        check=True, capture_output=True, text=True, timeout=30
+                    )
+                    subprocess.run(
+                        ["git", "-C", str(repo_path), "push"],
+                        check=True, capture_output=True, text=True, timeout=60
+                    )
+                except subprocess.CalledProcessError as commit_err:
+                    # Handle "nothing to commit" case specifically
+                    if "nothing to commit" in (commit_err.stderr or ""):
+                        logger.info("No changes to commit for deployment")
+                        # Continue execution - not an error
+                    else:
+                        # Other git errors should be raised
+                        raise HTTPException(status_code=500, detail=f"Deployment failed: {commit_err}\n{commit_err.stderr}")
+            except subprocess.CalledProcessError as e:
+                raise HTTPException(status_code=500, detail=f"Deployment failed: {e}\n{e.stderr}")
+        
+        # Trigger reconciliation in the background
+        background_tasks.add_task(reconcile_from_git)
+        
         return {
             "status": "deployment_triggered",
             "message": f"Deployment of {microservices_name} to {namespace} has been triggered",
@@ -172,6 +237,12 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
                 "replicas": deployment.replicas
             }
         }
+    except yaml.YAMLError as e:
+        logger.error(f"YAML error while updating values: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update deployment configuration")
+    except OSError as e:
+        logger.error(f"File operation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to write deployment configuration")
     except Exception as e:
         logger.exception(f"Unexpected error during deployment: {e}")
         raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
@@ -180,6 +251,15 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
 async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str, str]:
     """
     Triggers a GitOps reconciliation process.
+    
+    The reconciliation will pull the latest configuration from Git and apply it.
+    This operation runs in the background to avoid blocking the API request.
+    
+    Args:
+        background_tasks (BackgroundTasks): FastAPI background tasks runner.
+        
+    Returns:
+        dict: Status message indicating whether reconciliation was started or already running.
     """
     global is_reconciling
     
@@ -187,8 +267,7 @@ async def trigger_reconciliation(background_tasks: BackgroundTasks) -> Dict[str,
         if is_reconciling:
             return {"status": "already_running", "message": "Reconciliation already in progress"}
         
-        # Log instead of actually adding the task
-        logger.info("Would add background reconciliation task")
+        background_tasks.add_task(reconcile_from_git)
     
     return {"status": "started", "message": "Reconciliation process started"}
 
@@ -419,12 +498,16 @@ def get_last_reconciliation_time() -> Optional[str]:
     Returns:
         Optional[str]: ISO formatted timestamp of the last reconciliation, or None if unavailable.
     """
-    # During testing, always return a fixed timestamp to avoid file access
-    try:
-        return datetime.now(tz=timezone.utc).isoformat()
-    except Exception as e:
-        logger.error(f"Error generating timestamp: {e}")
-        return None
+    settings = get_settings()
+    timestamp_file = Path(settings.gitops_repo_path) / ".last_reconciliation"
+    
+    if timestamp_file.exists():
+        try:
+            return timestamp_file.read_text().strip()
+        except OSError as e:
+            logger.error(f"Error reading reconciliation timestamp: {e}")
+            return None
+    return None
 
 def set_last_reconciliation_time() -> None:
     """
@@ -480,10 +563,24 @@ def reconcile_from_git() -> None:
         # Ensure repo path exists
         repo_path = Path(settings.gitops_repo_path)
         
+        # Clone/update the repository
         if not repo_path.exists():
             _clone_repository(settings.gitops_repo_url, settings.gitops_repo_path, settings.gitops_repo_branch)
         else:
-            _update_repository(settings.gitops_repo_path, settings.gitops_repo_branch)
+            # Use subprocess.run directly since this function is not async
+            # This avoids the "coroutine was never awaited" warning
+            try:
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "fetch"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+                
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "checkout", settings.gitops_repo_branch], 
+                      check=True, capture_output=True, text=True, timeout=30)
+                
+                subprocess.run(["git", "-C", settings.gitops_repo_path, "pull"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+            except Exception as e:
+                logger.error(f"Repository update failed: {str(e)}")
+                raise
         
         # Apply configurations from Git to the Kubernetes API server
         _apply_configurations_from_git(repo_path)
@@ -512,21 +609,83 @@ def reconcile_from_git() -> None:
             # Set the flag directly without the lock as a last resort
             is_reconciling = False  # pragma: no cover
 
-def _clone_repository(repo_url: str, repo_path: str, branch: str):
+def _clone_repository(repo_url: str, repo_path: str, branch: str) -> None:
     """
-    Mocked clone - no-op for testing.
+    Clone the source repository.
+    
+    Args:
+        repo_url (str): URL of the Git repository to clone.
+        repo_path (str): Local path where the repository should be cloned.
+        branch (str): Branch to check out.
+        
+    Returns:
+        None: The function does not return any value.
+        
+    Raises:
+        subprocess.CalledProcessError: If Git clone operation fails.
+        OSError: If directory creation fails.
+        ValueError: If the repository URL contains potentially dangerous characters.
     """
-    # Ensure directory exists
+    # First validate repository URL to prevent command injection
+    safe_url = sanitize_git_url(repo_url)
+    if safe_url != repo_url:
+        # If the URL had to be modified during sanitization, it might be suspicious
+        logger.error(f"Potentially dangerous repository URL rejected: {repo_url}")
+        raise ValueError("Invalid repository URL. URLs should only contain alphanumeric characters, hyphens, dots, slashes, colons, and @ symbols.")
+        
+    # Validate branch name
+    safe_branch = sanitize_branch_name(branch)
+    if safe_branch != branch and branch not in ["", None]:
+        logger.warning(f"Branch name sanitized from '{branch}' to '{safe_branch}'")  # pragma: no cover
+    
     os.makedirs(os.path.dirname(repo_path), exist_ok=True)
-    # No real Git operations
-    return
+    try:
+        # Add timeout to prevent hanging on network issues
+        subprocess.run(
+            ["git", "clone", "-b", safe_branch, safe_url, repo_path], 
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+    except CalledProcessError as e:
+        logger.error(f"Git clone failed: {e.stderr}")
+        raise
+    except Exception as e:
+        logger.error(f"Clone failed with unexpected error: {str(e)}")
+        raise
 
-def _update_repository(repo_path: str, branch: str):
+def _update_repository(repo_path: str, branch: str) -> bool:
     """
-    Mocked update - no-op for testing.
+    Update the source repository to latest changes.
+    
+    Args:
+        repo_path (str): Local path of the repository to update.
+        branch (str): Branch to check out and pull.
+        
+    Returns:
+        bool: True if the update was successful, False otherwise.
+        
+    Raises:
+        subprocess.CalledProcessError: If any Git operation fails.
     """
-    # No real Git operations
-    return
+    try:
+        # Add timeout to prevent hanging
+        subprocess.run(["git", "-C", repo_path, "fetch"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+        
+        subprocess.run(["git", "-C", repo_path, "checkout", branch], 
+                      check=True, capture_output=True, text=True, timeout=30)
+        
+        subprocess.run(["git", "-C", repo_path, "pull"], 
+                      check=True, capture_output=True, text=True, timeout=30)
+        return True
+    except CalledProcessError as e:
+        logger.error(f"Git update failed: {e.stderr}")
+        raise
+    except Exception as e:
+        logger.error(f"Repository update failed with unexpected error: {str(e)}")
+        return False
 
 def _apply_configurations_from_git(repo_path: Union[str, Path]) -> None:
     """
@@ -641,29 +800,15 @@ def sanitize_git_url(url: str) -> str:
         url (str): The URL to sanitize
         
     Returns:
-        str: Sanitized URL that differs from input if dangerous characters were found
-        
-    Raises:
-        ValueError: If regex operations fail
+        str: Sanitized URL
     """
-    # Check for dangerous shell characters that could enable command injection
-    dangerous_chars = [';', '&', '|', '`', '$', '>', '<', '(', ')', '{', '}', '[', ']', '!', '#', '*', '?', '~']
-    
-    for char in dangerous_chars:
-        if char in url:
-            # Log the dangerous character found
-            logger.error(f"Dangerous character '{char}' found in URL: {url}")
-            # Return a modified URL to trigger the validation check in _clone_repository
-            return url.replace(char, '') # This ensures safe_url != url
-    
     try:
         # Only allow valid git URL characters
         sanitized = re.sub(r'[^a-zA-Z0-9\-_./:@]', '', url)
-        # If sanitization changed the URL, it means there were invalid characters
-        if sanitized != url:
-            logger.warning(f"URL sanitized from '{url}' to '{sanitized}'")
         return sanitized
     except Exception as e:
-        # If re module is not available or has an issue, log and re-raise
-        logger.error(f"Error using regex for URL sanitization: {str(e)}")
-        raise ValueError(f"Regex error during URL sanitization: {str(e)}")
+        # If re module is not available or has an issue, use basic sanitization
+        logger.warning(f"Error using regex for URL sanitization: {str(e)}")
+        # Fallback: basic character filtering
+        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./:@")
+        return ''.join(c for c in url if c in allowed_chars)
