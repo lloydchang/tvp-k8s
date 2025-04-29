@@ -215,12 +215,34 @@ async def deploy_microservices(namespace: str, microservices_name: str, deployme
                     )
                 except subprocess.CalledProcessError as commit_err:
                     # Handle "nothing to commit" case specifically
-                    if "nothing to commit" in (commit_err.stderr or ""):
+                    nothing_to_commit = False
+                    if hasattr(commit_err, 'stderr') and isinstance(commit_err.stderr, str):
+                        nothing_to_commit = "nothing to commit" in commit_err.stderr
+                        
+                    if nothing_to_commit:
                         logger.info("No changes to commit for deployment")
-                        # Continue execution - not an error
+                        # Continue execution - directly jump to triggering reconciliation
+                        # since there's no need to push if nothing changed
+                        
+                        # Trigger reconciliation in the background
+                        background_tasks.add_task(reconcile_from_git)
+                        
+                        return {
+                            "status": "deployment_triggered",
+                            "message": f"Deployment of {microservices_name} to {namespace} has been triggered (no changes needed)",
+                            "details": {
+                                "namespace": namespace,
+                                "microservices": microservices_name,
+                                "image": deployment.image,
+                                "replicas": deployment.replicas
+                            }
+                        }
                     else:
                         # Other git errors should be raised
-                        raise HTTPException(status_code=500, detail=f"Deployment failed: {commit_err}\n{commit_err.stderr}")
+                        error_detail = "Failed to update Git repository"
+                        if hasattr(commit_err, 'stderr') and commit_err.stderr:
+                            error_detail = f"Deployment failed: {commit_err.stderr}"
+                        raise HTTPException(status_code=500, detail=error_detail)
             except subprocess.CalledProcessError as e:
                 raise HTTPException(status_code=500, detail=f"Deployment failed: {e}\n{e.stderr}")
         
