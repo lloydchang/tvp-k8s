@@ -200,8 +200,8 @@ def test_deploy_microservices_repo_error(test_client, mock_settings):
          patch("subprocess.run") as mock_subprocess_run, \
          patch("pathlib.Path.exists") as mock_exists:
         
-        # Simulate error in repository update
-        mock_update_repo.side_effect = Exception("Repository update failed")
+        # Simulate error in subprocess.run
+        mock_subprocess_run.side_effect = Exception("Failed to update Git repository")
         # Ensure Path.exists returns True to avoid cloning operations
         mock_exists.return_value = True
         
@@ -221,8 +221,8 @@ def test_deploy_microservices_repo_error(test_client, mock_settings):
         assert response.status_code == 500
         assert "Failed to update Git repository" in response.json()["detail"]
         
-        # Verify subprocess.run was not called (git operations)
-        mock_subprocess_run.assert_not_called()
+        # Verify subprocess.run was called (git operations attempted)
+        assert mock_subprocess_run.called
 
 def test_sanitize_branch_name():
     """Test branch name sanitization function"""
@@ -316,12 +316,12 @@ def test_clone_repository_failure():
 def test_update_repository():
     """Test repository update function"""
     from python.app.gitops import _update_repository
-    import asyncio
     
     # Mock subprocess.run to avoid actual git operations
     with patch("subprocess.run") as mock_run:
-        # Call the function with asyncio to properly await the coroutine
-        asyncio.run(_update_repository("/tmp/repo", "main"))
+        # Call the function directly since it's no longer async
+        result = _update_repository("/tmp/repo", "main")
+        assert result is True
         
         # Verify git commands were called with the right arguments
         assert mock_run.call_count == 3
@@ -539,7 +539,8 @@ def test_reconcile_from_git_error_handling():
          patch("python.app.gitops._update_repository") as mock_update, \
          patch("python.app.gitops._apply_configurations_from_git") as mock_apply, \
          patch("python.app.gitops.set_last_reconciliation_time") as mock_set_time, \
-         patch("pathlib.Path.exists") as mock_exists:
+         patch("pathlib.Path.exists") as mock_exists, \
+         patch("subprocess.run") as mock_run:
         
         # Set up the global state
         import python.app.gitops as gitops
@@ -566,22 +567,27 @@ def test_reconcile_from_git_error_handling():
         # Test case 2: Repository exists, needs to be updated
         mock_exists.return_value = True
         
+        # Configure mock for subprocess.run since we're now using direct subprocess calls
+        mock_run.return_value = MagicMock()
+        
         reconcile_from_git()
         
-        # Verify update was called, not clone
+        # Since we're now using direct subprocess calls instead of _update_repository,
+        # we need to check that subprocess.run was called for the git operations
+        mock_run.assert_called()
         mock_clone.assert_not_called()
-        mock_update.assert_called_once()
         mock_apply.assert_called_once()
         mock_set_time.assert_called_once()
         assert not gitops.is_reconciling  # Should be reset to False
         
         # Reset mocks and test error cases
-        mock_update.reset_mock()
+        mock_run.reset_mock()
         mock_apply.reset_mock()
         mock_set_time.reset_mock()
         
         # Test case 3: Git operation fails
-        mock_update.side_effect = subprocess.CalledProcessError(1, "git", stderr="git error")
+        # Since we now use subprocess.run directly instead of _update_repository
+        mock_run.side_effect = subprocess.CalledProcessError(1, "git", stderr="git error")
         
         reconcile_from_git()
         

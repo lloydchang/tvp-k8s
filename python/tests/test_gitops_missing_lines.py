@@ -25,16 +25,16 @@ from app.gitops import (
 
 def test_gitops_lines_195_197():
     """Test coverage for lines 195-197 in gitops.py"""
-    
+
     # Mock subprocess.run to simulate command execution
     with patch('subprocess.run') as mock_run:
         # Set up mock to return success for initialization
         mock_run.return_value.returncode = 0
-        
+
         # Create a mock Path that behaves like it exists
         mock_path = MagicMock()
         mock_path.exists.return_value = True
-        
+
         with patch('pathlib.Path', return_value=mock_path):
             # Test the clone repository function with the correct signature
             result = _clone_repository(
@@ -42,8 +42,8 @@ def test_gitops_lines_195_197():
                 "/tmp/repo",
                 "main"  # branch parameter
             )
-            # Function returns None on success
-            assert result is None
+            # Function now returns True on success (was previously None)
+            assert result is True
             # Verify subprocess.run was called
             mock_run.assert_called()
 

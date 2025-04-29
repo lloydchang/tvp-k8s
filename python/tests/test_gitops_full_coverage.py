@@ -19,6 +19,7 @@ def test_deploy_microservices_nothing_to_commit_exact_path():
     """Test the exact path in deploy_microservices when git commit returns 'nothing to commit'"""
     from python.app.gitops import deploy_microservices, DeploymentRequest
     import python.app.gitops as gitops
+    import sys
     
     # Create a deployment request
     deployment = DeploymentRequest(
@@ -36,9 +37,16 @@ def test_deploy_microservices_nothing_to_commit_exact_path():
     )
     commit_error.stderr = "nothing to commit, working tree clean"
     
+    # Mock settings to provide expected configuration
+    mock_settings = MagicMock()
+    mock_settings.gitops_repo_path = "/tmp/kubernetes-apps"
+    mock_settings.environment = "production"
+    
     # Mock all required functions
-    with patch("pathlib.Path.exists", return_value=True), \
+    with patch("python.app.gitops.get_settings", return_value=mock_settings), \
+         patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.mkdir"), \
+         patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
          patch("builtins.open", mock_open()), \
          patch("yaml.safe_load", return_value={"image": "old-image:v1"}), \
          patch("yaml.safe_dump"), \
@@ -46,12 +54,17 @@ def test_deploy_microservices_nothing_to_commit_exact_path():
          patch("python.app.gitops.reconcile_from_git"), \
          patch("python.app.gitops._update_repository") as mock_update_repo:
         
-        # Configure mock_run to raise our error on the second call (commit)
-        mock_run.side_effect = [
-            MagicMock(),  # git add succeeds
-            commit_error,  # git commit fails with "nothing to commit"
-            MagicMock()   # git push succeeds
-        ]
+        # Configure mock_run to raise our error on the commit call specifically
+        def mock_run_side_effect(*args, **kwargs):
+            # Check if this is the git commit command
+            if args and isinstance(args[0], list) and len(args[0]) >= 3 and args[0][1] == "-C" and "commit" in args[0]:
+                raise commit_error
+            # Otherwise return a successful result
+            result = MagicMock()
+            result.returncode = 0
+            return result
+            
+        mock_run.side_effect = mock_run_side_effect
         
         # Call the function
         async def test():
@@ -91,7 +104,8 @@ def test_deploy_microservices_commit_nothing_to_commit_line_223():
     commit_error.stderr = "nothing to commit, working tree clean"
     
     # Set up all necessary mocks
-    with patch("pathlib.Path.exists", return_value=True), \
+    with patch("python.app.gitops.get_settings") as mock_settings, \
+         patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.mkdir"), \
          patch("pathlib.Path.relative_to", return_value="test-namespace/test-app/values.yaml"), \
          patch("builtins.open", mock_open()), \
@@ -101,12 +115,21 @@ def test_deploy_microservices_commit_nothing_to_commit_line_223():
          patch("python.app.gitops.reconcile_from_git"), \
          patch("subprocess.run") as mock_run:
         
-        # Configure mock_run to raise the "nothing to commit" error
-        # on the second call (commit) to specifically target line 223
+        # Configure settings
+        mock_settings.return_value = MagicMock()
+        mock_settings.return_value.gitops_repo_path = "/tmp/kubernetes-apps"
+        mock_settings.return_value.gitops_repo_url = "https://example.com/repo.git"
+        mock_settings.return_value.gitops_repo_branch = "main"
+        mock_settings.return_value.environment = "production"  # Not development mode
+        
+        # Configure mock_run for all subprocess calls
         mock_run.side_effect = [
-            MagicMock(),  # First subprocess.run succeeds (git add)
-            commit_error,  # Second subprocess.run fails with "nothing to commit"
-            MagicMock()   # Third subprocess.run succeeds (git push)
+            MagicMock(),  # First call: git fetch - succeeds
+            MagicMock(),  # Second call: git checkout - succeeds
+            MagicMock(),  # Third call: git pull - succeeds
+            MagicMock(),  # Fourth call: git add - succeeds
+            commit_error,  # Fifth call: git commit - "nothing to commit" error
+            # No sixth call (git push) because we short-circuit after the commit error
         ]
         
         # Execute the function
@@ -123,6 +146,7 @@ def test_deploy_microservices_commit_nothing_to_commit_line_223():
             
             # Verify success despite the git error
             assert result["status"] == "deployment_triggered"
+            assert "(no changes needed)" in result["message"]
         
         # Run the test
         asyncio.run(test())
@@ -868,58 +892,81 @@ async def test_deploy_microservices():
          patch('python.app.gitops.get_settings') as mock_settings, \
          patch('python.app.gitops.Path') as mock_path, \
          patch('python.app.gitops._generate_manifest_files') as mock_generate, \
-         patch('python.app.gitops._apply_configurations_from_git') as mock_apply:
-
+         patch('python.app.gitops._apply_configurations_from_git') as mock_apply, \
+         patch('python.app.gitops.subprocess.run') as mock_run, \
+         patch('python.app.gitops.open', mock_open()), \
+         patch('python.app.gitops.yaml.safe_load', return_value={}), \
+         patch('python.app.gitops.yaml.safe_dump'), \
+         patch('python.app.gitops.reconcile_from_git'):
+        
         # Setup mock returns
         mock_clone.return_value = True
         mock_update.return_value = True
         mock_generate.return_value = True
         mock_apply.return_value = True
-        mock_settings.return_value = MagicMock()
-        mock_settings.return_value.gitops_repo = "https://github.com/example/gitops.git"
-        mock_path.return_value.exists.return_value = True
-
+        
+        # Configure mock settings
+        mock_settings_instance = MagicMock()
+        mock_settings_instance.gitops_repo_url = "https://github.com/example/gitops.git"
+        mock_settings_instance.gitops_repo_path = "/tmp/gitops"
+        mock_settings_instance.gitops_repo_branch = "main"
+        mock_settings_instance.environment = "development"  # Use development to avoid Git operations
+        mock_settings.return_value = mock_settings_instance
+        
+        # Setup Path mock
+        mock_path_instance = MagicMock()
+        mock_path_instance.exists.return_value = True
+        mock_path_instance.mkdir.return_value = None
+        mock_path_instance.__truediv__.return_value = mock_path_instance
+        mock_path.return_value = mock_path_instance
+        
+        # Setup subprocess run mock
+        mock_run.return_value = MagicMock(returncode=0)
+        
         # Import the function
-        from python.app.gitops import deploy_microservices
+        from python.app.gitops import deploy_microservices, DeploymentRequest
         from fastapi import BackgroundTasks
+        
+        # Create proper deployment request object
+        deployment = DeploymentRequest(image="test-image:latest")
         
         # Create background tasks mock
         background_tasks = MagicMock(spec=BackgroundTasks)
-
+    
         # Test successful deployment with required arguments
-        result = await deploy_microservices("default", "test-service", {"image": "test-image:latest"}, background_tasks)
+        result = await deploy_microservices("default", "test-service", deployment, background_tasks)
         
+        # Assert the test passes
         assert result is not None
         assert "status" in result
-        assert result["status"] in ["success", "deployment_triggered"]
+        assert result["status"] == "deployment_triggered"
 
-@pytest.mark.asyncio
-async def test_clone_and_update_repository():
+def test_clone_and_update_repository():
     """Test the _clone_repository and _update_repository functions."""
     with patch('python.app.gitops.subprocess.run') as mock_run, \
          patch('python.app.gitops.get_settings') as mock_settings, \
          patch('python.app.gitops.Path') as mock_path, \
          patch('python.app.gitops.os.makedirs') as mock_makedirs:
-
+        
         # Setup mock
         mock_settings.return_value = MagicMock()
         mock_settings.return_value.gitops_repo = "https://github.com/example/gitops.git"
         mock_settings.return_value.gitops_branch = "main"
         mock_path.return_value.exists.return_value = False  # For clone
-
+        
         # Mock successful clone
         mock_run.return_value = MagicMock(returncode=0)
-
+        
         # Import the functions
         from python.app.gitops import _clone_repository, _update_repository
-
-        # Test successful clone - we made these functions async in our fixes
-        result = await _clone_repository("https://github.com/example/repo.git", "/tmp/repo", "main")
-        assert result == True
         
-        # Test update
-        result = await _update_repository("/tmp/repo", "main")
-        assert result == True
+        # Test successful clone - now a synchronous function
+        result = _clone_repository("https://github.com/example/repo.git", "/tmp/repo", "main")
+        assert result is True
+        
+        # Test update - also a synchronous function now
+        result = _update_repository("/tmp/repo", "main")
+        assert result is True
 
 @pytest.mark.asyncio
 async def test_apply_configurations_from_git():
